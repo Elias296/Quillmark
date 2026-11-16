@@ -2887,7 +2887,7 @@ function idleUi() {
 }
 /* ---------- Server-Modus: Tizian läuft auf einem eigenen Server (OpenAI-kompatible Chat-Schnittstelle) ----------
    Standardmäßig aus. Eingeschaltet gehen die Texte für Tizian an die eingetragene Adresse – sonst nichts. */
-const SRV = Object.assign({ on: false, url: '', model: '', key: '' }, LS.get(K.server, {}));
+const SRV = Object.assign({ on: false, url: '', model: '', key: '', noSystem: false }, LS.get(K.server, {}));
 AI.srv = SRV;
 const localGenerate = AI.generate, localInterrupt = AI.interrupt;
 let srvAbort = null;
@@ -2901,23 +2901,47 @@ function srvEndpoint(u) {
 }
 const srvHost = () => { try { return new URL(srvEndpoint(SRV.url)).host; } catch (e) { return SRV.url || 'Server'; } };
 AI.srvHost = srvHost;
+/* Manche Modelle (z. B. Gemma bei einigen Anbietern) lehnen System-Anweisungen ab: dann in die erste Nutzer-Nachricht einbetten */
+function mergeSystem(messages) {
+  const sys = messages.filter(m => m.role === 'system').map(m => m.content).join('\n\n');
+  if (!sys) return messages;
+  const rest = messages.filter(m => m.role !== 'system').map(m => Object.assign({}, m));
+  const i = rest.findIndex(m => m.role === 'user');
+  if (i >= 0) rest[i].content = `${sys}\n\n---\n\n${rest[i].content}`; else rest.unshift({ role: 'user', content: sys });
+  return rest;
+}
 async function serverGenerate(messages, opts, onTok) {
   const url = srvEndpoint(SRV.url);
   if (!url) throw new Error('Keine Server-Adresse eingetragen.');
   srvAbort = new AbortController();
   const headers = { 'Content-Type': 'application/json' };
   if (SRV.key) headers.Authorization = 'Bearer ' + SRV.key;
-  const body = { messages, stream: true, temperature: opts && opts.do_sample === false ? 0 : 0.7, max_tokens: (opts && opts.max_new_tokens) || 512 };
-  if (SRV.model) body.model = SRV.model;
+  const send = msgs => {
+    const body = { messages: msgs, stream: true, temperature: opts && opts.do_sample === false ? 0 : 0.7, max_tokens: (opts && opts.max_new_tokens) || 512 };
+    if (SRV.model) body.model = SRV.model;
+    return fetch(url, { method: 'POST', headers, body: JSON.stringify(body), signal: srvAbort.signal });
+  };
   let resp, text = '';
-  try { resp = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body), signal: srvAbort.signal }); }
-  catch (e) {
+  try {
+    resp = await send(SRV.noSystem ? mergeSystem(messages) : messages);
+    if (!resp.ok && !SRV.noSystem && resp.status === 400 && messages.some(m => m.role === 'system')) {
+      const d = await resp.clone().text().catch(() => '');
+      if (/system|developer instruction|instruction is not enabled|role/i.test(d)) {
+        SRV.noSystem = true; saveSrv();                         // merken: dieses Modell ohne System-Anweisung ansprechen
+        resp = await send(mergeSystem(messages));
+      }
+    }
+  } catch (e) {
     if (e && e.name === 'AbortError') return { text, interrupted: true };
-    throw new Error(`Server nicht erreichbar (${srvHost()}). Ein schlafender Gratis-Server braucht beim ersten Aufruf 1–2 Minuten – bitte gleich noch einmal versuchen.`);
+    throw new Error(`Server nicht erreichbar (${srvHost()}). Bitte Internetverbindung und Adresse prüfen und gleich noch einmal versuchen.`);
   }
   if (!resp.ok) {
-    let d = ''; try { d = (await resp.text()).replace(/\s+/g, ' ').slice(0, 160); } catch (e) { /* egal */ }
-    const why = resp.status === 401 || resp.status === 403 ? ' – API-Schlüssel prüfen' : resp.status === 404 ? ' – Adresse prüfen' : resp.status >= 500 ? ' – der Server startet evtl. noch, bitte gleich erneut versuchen' : '';
+    let d = ''; try { d = (await resp.text()).replace(/\s+/g, ' ').slice(0, 200); } catch (e) { /* egal */ }
+    const why = resp.status === 401 ? ' – API-Schlüssel prüfen'
+      : resp.status === 402 || resp.status === 403 ? ' – Schlüssel hat kein Guthaben oder keine Berechtigung (bei OpenRouter: Ausgabelimit des Schlüssels leer lassen statt 0, Datenschutz-Einstellung für kostenlose Modelle prüfen)'
+      : resp.status === 404 ? ' – Adresse oder Modellname prüfen'
+      : resp.status === 429 ? ' – Limit erreicht: kurz warten (höchstens ca. 20 Anfragen pro Minute) oder morgen wieder (Tageslimit kostenloser Anfragen)'
+      : resp.status >= 500 ? ' – der Server ist gerade überlastet oder startet noch, bitte gleich erneut versuchen' : '';
     throw new Error(`Server-Fehler ${resp.status}${why}${d ? ` (${d})` : ''}`);
   }
   if (!/event-stream/i.test(resp.headers.get('content-type') || '')) {          // Server ohne Streaming
@@ -2975,7 +2999,7 @@ document.addEventListener('tw-ai-state', () => {
 });
 $('#srvUrl').value = SRV.url; $('#srvModel').value = SRV.model; $('#srvKey').value = SRV.key;
 ['srvUrl', 'srvModel', 'srvKey'].forEach(id => $('#' + id).addEventListener('change', e => {
-  SRV[{ srvUrl: 'url', srvModel: 'model', srvKey: 'key' }[id]] = e.target.value.trim(); saveSrv();
+  SRV[{ srvUrl: 'url', srvModel: 'model', srvKey: 'key' }[id]] = e.target.value.trim(); if (id !== 'srvKey') SRV.noSystem = false; saveSrv();
   if (SRV.on && !srvEndpoint(SRV.url)) { SRV.on = false; saveSrv(); }
   applyServer();
 }));
