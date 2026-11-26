@@ -45,6 +45,12 @@ oder angehängt (mit Undo) → Vektor-Handschrift im Goodnotes-Export.
 Grenzen: nur Texterkennung (keine Bilder, Diagramme, Handschrift, Formeln), kleine Modelle machen Fehler; die Größenangaben der Modelle sind geschätzt
 und das 1,5-B-Modell wurde nicht auf einem iPad getestet (Speicherbedarf!).
 
+## Meine Notizen & Backup
+Oben links neben dem Titel: **Meine Notizen** – alle Lernzettel mit Titel und Änderungsdatum, „+ Neue Notiz“, Öffnen per Tipp und ein
+**Papierkorb** (Wiederherstellen, endgültig löschen; nach 30 Tagen automatisch geleert). „Neue Notiz“ legt eine weitere Notiz an,
+die bisherige bleibt in der Liste. **Backup speichern** erzeugt eine JSON-Datei mit allen Notizen (auch Papierkorb), eingefügten Bildern,
+der eigenen Handschrift und den Blatteinstellungen; **Backup öffnen** lädt sie wieder (gleiche Notizen: die neuere Fassung gewinnt).
+
 ## Chat mit Tizian
 Seitenleiste → **Chat**: frei mit Tizian schreiben, sich etwas erklären oder Aufgaben lösen lassen. Schnell-Aktionen:
 **Lernzettel mit Skizze**, **Aufgaben lösen**, **Zusammenfassen**, **Quiz** (ohne Eingabe nutzen sie den Notiztext).
@@ -55,7 +61,7 @@ aus einem Foto an (Texterkennung). Reine Rechenzeilen (`12 + 30 =`) rechnet der 
 Tizian ist ein Textmodell und kann keine Fotos erzeugen – dafür zeichnet Quillmark Skizzen als echte Handschrift-Striche:
 - `[[Licht -> Chlorophyll -> Glucose]]` – Ablauf mit Kästen und Pfeilen (bricht bei Bedarf um)
 - `[[Fotosynthese: Licht, Wasser, CO2, Glucose]]` – Mindmap
-- **Bild in den Lernzettel einfügen** (Text & KI) setzt eigene Fotos als `![Bild](bild:…)` ein. In der Vorschau und im PDF erscheinen sie direkt;
+- **Bild aufs Blatt setzen** (Text & KI) setzt eigene Fotos als `![Bild](bild:…)` ein. In der Vorschau und im PDF erscheinen sie direkt;
   im `.goodnotes`-Export liegen sie im Seitenhintergrund (sichtbar, aber in Goodnotes nicht verschiebbar).
 
 ## Tizian auf einem Server (für Geräte, auf denen die lokale KI nicht startet)
@@ -94,7 +100,7 @@ Hochzahlen: `x^2`, `x2`, `cm3` werden zu x², x², cm³ (abschaltbar im ⓘ der 
 
 ## Entwicklung
 - Quellen: `dev/src/` · Bauen: `dev/tools/build.sh` (schreibt `index.html`) · Tests: `node dev/tools/test.js`
-- Browser-Tests (Playwright, lokaler Server auf Port 8765): `node dev/tools/e2e-ui.js`, `e2e-server.js`, `e2e-server-compat.js`, `e2e-server-private.js`, `e2e-cache.js`, `e2e-solver.js`, `e2e-chat.js`
+- Browser-Tests (Playwright, lokaler Server auf Port 8765): `node dev/tools/e2e-ui.js`, `e2e-server.js`, `e2e-server-compat.js`, `e2e-server-private.js`, `e2e-cache.js`, `e2e-solver.js`, `e2e-chat.js`, `e2e-notes.js`
 - Texterkennung mit echten Sprachdaten: `TESS_PK=<ordner> node dev/tools/e2e-ocr.js` (benötigte Pakete stehen im Kopf der Datei)
 - `dev/tools/shape.py` vergleicht eine erzeugte `.goodnotes` strukturell mit einer Referenzdatei (`python3 -I dev/tools/shape.py ref.goodnotes out.goodnotes`).
 - Änderungen immer in `dev/src/` machen und neu bauen, nicht in `index.html`.

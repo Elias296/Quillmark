@@ -7,15 +7,15 @@ const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const K = { draft: 'tintenwerk.entwurf.v1', undo: 'tintenwerk.undo.v1', settings: 'tintenwerk.einstellungen.v1', own: 'tintenwerk.handschrift.v1', ui: 'tintenwerk.ui.v1', server: 'tintenwerk.server.v1', images: 'tintenwerk.bilder.v1', chat: 'tintenwerk.chat.v1' };
+const K = { draft: 'tintenwerk.entwurf.v1', undo: 'tintenwerk.undo.v1', settings: 'tintenwerk.einstellungen.v1', own: 'tintenwerk.handschrift.v1', ui: 'tintenwerk.ui.v1', server: 'tintenwerk.server.v1', images: 'tintenwerk.bilder.v1', chat: 'tintenwerk.chat.v1', notes: 'tintenwerk.notizen.v1' };
 
 const SAMPLE_MARK = 'Dies ist eine Beispielnotiz von Quillmark.';
 const SAMPLE = {
   title: 'Willkommen bei Quillmark',
   text: 'Willkommen bei Quillmark\n\n' + SAMPLE_MARK + ' Sie zeigt, wie dein Text als echte Vektor-Handschrift auf einem Goodnotes-Blatt aussieht.\n\n' +
-    '# So funktioniert es\n- Screenshots importieren und Text lokal erkennen lassen\n- Text prüfen, korrigieren und auf Wunsch natürlicher formulieren\n- Schriftstil, Papier und Tinte wählen\n- Als native .goodnotes-Datei oder PDF exportieren\n\n' +
+    '# So funktioniert es\n- Text aus Fotos und Screenshots lokal erkennen lassen\n- Text prüfen, korrigieren und auf Wunsch natürlicher formulieren\n- Schriftstil, Papier und Tinte wählen\n- Als native .goodnotes-Datei oder PDF exportieren\n\n' +
     '## Gut zu wissen\n1. Jede Zeile sitzt exakt auf der Grundlinie.\n2. Die Schrift lässt sich in Goodnotes mit Lasso und Radierer bearbeiten.\n3. Deine Notizen und deine Handschrift bleiben auf deinem iPad.\n\n' +
-    'Tippe auf „Neue Notiz“ oder importiere deinen ersten Screenshot.'
+    'Tippe auf „Eigene Notiz starten“ – oder lass Text aus einem Foto erkennen.'
 };
 
 /* ---------- Speicher ---------- */
@@ -75,6 +75,49 @@ function confirmDialog(title, text, okLabel, danger) {
 }
 function openModal(id) { $(id).hidden = false; }
 function closeModal(id) { $(id).hidden = true; }
+/* Dialog-Fokus (W3C „Dialog (Modal)“): beim Öffnen in den Dialog, Tab bleibt darin, Escape schließt, danach zurück zum Auslöser */
+const modalStack = [];
+const FOCUSABLE = 'button:not([disabled]),[href],input:not([disabled]):not([type=hidden]):not([type=file]),select:not([disabled]),textarea:not([disabled]),summary,[tabindex]:not([tabindex="-1"])';
+const focusablesIn = m => [...m.querySelectorAll(FOCUSABLE)].filter(e => e.getClientRects().length && !e.closest('[hidden]'));
+function modalOpened(m) {
+  if (modalStack.some(x => x.m === m)) return;
+  const opener = document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
+  modalStack.push({ m, opener });
+  $('.app').inert = true;
+  requestAnimationFrame(() => {
+    if (m.hidden || m.contains(document.activeElement)) return;
+    const t = m.querySelector('[data-autofocus]') || m.querySelector('.modal-head h2[tabindex]') || focusablesIn(m)[0] || m.querySelector('.modal-card');
+    if (t) { if (!t.hasAttribute('tabindex') && !t.matches(FOCUSABLE)) t.setAttribute('tabindex', '-1'); t.focus({ preventScroll: true }); }
+  });
+}
+function modalClosed(m) {
+  const i = modalStack.findIndex(x => x.m === m); if (i < 0) return;
+  const { opener } = modalStack.splice(i, 1)[0];
+  if (!modalStack.length) $('.app').inert = false;
+  const top = modalStack[modalStack.length - 1];
+  if (opener && document.contains(opener) && opener.getClientRects().length && !opener.closest('[inert]')) opener.focus({ preventScroll: true });
+  else if (top) { const f = focusablesIn(top.m)[0]; if (f) f.focus({ preventScroll: true }); }
+}
+const modalObs = new MutationObserver(rs => rs.forEach(r => (r.target.hidden ? modalClosed : modalOpened)(r.target)));
+$$('.modal').forEach(m => {
+  m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
+  const h = m.querySelector('.modal-head h2, #confirmTitle');
+  if (h) { if (!h.id) h.id = m.id + 'Title'; m.setAttribute('aria-labelledby', h.id); }
+  modalObs.observe(m, { attributes: true, attributeFilter: ['hidden'] });
+});
+document.addEventListener('keydown', e => {
+  const top = modalStack[modalStack.length - 1]; if (!top || top.m.hidden) return;
+  if (e.key === 'Escape') {
+    const c = top.m.id === 'confirmModal' ? $('#confirmNo') : top.m.querySelector('.modal-head [data-close]');
+    if (c) { e.preventDefault(); c.click(); }
+  } else if (e.key === 'Tab') {
+    const f = focusablesIn(top.m); if (!f.length) { e.preventDefault(); return; }
+    const first = f[0], last = f[f.length - 1], a = document.activeElement;
+    if (!top.m.contains(a)) { e.preventDefault(); first.focus(); }
+    else if (e.shiftKey && (a === first || !f.includes(a))) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
+  }
+});
 $$('[data-close]').forEach(b => b.addEventListener('click', () => { b.closest('.modal').hidden = true; }));
 function downloadBlob(blob, name) {
   const a = document.createElement('a'), url = URL.createObjectURL(blob);
@@ -241,11 +284,21 @@ window.addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(()
 const editor = $('#editor'), titleInput = $('#noteTitle');
 function syncDraftUi() {
   editor.value = S.draft.text; titleInput.value = S.draft.title;
-  $('#sampleBadge').hidden = !S.draft.isSample;
+  syncSampleUi();
   $('#btnUndo').disabled = !S.undo;
   $('#btnUndo').title = S.undo ? 'Rückgängig: ' + (S.undo.reason || 'letzter Import') : 'Letzten Import rückgängig machen';
   updateAppendOption();
 }
+/* Erster Besuch: „Eigene Notiz starten“ hervorheben, Export zurücknehmen */
+function syncSampleUi() {
+  const smp = !!S.draft.isSample, nb = $('#btnNew'), ex = $('#btnExport');
+  $('#sampleBadge').hidden = !smp;
+  nb.className = 'btn btn-sm ' + (smp ? 'btn-primary' : 'btn-ghost');
+  nb.textContent = smp ? 'Eigene Notiz starten' : 'Neue Notiz';
+  nb.setAttribute('aria-label', smp ? 'Eigene Notiz starten' : 'Neue leere Notiz');
+  ex.classList.toggle('btn-primary', !smp);
+}
+function markOwn() { if (S.draft.isSample) { S.draft.isSample = false; syncSampleUi(); updateAppendOption(); } }
 function updateEditorStats() {
   const t = S.draft.text.trim(), words = t ? t.split(/\s+/).length : 0;
   $('#editorStats').textContent = `${words.toLocaleString('de-DE')} Wörter · ${S.draft.text.length.toLocaleString('de-DE')} Zeichen · automatisch lokal gespeichert`;
@@ -260,13 +313,11 @@ function applyTypo(el, key) {
 editor.addEventListener('change', () => applyTypo(editor, 'text'));
 titleInput.addEventListener('change', () => applyTypo(titleInput, 'title'));
 editor.addEventListener('input', () => {
-  S.draft.text = editor.value;
-  if (S.draft.isSample) { S.draft.isSample = false; $('#sampleBadge').hidden = true; updateAppendOption(); }
+  S.draft.text = editor.value; markOwn();
   saveDraft(); relayout();
 });
 titleInput.addEventListener('input', () => {
-  S.draft.title = titleInput.value;
-  if (S.draft.isSample) { S.draft.isSample = false; $('#sampleBadge').hidden = true; updateAppendOption(); }
+  S.draft.title = titleInput.value; markOwn();
   saveDraft(); relayout();
 });
 function snapshot(reason) {
@@ -281,14 +332,7 @@ $('#btnUndo').addEventListener('click', () => {
   setDraft({ title: u.title, text: u.text, isSample: u.isSample, imports: u.imports });
   toast('Vorheriger Stand wiederhergestellt.');
 });
-$('#btnNew').addEventListener('click', async () => {
-  const has = S.draft.text.trim() && !S.draft.isSample;
-  if (has && !(await confirmDialog('Neue leere Notiz?', 'Der aktuelle Entwurf wird geleert. Mit dem Rückgängig-Pfeil kannst du ihn einmal wiederherstellen.', 'Leeren'))) return;
-  if (has) snapshot('Notiz geleert');
-  setDraft({ title: '', text: '', isSample: false, imports: 0 });
-  setMode('import'); editor.focus();
-  toast('Neue leere Notiz angelegt.');
-});
+$('#btnNew').addEventListener('click', () => APP.notes.newNote());      // die bisherige Notiz bleibt unter „Meine Notizen“
 
 /* ---------- Übernahme aus dem Prüfungsfenster ---------- */
 function updateAppendOption() {
@@ -647,7 +691,7 @@ $('#panel').addEventListener('scroll', () => { if (!pop.hidden) closePop(); }, {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePop(); });
 
 /* Schnittstellen für die weiteren Teile */
-const APP = { cropOne, loadImg, ensureImages, exportImages, infoFill, closePop, runImport, $, $$, clamp, esc, K, LS, IDB, S, SAMPLE_MARK, toast, confirmDialog, openModal, closeModal, downloadBlob, safeName, setMode, setView, relayout, drawSheet, renderPage, snapshot, setDraft, syncDraftUi, saveSettings, syncZoom, showStaging };
+const APP = { syncSampleUi, modalStack, cropOne, loadImg, ensureImages, exportImages, infoFill, closePop, runImport, $, $$, clamp, esc, K, LS, IDB, S, SAMPLE_MARK, toast, confirmDialog, openModal, closeModal, downloadBlob, safeName, setMode, setView, relayout, drawSheet, renderPage, snapshot, setDraft, syncDraftUi, saveSettings, syncZoom, showStaging };
 window.TWApp.APP = APP;
 let renderTiles = () => {}, refreshBlattPanel = () => {}, updateWarnings = () => {};
 APP.hook = (name, fn) => { if (name === 'tiles') renderTiles = fn; else if (name === 'blatt') refreshBlattPanel = fn; else if (name === 'warn') updateWarnings = fn; };

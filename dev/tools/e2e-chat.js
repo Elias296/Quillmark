@@ -29,7 +29,7 @@ const SHEET = '# Vulkane\n\n## Entstehung\n- Magma steigt aus dem **Erdmantel** 
   await pg.fill('#chatInput', '12 + 30 ='); await pg.click('#chatSend'); await pg.waitForTimeout(150);
   ok(/12 \+ 30 = 42/.test(await pg.textContent('#chatLog')) && /Rechner/.test(await pg.textContent('#chatLog')) && reqs.length === 0, 'Rechenzeile: exakter Rechner, ohne Server-Anfrage');
   await pg.fill('#chatInput', 'Was ist 5+5?'); await pg.click('#chatSend'); await pg.waitForTimeout(150);
-  ok(/5\+5 = 10/.test(await pg.textContent('#chatLog')) && reqs.length === 0, 'Frage „Was ist 5+5?“: Rechner statt KI');
+  ok(await ev(() => [...document.querySelectorAll('#chatLog .msg.ai .bub')].pop().textContent.trim() === '10') && reqs.length === 0, 'Frage „Was ist 5+5?“: Rechner antwortet nur „10“');
   ok(await ev(() => getComputedStyle(document.querySelector('.radio input')).appearance === 'none'), 'Auswahlkreise eigen gestaltet (nicht schwarz gefüllt)');
   await pg.click('#chatClear'); await pg.click('#confirmYes'); await pg.waitForTimeout(100);
 
@@ -43,6 +43,11 @@ const SHEET = '# Vulkane\n\n## Entstehung\n- Magma steigt aus dem **Erdmantel** 
   const r0 = reqs[reqs.length - 1];
   ok(r0.messages[0].role === 'system' && /Du heißt Tizian/.test(r0.messages[0].content) && r0.messages.filter(m => m.role === 'user' && m.content === 'Was ist Fotosynthese?').length === 1, 'Anfrage: Systemanweisung, Frage genau einmal');
   ok(await ev(() => !/\*\*/.test(document.querySelector('#chatLog').innerText)), 'Keine **Sternchen** in der Chat-Anzeige');
+  ok(/nur das Ergebnis/.test(r0.messages[0].content) && !/zeige ihn kurz/.test(r0.messages[0].content), 'Ohne Bitte: Anweisung „nur das Ergebnis“, kein Rechenweg');
+  const nReq = reqs.length;
+  await pg.fill('#chatInput', 'Erklär mir den Rechenweg für 17 * 23'); await pg.press('#chatInput', 'Enter');
+  await pg.waitForFunction(() => document.querySelector('#chatSend').textContent === 'Senden', null, { timeout: 8000 }); await pg.waitForTimeout(100);
+  ok(reqs.length === nReq + 1 && /zeige ihn kurz/.test(reqs[reqs.length - 1].messages[0].content), 'Mit Bitte um Rechenweg: Anweisung, ihn zu zeigen');
   ok(/Notiztext/.test(r0.messages[0].content) === false, 'Beispielnotiz wird nicht als Hintergrund mitgeschickt');
 
   // --- Lernzettel mit Skizze
