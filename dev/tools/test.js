@@ -29,6 +29,10 @@ const TW = require('./t_engine.js');
   const r = S.splitTasks('Lies den Text.\nEr erschien am 12. Januar 1945.\n1. Nenne das Datum.\n2. Was geschah?\na) Erkläre\nb) Begründe\n3) Rechne 3+4 =');
   eq(r.tasks.map(t => t.label), ['1', '2', '3']); assert(r.context.startsWith('Lies den Text'), 'context'); assert(r.tasks[1].text.includes('b) Begründe'));
   eq(S.splitTasks('Aufgabe 1: Berechne.\nAufgabe 2: Zeichne.').tasks.map(t => t.label), ['1', '2']);
+  // OCR ohne Leerzeichen nach der Nummer und „x“ als Malzeichen
+  const o = S.splitTasks('Übungen\n1.345 + 678 =\n2. 1200 - 457 =\n3.24 x 15=\n4.144 : 12 =');
+  eq(o.tasks.map(t => t.label + ':' + S.calcTask(t.text)), ['1:345 + 678 = 1023', '2:1200 - 457 = 743', '3:24 × 15 = 360', '4:144 : 12 = 12']);
+  eq(S.splitTasks('3.24 Euro kostet das Heft.').tasks.map(t => t.label), ['']);
   eq(S.splitTasks('Erster Absatz.\n\nZweiter Absatz.').tasks.length, 2); eq(S.splitTasks('Nur ein Text').tasks.length, 1); eq(S.splitTasks('').tasks.length, 0);
   eq(S.cleanAnswer('## Lösung\n$\\frac{3}{4} \\cdot 2 = 1,5$\n* Punkt **fett**'), 'Lösung\n3/4 · 2 = 1,5\n- Punkt fett'); assert(S.isUnsolvable('[Nicht lösbar: Bild fehlt]'));
   assert(S.buildSystem({ name: 'Mia', grade: '7' }).includes('für Mia (Klasse 7)')); assert(S.buildSystem({}).startsWith('Du heißt Tizian')); assert(!/ sein | ihr | er /.test(S.buildSystem({ name: 'Mia' })), 'keine Pronomen');
