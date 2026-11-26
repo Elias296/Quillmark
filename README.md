@@ -45,6 +45,19 @@ oder angehängt (mit Undo) → Vektor-Handschrift im Goodnotes-Export.
 Grenzen: nur Texterkennung (keine Bilder, Diagramme, Handschrift, Formeln), kleine Modelle machen Fehler; die Größenangaben der Modelle sind geschätzt
 und das 1,5-B-Modell wurde nicht auf einem iPad getestet (Speicherbedarf!).
 
+## Chat mit Tizian
+Seitenleiste → **Chat**: frei mit Tizian schreiben, sich etwas erklären oder Aufgaben lösen lassen. Schnell-Aktionen:
+**Lernzettel mit Skizze**, **Aufgaben lösen**, **Zusammenfassen**, **Quiz** (ohne Eingabe nutzen sie den Notiztext).
+Unter jeder Antwort: **Als Notiz / Als Lernzettel übernehmen**, **Anhängen** (mit Undo) oder **Kopieren**. Die Kamera hängt Text
+aus einem Foto an (Texterkennung). Reine Rechenzeilen (`12 + 30 =`) rechnet der exakte Rechner. Der Verlauf bleibt nur auf diesem Gerät.
+
+## Lernzettel mit Skizzen und Bildern
+Tizian ist ein Textmodell und kann keine Fotos erzeugen – dafür zeichnet Quillmark Skizzen als echte Handschrift-Striche:
+- `[[Licht -> Chlorophyll -> Glucose]]` – Ablauf mit Kästen und Pfeilen (bricht bei Bedarf um)
+- `[[Fotosynthese: Licht, Wasser, CO2, Glucose]]` – Mindmap
+- **Bild in den Lernzettel einfügen** (Text & KI) setzt eigene Fotos als `![Bild](bild:…)` ein. In der Vorschau und im PDF erscheinen sie direkt;
+  im `.goodnotes`-Export liegen sie im Seitenhintergrund (sichtbar, aber in Goodnotes nicht verschiebbar).
+
 ## Tizian auf einem Server (für Geräte, auf denen die lokale KI nicht startet)
 Text & KI → Tizian → **Server statt lokal**: Adresse eintragen, **Verbindung testen**, dann **Text auf Server verarbeiten**
 einschalten (standardmäßig aus, mit Datenschutz-Abfrage). Unterstützt wird jede OpenAI-kompatible Chat-Schnittstelle
@@ -81,7 +94,7 @@ Hochzahlen: `x^2`, `x2`, `cm3` werden zu x², x², cm³ (abschaltbar im ⓘ der 
 
 ## Entwicklung
 - Quellen: `dev/src/` · Bauen: `dev/tools/build.sh` (schreibt `index.html`) · Tests: `node dev/tools/test.js`
-- Browser-Tests (Playwright, lokaler Server auf Port 8765): `node dev/tools/e2e-ui.js`, `e2e-server.js`, `e2e-server-compat.js`, `e2e-server-private.js`, `e2e-cache.js`, `e2e-solver.js`
+- Browser-Tests (Playwright, lokaler Server auf Port 8765): `node dev/tools/e2e-ui.js`, `e2e-server.js`, `e2e-server-compat.js`, `e2e-server-private.js`, `e2e-cache.js`, `e2e-solver.js`, `e2e-chat.js`
 - Texterkennung mit echten Sprachdaten: `TESS_PK=<ordner> node dev/tools/e2e-ocr.js` (benötigte Pakete stehen im Kopf der Datei)
 - `dev/tools/shape.py` vergleicht eine erzeugte `.goodnotes` strukturell mit einer Referenzdatei (`python3 -I dev/tools/shape.py ref.goodnotes out.goodnotes`).
 - Änderungen immer in `dev/src/` machen und neu bauen, nicht in `index.html`.
