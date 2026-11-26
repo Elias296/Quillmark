@@ -305,16 +305,31 @@ function strokeOps(strokes, ink) {
   return s + 'Q\n';
 }
 const MEDIABOX = () => `[0 0 ${num(TW.PAGE_W)} ${num(TW.PAGE_H)}]`;
+/* Bilder (JPEG) als PDF-XObjekte: imgs = { id: { jpeg: Uint8Array, pw, ph } } */
+function imageObjs(pageImages, imgs, firstId) {
+  const objs = [], refs = [], ops = [];
+  (pageImages || []).forEach((im, k) => {
+    const d = imgs && imgs[im.id]; if (!d || !d.jpeg) return;
+    const id = firstId + objs.length, name = `/I${k}`;
+    objs.push(concatBytes([te.encode(`<< /Type /XObject /Subtype /Image /Width ${d.pw} /Height ${d.ph} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${d.jpeg.length} >>\nstream\n`), d.jpeg, te.encode('\nendstream')]));
+    refs.push(`${name} ${id} 0 R`);
+    ops.push(`q\n${num(im.w)} 0 0 ${num(im.h)} ${num(im.x)} ${num(TW.PAGE_H - im.y - im.h)} cm\n${name} Do\nQ\n`);
+  });
+  return { objs, res: refs.length ? ` /XObject << ${refs.join(' ')} >>` : '', ops: ops.join('') };
+}
+TW.imageObjs = imageObjs;
 /* Hintergrund-PDF einer Seite: zwingend in echten PDF-Punkten (419,53 × 595,28) */
-TW.backgroundPdf = function (settings) {
-  const content = te.encode(paperOps(TW.paper(settings)));
+TW.backgroundPdf = function (settings, pageImages, imgs) {
+  const im = imageObjs(pageImages, imgs, 5);
+  const content = te.encode(paperOps(TW.paper(settings)) + im.ops);
   return pdfAssemble([
     '<< /Type /Catalog /Pages 2 0 R >>',
     '<< /Type /Pages /Count 1 /Kids [3 0 R] >>',
-    `<< /Type /Page /Parent 2 0 R /MediaBox ${MEDIABOX()} /Contents 4 0 R /Resources << /ProcSet [/PDF] >> >>`,
+    `<< /Type /Page /Parent 2 0 R /MediaBox ${MEDIABOX()} /Contents 4 0 R /Resources << /ProcSet [/PDF /ImageC]${im.res} >> >>`,
     streamObj('', content),
+    ...im.objs,
     '<< /Producer (Quillmark) >>'
-  ], 1, 5);
+  ], 1, 5 + im.objs.length);
 };
 function pdfTextString(s) {
   let hex = 'FEFF';
@@ -322,16 +337,18 @@ function pdfTextString(s) {
   return `<${hex}>`;
 }
 /* Standard-PDF: Papier + Vektor-Handschrift, identische Koordinaten wie Vorschau/Goodnotes */
-TW.buildPdf = async function (layout, title) {
+TW.buildPdf = async function (layout, title, imgs) {
   const paper = TW.paper(layout.settings), n = layout.pages.length;
   const objs = ['<< /Type /Catalog /Pages 2 0 R >>', null];
   const kids = [];
   for (let i = 0; i < n; i++) {
-    const raw = te.encode(paperOps(paper) + strokeOps(layout.pages[i].strokes, layout.settings.ink));
+    const im = imageObjs(layout.pages[i].images, imgs, objs.length + 1);
+    objs.push(...im.objs);
+    const raw = te.encode(paperOps(paper) + im.ops + strokeOps(layout.pages[i].strokes, layout.settings.ink));
     const z = await streamCompress(raw, 'deflate');
     const pageId = objs.length + 1, contId = pageId + 1;
     kids.push(`${pageId} 0 R`);
-    objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox ${MEDIABOX()} /Contents ${contId} 0 R /Resources << /ProcSet [/PDF] >> >>`);
+    objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox ${MEDIABOX()} /Contents ${contId} 0 R /Resources << /ProcSet [/PDF /ImageC]${im.res} >> >>`);
     objs.push(z ? streamObj('/Filter /FlateDecode', z) : streamObj('', raw));
   }
   objs[1] = `<< /Type /Pages /Count ${n} /Kids [${kids.join(' ')}] >>`;
@@ -341,7 +358,7 @@ TW.buildPdf = async function (layout, title) {
 
 /* ---- .goodnotes ------------------------------------------------------------ */
 const REF_TEMPLATE = '238EE861-EE9A-51BD-B010-832CD3C50D2C_a5_1_2 - White';
-TW.buildGoodnotes = async function (layout, title, thumbJpeg) {
+TW.buildGoodnotes = async function (layout, title, thumbJpeg, imgs) {
   const S = layout.settings, PEN = TW.PEN, V = TW.SCHEMA;
   const docId = TW.uuid(), device = BigInt.asUintN(62, new DataView(randBytes(8).buffer).getBigUint64(0, true)) | (1n << 61n);
   let ts = Date.now() + 0.25, seq = BigInt(Date.now());
@@ -355,7 +372,7 @@ TW.buildGoodnotes = async function (layout, title, thumbJpeg) {
   const spacingPen = paper.grid.S * PEN, lineT = 0.5 * PEN;
   const isRef = S.paper === 'liniert' && S.paperColor === 'weiss' && S.spacing === 'ref';
   const tplName = isRef ? REF_TEMPLATE : `${TW.uuid()}_a5_1_2 - ${pc.name}`;
-  const bgPdf = TW.backgroundPdf(S);
+  const bgShared = TW.backgroundPdf(S);
   const Wp = Math.fround(TW.PAGE_W * PEN), Hp = Math.fround(TW.PAGE_H * PEN);
   const originY = (TW.FIRST_LINE - 0.25) * PEN - (spacingPen - lineT);
   const [ir, ig, ib] = TW.hexRgb(S.ink);
@@ -372,6 +389,8 @@ TW.buildGoodnotes = async function (layout, title, thumbJpeg) {
   let strokeCounter = 1000000 + Math.floor(Math.random() * 3000000);
   for (let pi = 0; pi < nPages; pi++) {
     const ids = TW.pageUuidPair(), attId = TW.uuid(), bgId = TW.uuid();
+    const pgImgs = (layout.pages[pi].images || []).filter(im => imgs && imgs[im.id]);
+    const bgPdf = pgImgs.length ? TW.backgroundPdf(S, pgImgs, imgs) : bgShared;
     // Anhang (Hintergrund-PDF, Feld 6)
     tick();
     events.push(ev(attId, 6, new Pb().str(1, attId).str(2, attId).varint(5, bgPdf.length).str(6, docId).f64(10, ts).str(11, TW.uuid())

@@ -772,6 +772,7 @@ $('#cmpTake').addEventListener('click', async () => {
 
 /* ---------- Export ---------- */
 async function thumbnailJpeg() {
+  await A.ensureImages(S.layout);
   const cv = document.createElement('canvas'); cv.width = 352; cv.height = 499;
   A.renderPage(cv.getContext('2d'), S.layout, 0, 352 / TW.PAGE_W, false);
   const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.82));
@@ -806,7 +807,7 @@ async function exportGoodnotes(btn) {
   const label = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Datei wird erzeugt …';
   try {
     const title = (S.draft.title || '').trim() || 'Quillmark-Notiz';
-    const g = await TW.buildGoodnotes(L, title, await thumbnailJpeg());
+    const g = await TW.buildGoodnotes(L, title, await thumbnailJpeg(), await A.exportImages(L));
     const v = await TW.verifyGoodnotes(g.zip, L);
     $('#exportChecks').innerHTML = checksHtml(v.checks);
     if (!v.ok) { toast('Interne Prüfung fehlgeschlagen – die Datei wurde nicht bereitgestellt.', 6000); openModal('#exportModal'); return; }
@@ -823,7 +824,7 @@ async function exportPdf(btn) {
   const label = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin dark"></span> PDF wird erzeugt …';
   try {
     const title = (S.draft.title || '').trim() || 'Quillmark-Notiz';
-    const pdf = await TW.buildPdf(L, title);
+    const pdf = await TW.buildPdf(L, title, await A.exportImages(L));
     $('#exportChecks').innerHTML = '';
     openModal('#exportModal');
     await finishExport(pdf, safeName(title) + '.pdf', 'application/pdf', `<b>${esc(safeName(title))}.pdf</b> ist fertig (${(pdf.length / 1024).toFixed(0)} KB). Papier und Vektor-Handschrift sind identisch zur Vorschau aufgeteilt.`);
@@ -861,7 +862,7 @@ async function selfTest() {
   out.push({ name: 'Schreibränder links/rechts eingehalten, nichts außerhalb des Blattes', ok: v.offMargin === 0 && v.offPage === 0, detail: `Rand ${S.settings.margin} mm · ${v.offMargin} Randverletzungen · ${v.offPage} Striche außerhalb` });
   // 3) Echte Exportdatei bauen und zurücklesen
   try {
-    const g = await TW.buildGoodnotes(L, d.title || 'Selbsttest', await thumbnailJpeg());
+    const g = await TW.buildGoodnotes(L, d.title || 'Selbsttest', await thumbnailJpeg(), await A.exportImages(L));
     const r = await TW.verifyGoodnotes(g.zip, L);
     out.push(...r.checks);
     const ids = g.meta.pages.every(p => TW.uuidPlusOne(p.pageId) === p.notesId);
@@ -900,7 +901,9 @@ $('#btnHostInfo').addEventListener('click', () => openModal('#hostModal'));
 $('#delDraft').addEventListener('click', async () => {
   if (!(await confirmDialog('Entwürfe löschen?', 'Die aktuelle Notiz und der Undo-Stand werden unwiderruflich gelöscht.', 'Löschen', true))) return;
   LS.del(K.draft); LS.del(K.undo); S.undo = null;
-  A.setDraft({ title: '', text: '', isSample: false, imports: 0 }); toast('Entwürfe gelöscht.'); refreshSettingsModal();
+  for (const id of Object.keys(S.imgMeta || {})) IDB.del('img:' + id);          // eingefügte Bilder gehören zu den Entwürfen
+  S.imgMeta = {}; LS.del(K.images); LS.del(K.chat);
+  A.setDraft({ title: '', text: '', isSample: false, imports: 0 }); toast('Entwürfe, Bilder und Chat gelöscht.'); refreshSettingsModal();
 });
 $('#delOwn').addEventListener('click', async () => {
   if (!(await confirmDialog('Eigene Handschrift zurücksetzen?', 'Alle gezeichneten Zeichen werden gelöscht. Tipp: vorher als JSON sichern.', 'Zurücksetzen', true))) return;
@@ -936,7 +939,7 @@ function makeTouchIcon() {         // Home-Bildschirm-Symbol zur Laufzeit erzeug
 function init() {
   makeTouchIcon();
   A.syncDraftUi(); A.syncZoom();
-  A.setMode(['import', 'schrift', 'blatt'].includes(S.mode) ? S.mode : 'import');
+  A.setMode(['import', 'chat', 'schrift', 'blatt'].includes(S.mode) ? S.mode : 'import');
   refreshBlattPanel();
   A.relayout(true);
   detectGpu();

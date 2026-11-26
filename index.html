@@ -182,6 +182,33 @@ pre.log:empty{display:none}
 .grp-h{display:flex;justify-content:space-between;align-items:baseline;margin:18px 0 8px;font-size:12.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
 .grp-h span{font-weight:500;color:var(--dim);font-size:12.5px;text-transform:none}
 
+/* ---------- Chat ---------- */
+#panel[data-mode=chat]{overflow:hidden;padding-bottom:2px}
+#panel[data-mode=chat]>section[data-panel=chat]{height:100%}
+.chat-card{height:100%;min-height:0;display:flex;flex-direction:column;padding-bottom:12px}
+.chat-log{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:12px;padding:4px 2px 10px;margin:0 -4px}
+.chat-empty{margin:auto;max-width:360px;text-align:center;display:flex;flex-direction:column;gap:8px;color:var(--muted);font-size:14px;padding:20px}
+.chat-empty b{color:var(--text);font-size:16px}
+.msg{display:flex;flex-direction:column;max-width:88%}
+.msg.me{align-self:flex-end;align-items:flex-end}
+.msg.ai{align-self:flex-start}
+.bub{padding:11px 15px;border-radius:20px;white-space:pre-wrap;word-break:break-word;font-size:15px;line-height:1.45}
+.msg.me .bub{background:var(--accent);color:var(--on-accent);border-bottom-right-radius:6px}
+.msg.ai .bub{background:var(--glass-2);border:1px solid var(--line);border-bottom-left-radius:6px}
+.msg.sys .bub{background:rgba(251,191,36,.10);border-color:rgba(251,191,36,.28);color:#FDE68A}
+.bub .sk{display:inline-block;margin:2px 0;padding:2px 9px;border-radius:999px;background:rgba(255,255,255,.10);border:1px dashed var(--line-2);font-size:13.5px}
+.by{font-size:11.5px;color:var(--dim);margin:4px 8px 0}
+.msg-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 8px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:var(--tap);padding:0 15px;border-radius:999px;border:1px solid var(--line);background:var(--glass);color:var(--text);font-weight:600;font-size:14px;white-space:nowrap}
+.chip:hover{background:var(--glass-2)}
+.composer{display:flex;align-items:flex-end;gap:8px;padding:6px;border-radius:24px;background:var(--field);border:1px solid var(--line)}
+.composer textarea{flex:1;min-height:var(--tap);max-height:160px;border:0;background:transparent;resize:none;padding:11px 6px;box-shadow:none}
+.composer textarea:focus{box-shadow:none}
+.composer .btn{border-radius:999px}
+.composer .icon-btn{background:var(--glass)}
+
 /* ---------- Vorschau: Glas-Bühne, darauf das weiße Blatt ---------- */
 .stage{flex:1 1 auto;min-width:0;min-height:0;position:relative;display:flex;flex-direction:column;border-radius:32px;overflow:hidden;background:rgba(255,255,255,.03) radial-gradient(rgba(255,255,255,.07) 1px,transparent 1.3px) 0 0/22px 22px;border:1px solid var(--line);box-shadow:inset 0 1px 0 var(--hi)}
 .sheet-scroll{flex:1 1 auto;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;display:flex;padding:28px 28px 100px;touch-action:pan-x pan-y;overscroll-behavior:contain}
@@ -259,6 +286,26 @@ pre.log:empty{display:none}
 .spin.dark{border-color:rgba(255,255,255,.22);border-top-color:#fff}
 @keyframes sp{to{transform:rotate(360deg)}}
 
+/* ---------- Glas-Animationen: Lichtstreif beim Antippen, gleitende Auswahl ---------- */
+.btn,.chip,.seg button,.icon-btn,.rail nav .ic{position:relative;overflow:hidden;transition:transform .18s cubic-bezier(.3,1.4,.5,1),background .15s,color .15s,box-shadow .2s}
+.btn::after,.chip::after,.seg button::after,.icon-btn::after,.rail nav .ic::after,.glider::after{content:"";position:absolute;inset:-1px;pointer-events:none;border-radius:inherit;z-index:2;opacity:0;transform:translateX(-130%);
+  background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.05) 40%,rgba(255,255,255,.42) 50%,rgba(255,255,255,.05) 60%,transparent 70%)}
+.btn-primary::after,.btn-amber::after,.rail nav .glider::after{background:linear-gradient(105deg,transparent 30%,rgba(11,12,14,.07) 42%,rgba(255,255,255,1) 50%,rgba(11,12,14,.07) 58%,transparent 70%)}
+.sweep::after{animation:qm-sweep .75s cubic-bezier(.22,.8,.3,1)}
+@keyframes qm-sweep{0%{opacity:1;transform:translateX(-130%)}100%{opacity:1;transform:translateX(130%)}}
+@media (hover:hover) and (pointer:fine){.btn:not(:disabled):hover::after,.chip:hover::after,.rail nav button:hover .ic::after{animation:qm-sweep .9s cubic-bezier(.22,.8,.3,1)}}
+.btn:not(:disabled):active,.chip:active,.seg button:active,.icon-btn:not(:disabled):active,.rail nav button:active .ic{transform:scale(.95)}
+.seg,.rail nav{position:relative}
+.seg button,.rail nav button{position:relative;z-index:1}
+.glider{position:absolute;left:0;top:0;width:0;height:0;z-index:0;pointer-events:none;overflow:hidden;border-radius:999px;opacity:0;
+  transition:transform .5s cubic-bezier(.3,1.3,.45,1),width .5s cubic-bezier(.3,1.3,.45,1),height .5s cubic-bezier(.3,1.3,.45,1),opacity .2s}
+.glider.instant{transition:none}
+.seg .glider{background:var(--glass-3);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 4px 14px rgba(0,0,0,.28);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.seg.has-glider button.on{background:transparent;box-shadow:none}
+.rail nav .glider{border-radius:50%;background:var(--accent);box-shadow:0 6px 20px rgba(255,255,255,.18)}
+.rail nav.has-glider button.on .ic{background:transparent;border-color:transparent;box-shadow:none}
+@media (prefers-reduced-motion:reduce){.glider{transition:opacity .2s}.sweep::after,.btn:hover::after,.chip:hover::after,.rail nav button:hover .ic::after{animation:none!important}.btn:active,.chip:active,.seg button:active,.icon-btn:active,.rail nav button:active .ic{transform:none}}
+
 /* ---------- iPad Hochformat / schmale Fenster ---------- */
 @media (max-width:1000px){
   .rail{width:76px;margin-left:10px}
@@ -293,6 +340,7 @@ pre.log:empty{display:none}
   </div>
   <nav id="modeSeg" aria-label="Arbeitsschritte">
     <button data-mode="import" aria-label="Schritt 1: Text und KI"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h10M4 18h7"/><path d="m17 15 1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1z"/></svg></span><span class="t-long">Text &amp; KI</span><span class="t-short">Text</span></button>
+    <button data-mode="chat" aria-label="Chat mit Tizian"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/></svg></span><span class="t-long">Chat</span><span class="t-short">Chat</span></button>
     <button data-mode="schrift" aria-label="Schritt 2: Handschrift"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span><span class="t-long">Handschrift</span><span class="t-short">Schrift</span></button>
     <button data-mode="blatt" aria-label="Schritt 3: Papier und Export"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span><span class="t-long">Papier &amp; Export</span><span class="t-short">Papier</span></button>
   </nav>
@@ -337,6 +385,12 @@ pre.log:empty{display:none}
         <button class="btn btn-block" id="btnPick" style="margin-top:12px">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="m4 18 5-5 4 4 3-3 4 4"/></svg>
           Screenshots importieren
+          <span class="grow"></span>
+        </button>
+        <input type="file" id="imgFile" accept="image/*" hidden>
+        <button class="btn btn-block" id="btnImg" style="margin-top:8px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m4 17 5-5 4 4 2-2 5 5"/><path d="M15 4v6M12 7h6"/></svg>
+          Bild in den Lernzettel einfügen
           <span class="grow"></span>
         </button>
         <div id="ocrStatus" hidden style="margin-top:12px">
@@ -414,6 +468,28 @@ pre.log:empty{display:none}
             <label class="switch" style="margin-top:6px"><input type="checkbox" id="stuWork"><span>Rechenweg zeigen</span></label>
           </div>
         </details>
+      </div>
+    </section>
+
+    <!-- ============ Chat ============ -->
+    <section data-panel="chat" hidden>
+      <div class="card chat-card">
+        <div class="card-h"><h3>Chat mit Tizian</h3><span class="badge off" id="chatState"><i></i>nicht geladen</span><span class="grow"></span>
+          <button class="btn btn-ghost btn-sm" id="chatClear">Leeren</button><button class="info" data-info="chat" aria-label="Info zum Chat">ⓘ</button></div>
+        <div class="chat-log" id="chatLog" aria-live="polite"></div>
+        <div class="chips" id="chatChips" role="group" aria-label="Schnell-Aktionen">
+          <button class="chip" data-act="lernzettel">✎ Lernzettel mit Skizze</button>
+          <button class="chip" data-act="aufgaben">Aufgaben lösen</button>
+          <button class="chip" data-act="zusammenfassen">Zusammenfassen</button>
+          <button class="chip" data-act="quiz">Quiz</button>
+        </div>
+        <div class="composer">
+          <button class="icon-btn" id="chatAttach" title="Foto anhängen (Texterkennung)" aria-label="Foto anhängen"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
+          <textarea id="chatInput" rows="1" placeholder="Frag Tizian … oder ein Thema für den Lernzettel" aria-label="Nachricht an Tizian"></textarea>
+          <button class="btn btn-primary" id="chatSend">Senden</button>
+        </div>
+        <label class="switch"><input type="checkbox" id="chatCtx" checked><span>Notiztext als Hintergrund mitschicken</span></label>
+        <input type="file" id="chatFile" accept="image/*" multiple hidden>
       </div>
     </section>
 
@@ -505,10 +581,11 @@ pre.log:empty{display:none}
 
 <!-- ============ Info-Popover (Progressive Disclosure) ============ -->
 <div class="pop" id="pop" hidden role="dialog"></div>
-<template id="info-text"><h4>Formatierung</h4><ul><li><code># Titel</code>, <code>## Abschnitt</code> – Überschriften</li><li><code>- Punkt</code> oder <code>1. Punkt</code> – Listen</li><li>Leerzeile – neuer Absatz</li><li><code>**fett**</code> – kräftiger Strich</li><li><code>a | b | c</code> – Tabellenzeile</li><li><code>x^2</code> oder <code>x2</code> wird zu x²</li></ul><label class="switch"><input type="checkbox" data-opt="autoSup"><span>Hochzahlen automatisch setzen</span></label><p>Der Text wird automatisch lokal gespeichert.</p></template>
+<template id="info-text"><h4>Formatierung</h4><ul><li><code>[[A -&gt; B -&gt; C]]</code> – Ablauf-Skizze, <code>[[Thema: a, b, c]]</code> – Mindmap</li><li>„Bild in den Lernzettel einfügen“ setzt <code>![Bild](bild:…)</code></li><li><code># Titel</code>, <code>## Abschnitt</code> – Überschriften</li><li><code>- Punkt</code> oder <code>1. Punkt</code> – Listen</li><li>Leerzeile – neuer Absatz</li><li><code>**fett**</code> – kräftiger Strich</li><li><code>a | b | c</code> – Tabellenzeile</li><li><code>x^2</code> oder <code>x2</code> wird zu x²</li></ul><label class="switch"><input type="checkbox" data-opt="autoSup"><span>Hochzahlen automatisch setzen</span></label><p>Der Text wird automatisch lokal gespeichert.</p></template>
 <template id="info-ocr"><h4>Texterkennung</h4><p>Läuft vollständig im Browser mit Tesseract.js. Die Sprachen wählst du im Zuschnitt-Fenster (z. B. ES für Spanisch) – nur dann werden Akzente wie á, ñ zuverlässig erkannt. Jede Sprache lädt beim ersten Mal einige MB Sprachdaten. Es wird nur der zugeschnittene Ausschnitt verarbeitet.</p><p>Formeln und komplexe Tabellen werden nur als einfacher Text erkannt – bitte prüfen.</p></template>
 <template id="info-ki"><h4>Tizian – lokale KI</h4><p id="gpuDetail"></p><ul><li>Läuft über WebGPU auf dem Gerät, Texte verlassen das iPad nicht – außer du schaltest „Text auf Server verarbeiten“ ein.</li><li>Das Modell wird erst nach deinem Tipp geladen (kein automatischer Download).</li><li>Ein Fakten-Wächter vergleicht Zahlen, Namen und Fachbegriffe mit dem Original.</li><li>Der Entwurf ändert sich erst mit „Tizians Fassung übernehmen“.</li></ul><p>Quillmark verspricht keine Umgehung von KI-Detektoren – es geht um bessere, eigene Notizen. Editor, Handschrift und Export funktionieren auch ohne KI.</p></template>
 <template id="info-server"><h4>Tizian auf einem anderen Rechner</h4><p>Die App spricht jede <b>OpenAI-kompatible</b> Chat-Schnittstelle an (<code>/v1/chat/completions</code>).</p><p><b>Empfohlen – eigener Laptop (kostenlos, privat):</b></p><ol><li>Auf dem Laptop <b>Ollama</b> mit einem Modell, Freigabe <code>OLLAMA_ORIGINS=https://elias296.github.io</code>.</li><li><b>Tailscale</b> auf Laptop und iPad mit demselben Konto, auf dem Laptop <code>tailscale serve --bg 11434</code>.</li><li>Hier die Adresse <code>https://…ts.net</code> und den Modellnamen aus <code>ollama list</code> eintragen, Schlüssel leer lassen.</li></ol><p>Die Texte bleiben dabei in deinem privaten Tailscale-Netz. Der Laptop muss laufen und darf nicht schlafen.</p><p><b>Alternative – OpenRouter:</b> Adresse <code>https://openrouter.ai/api/v1</code>, ein Modell mit <code>:free</code> und dein API-Schlüssel. Kostenlos mit Tageslimit; die Texte gehen an fremde Anbieter, die sie speichern dürfen.</p><p>Handschrift, Texterkennung und Export bleiben immer auf dem iPad.</p></template>
+<template id="info-chat"><h4>Chat mit Tizian</h4><p>Frag Tizian etwas, lass dir etwas erklären oder Aufgaben lösen. Reine Rechenzeilen wie <code>345 + 678 =</code> rechnet ein exakter Rechner.</p><ul><li><b>Lernzettel mit Skizze:</b> Thema eintippen und den Knopf antippen – oder leer lassen, dann nutzt Tizian deinen Notiztext. Skizzen (Ablauf, Mindmap) zeichnet Quillmark als echte Striche aufs Blatt.</li><li><b>Übernehmen:</b> Unter jeder Antwort „Als Notiz“ bzw. „Als Lernzettel übernehmen“ oder „Anhängen“.</li><li><b>Foto:</b> Die Kamera erkennt Text aus einem Bild und setzt ihn ins Eingabefeld.</li></ul><p>Tizian ist ein KI-Modell und kann sich irren – besonders bei Fakten und Mathe. Der Chat wird nur auf diesem Gerät gespeichert.</p></template>
 <template id="info-solve"><h4>Aufgaben lösen</h4><p>Buchseite fotografieren oder Screenshot senden → Zuschnitt → Texterkennung → Tizian löst jede Aufgabe. Reine Rechenzeilen wie <code>345 + 678 =</code> rechnet ein exakter Rechner.</p><p><b>Grenzen:</b> nur Text, kein Bildverständnis (Zeichnungen, Diagramme, Formeln). Kleine lokale Modelle machen Fehler, besonders in Mathe. Bitte Lösungen prüfen.</p></template>
 <template id="info-style"><h4>Schriftstile</h4><p>Alle Stile bestehen aus echten Vektor-Stiftpfaden. In Goodnotes lässt sich die Schrift mit Lasso und Radierer bearbeiten.</p><p>Bei „Meine eigene Handschrift“ werden fehlende Zeichen durch die Standardschrift ergänzt.</p></template>
 <template id="info-studio"><h4>Zeichenstudio</h4><p>Zeichen antippen und mit dem Apple Pencil schreiben. Gespeichert werden Stiftpfade mit Druck, relativ zur Grundlinie.</p><p>iPadOS kann lokale Browserdaten nach längerer Inaktivität löschen – sichere deine Handschrift unter „Sicherung“ als JSON.</p></template>
@@ -657,7 +734,7 @@ pre.log:empty{display:none}
 
       <h4>Gezielt löschen</h4>
       <div class="stack">
-        <button class="btn btn-block" id="delDraft">Entwürfe löschen (Notiz &amp; Undo-Stand)</button>
+        <button class="btn btn-block" id="delDraft">Entwürfe löschen (Notiz, Bilder, Chat &amp; Undo-Stand)</button>
         <button class="btn btn-block" id="delOwn">Eigene Handschrift zurücksetzen</button>
         <button class="btn btn-block" id="delModel">Heruntergeladenes KI-Modell aus dem Cache entfernen</button>
         <button class="btn btn-danger btn-block" id="delAll">Komplett-Reset (alles löschen)</button>
@@ -1119,6 +1196,15 @@ function classifyLine(raw) {
   const line = raw.replace(/\t/g, '    ').replace(/[   ]/g, ' ');
   if (!line.trim()) return { type: 'blank' };
   let m;
+  /* Skizzen: [[A -> B -> C]] = Ablauf, [[Thema: a, b, c]] = Mindmap; Bilder: ![Text](bild:ID) */
+  if ((m = /^\s*\[\[\s*(.+?)\s*\]\]\s*$/.exec(line))) {
+    const body = m[1];
+    if (/->|→|=>/.test(body)) return { type: 'flow', items: body.split(/\s*(?:->|→|=>)\s*/).map(s => s.trim()).filter(Boolean).slice(0, 12) };
+    const mm = /^([^:]{1,60}):\s*(.+)$/.exec(body);
+    if (mm) return { type: 'mind', center: mm[1].trim(), items: mm[2].split(/\s*[,;]\s*/).map(s => s.trim()).filter(Boolean).slice(0, 10) };
+    return { type: 'flow', items: [body.trim()] };
+  }
+  if ((m = /^\s*!\[([^\]]*)\]\(bild:([A-Za-z0-9_-]+)\)\s*$/.exec(line))) return { type: 'img', alt: m[1], id: m[2] };
   if (/^[\s|:+-]+$/.test(line) && line.includes('|')) return { type: 'sep' };      // Markdown-Trennzeile |---|---|
   if (/\S\s*\|\s*\S/.test(line) && !/^\s*#/.test(line)) {                    // einfache Tabellenzeile: Zellen durch | getrennt
     const cells = line.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map(c => c.trim());
@@ -1142,7 +1228,7 @@ TW.layout = function (note, settings, own) {
   let page = null, lastRow = -1, pendingBlank = 0, charSeq = 0;
   const seedBase = settings.style === 'locker' ? 7331 : (settings.style === 'eigen' ? 4242 : 1009);
 
-  function newPage() { page = { strokes: [], glyphs: [], rowsUsed: [] }; pages.push(page); lastRow = -1; }
+  function newPage() { page = { strokes: [], glyphs: [], rowsUsed: [], images: [] }; pages.push(page); lastRow = -1; }
   newPage();
   const rowsFor = em => Math.max(1, Math.ceil(em * 1.2 / grid.S - 1e-9));
   const yOf = r => grid.y0 + r * grid.S;
@@ -1234,6 +1320,101 @@ TW.layout = function (note, settings, own) {
     return place;
   }
 
+  /* ---------- Skizzen-Bausteine (handgezeichnet, als echte Stiftstriche) ---------- */
+  const skRnd = mulberry32(hash32(seedBase + 777, 31));
+  const jit = v => v + (skRnd() - 0.5) * (st.ptJ > 0.5 ? 0.9 : 0.35);
+  function skStroke(pts, w) { const q = TW.toQuads(pts.map(p => [jit(p[0]), jit(p[1])])); if (q) { q.w = w || penW; q.fb = false; page.strokes.push(q); } }
+  function skLine(x0, y0, x1, y1, w) { skStroke([[x0, y0], [(x0 + x1) / 2, (y0 + y1) / 2], [x1, y1]], w); }
+  function skBox(x0, y0, x1, y1) {
+    const r = Math.min(4, (y1 - y0) / 3), pts = [];
+    const arc = (cx, cy, a0) => { for (let k = 0; k <= 2; k++) { const a = (a0 + k * 45) * Math.PI / 180; pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); } };
+    pts.push([x0 + r, y0]); pts.push([(x0 + x1) / 2, y0]); arc(x1 - r, y0 + r, 270); pts.push([x1, (y0 + y1) / 2]); arc(x1 - r, y1 - r, 0);
+    pts.push([(x0 + x1) / 2, y1]); arc(x0 + r, y1 - r, 90); pts.push([x0, (y0 + y1) / 2]); arc(x0 + r, y0 + r, 180); pts.push([x0 + r + 0.6, y0 + 0.2]);
+    skStroke(pts, penW * 0.95);
+  }
+  function skArrow(x0, y0, x1, y1) {
+    skLine(x0, y0, x1, y1, penW * 0.95);
+    const a = Math.atan2(y1 - y0, x1 - x0), L = 4.6;
+    for (const d of [-0.5, 0.5]) skStroke([[x1 - L * Math.cos(a + d), y1 - L * Math.sin(a + d)], [x1, y1]], penW * 0.95);
+  }
+  /* Beschriftung als Wörter mit Abständen (Leerzeichen haben keinen Pfad) */
+  function label(text, em) {
+    const parts = []; let width = 0;
+    for (const t of String(text).split(/\s+/).filter(Boolean)) {
+      const w = makeWord(t, em); if (!w.items.length) continue;
+      const gap = parts.length ? spaceW(em) : 0; parts.push({ items: w.items, gap }); width += gap + w.width;
+    }
+    return { parts, width, em };
+  }
+  function fitLabel(text, em, maxW) {
+    let l = label(text, em);
+    if (l.width > maxW) { const k = Math.max(0.6, maxW / l.width); em *= k; l = label(text, em); }
+    let t = String(text).trim();
+    while (l.width > maxW && t.length > 1) {                     // passt auch verkleinert nicht: kürzen mit „…“
+      t = t.includes(' ') ? t.replace(/\s+\S+\s*$/, '') : t.slice(0, -1);
+      l = label(t.replace(/[\s.,;:–-]+$/, '') + '…', em);
+    }
+    return l;
+  }
+  function emitLabel(l, x, row, wmul) { for (const p of l.parts) { x += p.gap; x = emit(p.items, x, row, l.em, wmul || 1, false); } }
+  /* Rasterzeilen am Stück reservieren (passt der Block nicht mehr, neue Seite) */
+  function reserve(n, extra) {
+    n = Math.max(1, Math.min(n, grid.rows));
+    let r = lastRow < 0 ? 0 : lastRow + rowsFor(E) + (extra || 0);
+    if (r + n - 1 > grid.rows - 1) { newPage(); r = 0; }
+    lastRow = r + n - 1; page.rowsUsed.push(r);
+    return r;
+  }
+  const boxY = row => { const b = yOf(row); return [b - Math.max(grid.S * 0.74, E * 0.98), b + Math.max(grid.S * 0.26, E * 0.36)]; };
+  function drawFlow(items, extra) {
+    const em = E * 0.95, padX = em * 0.55, gapX = Math.max(18, em * 1.9), maxW = grid.right - grid.left - padX * 2 - 26;
+    const ls = items.map(t => fitLabel(t, em, maxW));
+    const lines = [[]]; let x = grid.left;
+    ls.forEach(l => {
+      const w = l.width + padX * 2;
+      if (lines[lines.length - 1].length && x + gapX + w > grid.right) lines.push([]);      // passt nicht mehr: neue Zeile, Pfeil vom Rand
+      const cur = lines[lines.length - 1], bx = cur.length ? x + gapX : grid.left + (lines.length > 1 ? 26 : 0);
+      cur.push({ l, x0: bx, x1: bx + w }); x = bx + w;
+    });
+    const r0 = reserve(lines.length * 2 - 1, extra);
+    lines.forEach((ln, li) => {
+      const row = r0 + li * 2, [y0, y1] = boxY(row), ym = (y0 + y1) / 2;
+      if (li > 0) skArrow(grid.left + 4, ym, ln[0].x0 - 2, ym);
+      ln.forEach((b, k) => {
+        skBox(b.x0, y0, b.x1, y1); emitLabel(b.l, b.x0 + padX, row);
+        if (k < ln.length - 1) skArrow(b.x1 + 3, ym, ln[k + 1].x0 - 3, ym);
+        else if (li < lines.length - 1) skLine(b.x1 + 3, ym, Math.min(grid.right, b.x1 + 14), ym, penW * 0.95);
+      });
+    });
+  }
+  function drawMind(center, items, extra) {
+    const emC = E * 1.02, em = E * 0.92, padX = em * 0.5, cw = grid.right - grid.left;
+    const cl = fitLabel(center, emC, cw * 0.38), cW = cl.width + padX * 2.4;
+    const L = items.slice(0, Math.ceil(items.length / 2)), R = items.slice(Math.ceil(items.length / 2));
+    const side = (cw - cW) / 2 - 22 - padX * 2;
+    const rows = Math.max(1, Math.max(L.length, R.length) * 2 - 1), r0 = reserve(rows, extra);
+    const cRow = r0 + Math.floor((rows - 1) / 2), cx = (grid.left + grid.right) / 2;      // Mitte vertikal zentriert
+    const [cy0, cy1] = boxY(cRow), cx0 = cx - cW / 2, cx1 = cx + cW / 2;
+    skBox(cx0, cy0, cx1, cy1); skBox(cx0 + 1.6, cy0 + 1.6, cx1 - 1.6, cy1 - 1.6); emitLabel(cl, cx0 + padX * 1.2, cRow, 1.3);
+    const put = (arr, left) => arr.forEach((t, k) => {
+      const row = r0 + Math.floor((rows - (arr.length * 2 - 1)) / 2) + k * 2, l = fitLabel(t, em, side), w = l.width + padX * 2, [y0, y1] = boxY(row);
+      const bx0 = left ? cx0 - 22 - w : cx1 + 22, bx1 = bx0 + w;
+      skBox(bx0, y0, bx1, y1); emitLabel(l, bx0 + padX, row);
+      skLine(left ? cx0 - 1 : cx1 + 1, (cy0 + cy1) / 2, left ? bx1 + 1 : bx0 - 1, (y0 + y1) / 2, penW * 0.9);
+    });
+    put(L, true); put(R, false);
+  }
+  function drawImage(id, alt, extra) {
+    const meta = note.images && note.images[id];
+    if (!meta || !meta.w || !meta.h) return flow(`[Bild fehlt${alt ? ': ' + alt : ''}]`, E, 1, grid.left, grid.left, extra);
+    const cw = grid.right - grid.left, ratio = meta.h / meta.w, maxH = (grid.maxBaseline - grid.y0) * 0.55;
+    let w = Math.min(cw, meta.w / 2), h = w * ratio;
+    if (h > maxH) { h = maxH; w = h / ratio; }
+    const rows = Math.ceil((h + grid.S * 0.35) / grid.S), r0 = reserve(rows, extra);
+    page.images.push({ id, x: grid.left + (cw - w) / 2, y: yOf(r0) - grid.S + grid.S * 0.2, w, h, alt: alt || '' });
+    return { page, row: r0 };
+  }
+
   const sup = settings.autoSup !== false ? TW.typo : (x => x);
   const title = sup((note.title || '').trim());
   const lines = sup(note.text || '').replace(/\r\n?/g, '\n').split('\n').map(classifyLine);
@@ -1259,7 +1440,12 @@ TW.layout = function (note, settings, own) {
     }
     const extra = prev === 'title' ? 1 : (prev === 'h' ? 0 : pendingBlank);
     let place = null;
-    if (L.type === 'row') {
+    if (L.type === 'flow' || L.type === 'mind' || L.type === 'img') {
+      const ex = prev === null ? 0 : Math.max(1, extra);
+      if (L.type === 'flow') drawFlow(L.items, ex); else if (L.type === 'mind') drawMind(L.center, L.items, ex); else drawImage(L.id, L.alt, ex);
+      prev = 'body'; pendingBlank = 1;
+      continue;
+    } else if (L.type === 'row') {
       /* Tabellenzeile: Spalten gleich breit, alle Zellen beginnen auf derselben Rasterzeile */
       const n = L.cells.length, gap = E * 0.9, colW = (grid.right - grid.left) / n;
       const startPage = page, startLast = lastRow;
@@ -1296,9 +1482,9 @@ TW.layout = function (note, settings, own) {
     }
     if (place) { prev = 'body'; pendingBlank = 0; }
   }
-  let nStrokes = 0, nGlyphs = 0;
-  for (const p of pages) { nStrokes += p.strokes.length; nGlyphs += p.glyphs.length; }
-  return { pages, grid, settings, unmapped, fallback, stats: { strokes: nStrokes, glyphs: nGlyphs, pages: pages.length }, em: E };
+  let nStrokes = 0, nGlyphs = 0, nImages = 0;
+  for (const p of pages) { nStrokes += p.strokes.length; nGlyphs += p.glyphs.length; nImages += p.images.length; }
+  return { pages, grid, settings, unmapped, fallback, stats: { strokes: nStrokes, glyphs: nGlyphs, pages: pages.length, images: nImages }, em: E };
 };
 /* ==========================================================================
    Binärformate: CRC32/ZIP, LZ4 (Apple-Container bv41 … bv4$), TPL, Protobuf, PDF
@@ -1607,16 +1793,31 @@ function strokeOps(strokes, ink) {
   return s + 'Q\n';
 }
 const MEDIABOX = () => `[0 0 ${num(TW.PAGE_W)} ${num(TW.PAGE_H)}]`;
+/* Bilder (JPEG) als PDF-XObjekte: imgs = { id: { jpeg: Uint8Array, pw, ph } } */
+function imageObjs(pageImages, imgs, firstId) {
+  const objs = [], refs = [], ops = [];
+  (pageImages || []).forEach((im, k) => {
+    const d = imgs && imgs[im.id]; if (!d || !d.jpeg) return;
+    const id = firstId + objs.length, name = `/I${k}`;
+    objs.push(concatBytes([te.encode(`<< /Type /XObject /Subtype /Image /Width ${d.pw} /Height ${d.ph} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${d.jpeg.length} >>\nstream\n`), d.jpeg, te.encode('\nendstream')]));
+    refs.push(`${name} ${id} 0 R`);
+    ops.push(`q\n${num(im.w)} 0 0 ${num(im.h)} ${num(im.x)} ${num(TW.PAGE_H - im.y - im.h)} cm\n${name} Do\nQ\n`);
+  });
+  return { objs, res: refs.length ? ` /XObject << ${refs.join(' ')} >>` : '', ops: ops.join('') };
+}
+TW.imageObjs = imageObjs;
 /* Hintergrund-PDF einer Seite: zwingend in echten PDF-Punkten (419,53 × 595,28) */
-TW.backgroundPdf = function (settings) {
-  const content = te.encode(paperOps(TW.paper(settings)));
+TW.backgroundPdf = function (settings, pageImages, imgs) {
+  const im = imageObjs(pageImages, imgs, 5);
+  const content = te.encode(paperOps(TW.paper(settings)) + im.ops);
   return pdfAssemble([
     '<< /Type /Catalog /Pages 2 0 R >>',
     '<< /Type /Pages /Count 1 /Kids [3 0 R] >>',
-    `<< /Type /Page /Parent 2 0 R /MediaBox ${MEDIABOX()} /Contents 4 0 R /Resources << /ProcSet [/PDF] >> >>`,
+    `<< /Type /Page /Parent 2 0 R /MediaBox ${MEDIABOX()} /Contents 4 0 R /Resources << /ProcSet [/PDF /ImageC]${im.res} >> >>`,
     streamObj('', content),
+    ...im.objs,
     '<< /Producer (Quillmark) >>'
-  ], 1, 5);
+  ], 1, 5 + im.objs.length);
 };
 function pdfTextString(s) {
   let hex = 'FEFF';
@@ -1624,16 +1825,18 @@ function pdfTextString(s) {
   return `<${hex}>`;
 }
 /* Standard-PDF: Papier + Vektor-Handschrift, identische Koordinaten wie Vorschau/Goodnotes */
-TW.buildPdf = async function (layout, title) {
+TW.buildPdf = async function (layout, title, imgs) {
   const paper = TW.paper(layout.settings), n = layout.pages.length;
   const objs = ['<< /Type /Catalog /Pages 2 0 R >>', null];
   const kids = [];
   for (let i = 0; i < n; i++) {
-    const raw = te.encode(paperOps(paper) + strokeOps(layout.pages[i].strokes, layout.settings.ink));
+    const im = imageObjs(layout.pages[i].images, imgs, objs.length + 1);
+    objs.push(...im.objs);
+    const raw = te.encode(paperOps(paper) + im.ops + strokeOps(layout.pages[i].strokes, layout.settings.ink));
     const z = await streamCompress(raw, 'deflate');
     const pageId = objs.length + 1, contId = pageId + 1;
     kids.push(`${pageId} 0 R`);
-    objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox ${MEDIABOX()} /Contents ${contId} 0 R /Resources << /ProcSet [/PDF] >> >>`);
+    objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox ${MEDIABOX()} /Contents ${contId} 0 R /Resources << /ProcSet [/PDF /ImageC]${im.res} >> >>`);
     objs.push(z ? streamObj('/Filter /FlateDecode', z) : streamObj('', raw));
   }
   objs[1] = `<< /Type /Pages /Count ${n} /Kids [${kids.join(' ')}] >>`;
@@ -1643,7 +1846,7 @@ TW.buildPdf = async function (layout, title) {
 
 /* ---- .goodnotes ------------------------------------------------------------ */
 const REF_TEMPLATE = '238EE861-EE9A-51BD-B010-832CD3C50D2C_a5_1_2 - White';
-TW.buildGoodnotes = async function (layout, title, thumbJpeg) {
+TW.buildGoodnotes = async function (layout, title, thumbJpeg, imgs) {
   const S = layout.settings, PEN = TW.PEN, V = TW.SCHEMA;
   const docId = TW.uuid(), device = BigInt.asUintN(62, new DataView(randBytes(8).buffer).getBigUint64(0, true)) | (1n << 61n);
   let ts = Date.now() + 0.25, seq = BigInt(Date.now());
@@ -1657,7 +1860,7 @@ TW.buildGoodnotes = async function (layout, title, thumbJpeg) {
   const spacingPen = paper.grid.S * PEN, lineT = 0.5 * PEN;
   const isRef = S.paper === 'liniert' && S.paperColor === 'weiss' && S.spacing === 'ref';
   const tplName = isRef ? REF_TEMPLATE : `${TW.uuid()}_a5_1_2 - ${pc.name}`;
-  const bgPdf = TW.backgroundPdf(S);
+  const bgShared = TW.backgroundPdf(S);
   const Wp = Math.fround(TW.PAGE_W * PEN), Hp = Math.fround(TW.PAGE_H * PEN);
   const originY = (TW.FIRST_LINE - 0.25) * PEN - (spacingPen - lineT);
   const [ir, ig, ib] = TW.hexRgb(S.ink);
@@ -1674,6 +1877,8 @@ TW.buildGoodnotes = async function (layout, title, thumbJpeg) {
   let strokeCounter = 1000000 + Math.floor(Math.random() * 3000000);
   for (let pi = 0; pi < nPages; pi++) {
     const ids = TW.pageUuidPair(), attId = TW.uuid(), bgId = TW.uuid();
+    const pgImgs = (layout.pages[pi].images || []).filter(im => imgs && imgs[im.id]);
+    const bgPdf = pgImgs.length ? TW.backgroundPdf(S, pgImgs, imgs) : bgShared;
     // Anhang (Hintergrund-PDF, Feld 6)
     tick();
     events.push(ev(attId, 6, new Pb().str(1, attId).str(2, attId).varint(5, bgPdf.length).str(6, docId).f64(10, ts).str(11, TW.uuid())
@@ -1969,7 +2174,7 @@ const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const K = { draft: 'tintenwerk.entwurf.v1', undo: 'tintenwerk.undo.v1', settings: 'tintenwerk.einstellungen.v1', own: 'tintenwerk.handschrift.v1', ui: 'tintenwerk.ui.v1', server: 'tintenwerk.server.v1' };
+const K = { draft: 'tintenwerk.entwurf.v1', undo: 'tintenwerk.undo.v1', settings: 'tintenwerk.einstellungen.v1', own: 'tintenwerk.handschrift.v1', ui: 'tintenwerk.ui.v1', server: 'tintenwerk.server.v1', images: 'tintenwerk.bilder.v1', chat: 'tintenwerk.chat.v1' };
 
 const SAMPLE_MARK = 'Dies ist eine Beispielnotiz von Quillmark.';
 const SAMPLE = {
@@ -2050,7 +2255,7 @@ function setMode(mode) {
   S.mode = mode; saveUi();
   $$('#modeSeg button').forEach(b => b.classList.toggle('on', b.dataset.mode === mode));
   $$('#panel > section').forEach(s => { s.hidden = s.dataset.panel !== mode; });
-  $('#panel').scrollTop = 0;
+  $('#panel').scrollTop = 0; $('#panel').dataset.mode = mode;
   closePop();
   if (mode === 'schrift') renderTiles();
   if (mode !== 'import') refreshBlattPanel();
@@ -2065,12 +2270,45 @@ $('#modeSeg').addEventListener('click', e => { const b = e.target.closest('butto
 $('#viewSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setView(b.dataset.view); });
 
 /* ---------- Vorschau (gleiche Layout-Daten wie PDF & .goodnotes) ---------- */
+/* ---------- Bilder im Lernzettel: Daten in IndexedDB, Maße in localStorage ---------- */
+S.imgMeta = LS.get(K.images, {}) || {};
+const IMG_CACHE = new Map();
+function loadImg(id) {
+  if (IMG_CACHE.has(id)) return IMG_CACHE.get(id).p;
+  const el = new Image(); const ent = { el, ok: false };
+  ent.p = IDB.get('img:' + id).then(src => new Promise(res => {
+    if (!src) { res(null); return; }
+    el.onload = () => { ent.ok = true; res(el); }; el.onerror = () => res(null); el.src = src;
+  })).catch(() => null);
+  IMG_CACHE.set(id, ent);
+  return ent.p;
+}
+async function ensureImages(layout) { const ids = new Set(); for (const p of layout.pages) for (const im of (p.images || [])) ids.add(im.id); await Promise.all([...ids].map(loadImg)); }
+function dataUrlBytes(u) { const b = atob(u.slice(u.indexOf(',') + 1)); const a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
+/* Für PDF/.goodnotes: { id: { jpeg, pw, ph } } aller Bilder im Layout */
+async function exportImages(layout) {
+  const out = {};
+  for (const p of layout.pages) for (const im of (p.images || [])) {
+    if (out[im.id]) continue;
+    const src = await IDB.get('img:' + im.id).catch(() => null), meta = S.imgMeta[im.id];
+    if (src && meta && /^data:image\/jpeg/.test(src)) out[im.id] = { jpeg: dataUrlBytes(src), pw: meta.w, ph: meta.h };
+  }
+  return out;
+}
 function renderPage(ctx, layout, pi, scale, mark) {
   const P = TW.paper(layout.settings), page = layout.pages[pi];
   ctx.save(); ctx.scale(scale, scale);
   ctx.fillStyle = P.bg; ctx.fillRect(0, 0, TW.PAGE_W, TW.PAGE_H);
   ctx.fillStyle = P.line;
   for (const r of P.rects) ctx.fillRect(r[0], r[1], r[2], r[3]);
+  if (page) for (const im of (page.images || [])) {
+    const ent = IMG_CACHE.get(im.id);
+    if (ent && ent.ok) ctx.drawImage(ent.el, im.x, im.y, im.w, im.h);
+    else {
+      ctx.fillStyle = '#EEF0F3'; ctx.fillRect(im.x, im.y, im.w, im.h);
+      if (!ent) loadImg(im.id).then(el => { if (el) drawSheet(); });
+    }
+  }
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   if (page) for (const s of page.strokes) {
     ctx.strokeStyle = (mark && s.fb) ? '#D97706' : layout.settings.ink;
@@ -2109,7 +2347,7 @@ let layT = 0;
 function relayout(now) {
   clearTimeout(layT);
   const run = () => {
-    S.layout = TW.layout(S.draft, S.settings, S.own);
+    S.layout = TW.layout(Object.assign({}, S.draft, { images: S.imgMeta }), S.settings, S.own);
     updatePager(); drawSheet(); updateWarnings(); updateEditorStats();
   };
   if (now) run(); else layT = setTimeout(run, 140);
@@ -2329,12 +2567,14 @@ function loadImage(file) {
     img.src = url;
   });
 }
-async function cropOne(file, idx, total) {
+async function cropOne(file, idx, total, mode) {
   const { img, url } = await loadImage(file);
   crop.img = img; cropImg.src = url;
   crop.rect = crop.last ? Object.assign({}, crop.last) : { x: 0, y: 0, w: 1, h: 1 };
   $('#cropCount').textContent = total > 1 ? `Bild ${idx + 1} von ${total}` : file.name || '';
-  renderLangBar(); openModal('#cropModal'); fitCrop(); paintCrop();
+  renderLangBar(); $('.lang-bar').hidden = mode === 'image';
+  $('#cropOk').textContent = mode === 'image' ? 'Bild einfügen' : 'Zuschneiden & Text erkennen';
+  openModal('#cropModal'); fitCrop(); paintCrop();
   const action = await new Promise(r => { crop.resolve = r; });
   crop.resolve = null;
   let canvas = null;
@@ -2343,10 +2583,12 @@ async function cropOne(file, idx, total) {
     const sx = Math.round(r.x * img.naturalWidth), sy = Math.round(r.y * img.naturalHeight);
     const sw = Math.max(8, Math.round(r.w * img.naturalWidth)), sh = Math.max(8, Math.round(r.h * img.naturalHeight));
     let k = 1; const long = Math.max(sw, sh);
-    if (long > 2800) k = 2800 / long; else if (sw < 1100) k = Math.min(2, 2200 / long);
+    if (mode === 'image') k = Math.min(1, 1600 / long);          // Bild für den Lernzettel: höchstens 1600 px
+    else if (long > 2800) k = 2800 / long; else if (sw < 1100) k = Math.min(2, 2200 / long);
     canvas = document.createElement('canvas');          // Offscreen-Canvas: nur der Ausschnitt geht in die OCR
     canvas.width = Math.round(sw * k); canvas.height = Math.round(sh * k);
     const c = canvas.getContext('2d'); c.imageSmoothingQuality = 'high';
+    if (mode === 'image') { c.fillStyle = '#fff'; c.fillRect(0, 0, canvas.width, canvas.height); }      // Transparenz → Weiß (JPEG)
     c.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
   }
   URL.revokeObjectURL(url); cropImg.removeAttribute('src'); crop.img = null;
@@ -2530,6 +2772,7 @@ async function runImport(files, mode) {
   $('#ocrStatus').hidden = true;
   if (OCR.cancelled) return;
   if (!texts.length) { toast('Es wurde kein Text erkannt. Ausschnitt größer wählen?', 5000); return; }
+  if (mode === 'chat' && APP.chatAttach) { APP.chatAttach(texts.join('\n\n')); return; }
   if (mode === 'solve' && APP.solveText) { APP.solveText(texts.join('\n\n'), `${texts.length} ${texts.length === 1 ? 'Seite' : 'Seiten'} erkannt`); return; }
   const prevText = $('#stagingCard').hidden ? '' : $('#stagingText').value.trim();
   const conf = confN ? ` Erkennungssicherheit laut OCR: ca. ${Math.round(confSum / confN)} %.` : '';
@@ -2570,7 +2813,7 @@ $('#panel').addEventListener('scroll', () => { if (!pop.hidden) closePop(); }, {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePop(); });
 
 /* Schnittstellen für die weiteren Teile */
-const APP = { infoFill, closePop, runImport, $, $$, clamp, esc, K, LS, IDB, S, SAMPLE_MARK, toast, confirmDialog, openModal, closeModal, downloadBlob, safeName, setMode, setView, relayout, drawSheet, renderPage, snapshot, setDraft, syncDraftUi, saveSettings, syncZoom, showStaging };
+const APP = { cropOne, loadImg, ensureImages, exportImages, infoFill, closePop, runImport, $, $$, clamp, esc, K, LS, IDB, S, SAMPLE_MARK, toast, confirmDialog, openModal, closeModal, downloadBlob, safeName, setMode, setView, relayout, drawSheet, renderPage, snapshot, setDraft, syncDraftUi, saveSettings, syncZoom, showStaging };
 window.TWApp.APP = APP;
 let renderTiles = () => {}, refreshBlattPanel = () => {}, updateWarnings = () => {};
 APP.hook = (name, fn) => { if (name === 'tiles') renderTiles = fn; else if (name === 'blatt') refreshBlattPanel = fn; else if (name === 'warn') updateWarnings = fn; };
@@ -3349,6 +3592,7 @@ $('#cmpTake').addEventListener('click', async () => {
 
 /* ---------- Export ---------- */
 async function thumbnailJpeg() {
+  await A.ensureImages(S.layout);
   const cv = document.createElement('canvas'); cv.width = 352; cv.height = 499;
   A.renderPage(cv.getContext('2d'), S.layout, 0, 352 / TW.PAGE_W, false);
   const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.82));
@@ -3383,7 +3627,7 @@ async function exportGoodnotes(btn) {
   const label = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Datei wird erzeugt …';
   try {
     const title = (S.draft.title || '').trim() || 'Quillmark-Notiz';
-    const g = await TW.buildGoodnotes(L, title, await thumbnailJpeg());
+    const g = await TW.buildGoodnotes(L, title, await thumbnailJpeg(), await A.exportImages(L));
     const v = await TW.verifyGoodnotes(g.zip, L);
     $('#exportChecks').innerHTML = checksHtml(v.checks);
     if (!v.ok) { toast('Interne Prüfung fehlgeschlagen – die Datei wurde nicht bereitgestellt.', 6000); openModal('#exportModal'); return; }
@@ -3400,7 +3644,7 @@ async function exportPdf(btn) {
   const label = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin dark"></span> PDF wird erzeugt …';
   try {
     const title = (S.draft.title || '').trim() || 'Quillmark-Notiz';
-    const pdf = await TW.buildPdf(L, title);
+    const pdf = await TW.buildPdf(L, title, await A.exportImages(L));
     $('#exportChecks').innerHTML = '';
     openModal('#exportModal');
     await finishExport(pdf, safeName(title) + '.pdf', 'application/pdf', `<b>${esc(safeName(title))}.pdf</b> ist fertig (${(pdf.length / 1024).toFixed(0)} KB). Papier und Vektor-Handschrift sind identisch zur Vorschau aufgeteilt.`);
@@ -3438,7 +3682,7 @@ async function selfTest() {
   out.push({ name: 'Schreibränder links/rechts eingehalten, nichts außerhalb des Blattes', ok: v.offMargin === 0 && v.offPage === 0, detail: `Rand ${S.settings.margin} mm · ${v.offMargin} Randverletzungen · ${v.offPage} Striche außerhalb` });
   // 3) Echte Exportdatei bauen und zurücklesen
   try {
-    const g = await TW.buildGoodnotes(L, d.title || 'Selbsttest', await thumbnailJpeg());
+    const g = await TW.buildGoodnotes(L, d.title || 'Selbsttest', await thumbnailJpeg(), await A.exportImages(L));
     const r = await TW.verifyGoodnotes(g.zip, L);
     out.push(...r.checks);
     const ids = g.meta.pages.every(p => TW.uuidPlusOne(p.pageId) === p.notesId);
@@ -3477,7 +3721,9 @@ $('#btnHostInfo').addEventListener('click', () => openModal('#hostModal'));
 $('#delDraft').addEventListener('click', async () => {
   if (!(await confirmDialog('Entwürfe löschen?', 'Die aktuelle Notiz und der Undo-Stand werden unwiderruflich gelöscht.', 'Löschen', true))) return;
   LS.del(K.draft); LS.del(K.undo); S.undo = null;
-  A.setDraft({ title: '', text: '', isSample: false, imports: 0 }); toast('Entwürfe gelöscht.'); refreshSettingsModal();
+  for (const id of Object.keys(S.imgMeta || {})) IDB.del('img:' + id);          // eingefügte Bilder gehören zu den Entwürfen
+  S.imgMeta = {}; LS.del(K.images); LS.del(K.chat);
+  A.setDraft({ title: '', text: '', isSample: false, imports: 0 }); toast('Entwürfe, Bilder und Chat gelöscht.'); refreshSettingsModal();
 });
 $('#delOwn').addEventListener('click', async () => {
   if (!(await confirmDialog('Eigene Handschrift zurücksetzen?', 'Alle gezeichneten Zeichen werden gelöscht. Tipp: vorher als JSON sichern.', 'Zurücksetzen', true))) return;
@@ -3513,7 +3759,7 @@ function makeTouchIcon() {         // Home-Bildschirm-Symbol zur Laufzeit erzeug
 function init() {
   makeTouchIcon();
   A.syncDraftUi(); A.syncZoom();
-  A.setMode(['import', 'schrift', 'blatt'].includes(S.mode) ? S.mode : 'import');
+  A.setMode(['import', 'chat', 'schrift', 'blatt'].includes(S.mode) ? S.mode : 'import');
   refreshBlattPanel();
   A.relayout(true);
   detectGpu();
@@ -3642,6 +3888,254 @@ $('#solveAppend').addEventListener('click', () => {
   A.setDraft({ title: S.draft.title, text: S.draft.text.replace(/\s+$/, '') + '\n\n' + text, isSample: false, imports: (S.draft.imports || 0) + 1 });
   closeModal('#solveModal'); toast('Lösungen an die Notiz angehängt.');
 });
+})();
+/* ==========================================================================
+   Quillmark – Chat mit Tizian (Fragen, Lernzettel mit Skizzen, Aufgaben) und Bilder im Lernzettel
+   ========================================================================== */
+(function () {
+'use strict';
+const A = window.TWApp.APP, AI = window.TWApp.AI;
+const { $, $$, S, K, LS, IDB, esc, toast, confirmDialog } = A;
+
+/* ---------- Bilder in den Notiztext einfügen ---------- */
+function newId() { return Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3); }
+async function insertImage(file) {
+  const r = await A.cropOne(file, 0, 1, 'image');
+  A.closeModal('#cropModal');
+  if (r.action !== 'ok' || !r.canvas) return;
+  const url = r.canvas.toDataURL('image/jpeg', 0.85), id = newId();
+  try { await IDB.set('img:' + id, url); }
+  catch (e) { toast('Das Bild konnte nicht gespeichert werden (Speicher voll?).', 5000); return; }
+  S.imgMeta[id] = { w: r.canvas.width, h: r.canvas.height, t: Date.now() };
+  LS.quiet(K.images, S.imgMeta);
+  const ed = $('#editor'), pos = ed.selectionStart != null ? ed.selectionEnd : ed.value.length;
+  const before = ed.value.slice(0, pos), after = ed.value.slice(pos);
+  const ins = (before && !before.endsWith('\n') ? '\n' : '') + `![Bild](bild:${id})` + (after.startsWith('\n') ? '' : '\n');
+  ed.value = before + ins + after;
+  ed.dispatchEvent(new Event('input'));
+  toast('Bild eingefügt. Es erscheint auf dem Blatt an dieser Stelle.');
+}
+$('#btnImg').addEventListener('click', () => $('#imgFile').click());
+$('#imgFile').addEventListener('change', async e => {
+  const f = (e.target.files || [])[0]; e.target.value = '';
+  if (f) { try { await insertImage(f); } catch (err) { toast('Bild konnte nicht gelesen werden.', 4000); } }
+});
+
+/* ---------- Chat ---------- */
+const CHAT_SYS = 'Du heißt Tizian und bist der Lern-Assistent in der App Quillmark. Antworte auf Deutsch (außer bei Fragen in einer anderen Sprache), freundlich, klar und eher kurz. ' +
+  'Erfinde keine Fakten; wenn du etwas nicht weißt, sag es. Erledige Aufgaben vollständig und zeige bei Rechnungen kurz den Rechenweg. ' +
+  'Wenn du einen Lernzettel schreibst, nutze dieses Format, weil die App es als Handschrift auf ein Blatt zeichnet: erste Zeile „# Titel“, Abschnitte mit „## …“, ' +
+  'Stichpunkte mit „- “, wichtige Begriffe **fett**. Skizzen stehen jeweils allein in einer Zeile: Ablauf als [[Schritt 1 -> Schritt 2 -> Schritt 3]] ' +
+  'oder Mindmap als [[Thema: Punkt, Punkt, Punkt]] (höchstens 6 Punkte, je 1–3 Wörter). Verwende kein LaTeX und keine Tabellen mit Strichen.';
+const ACTIONS = {
+  lernzettel: { label: 'Lernzettel', need: 'topic' },
+  zusammenfassen: { label: 'Zusammenfassen', need: 'note' },
+  quiz: { label: 'Quiz', need: 'note' },
+  aufgaben: { label: 'Aufgaben lösen', need: 'note' }
+};
+let chat = (LS.get(K.chat, []) || []).filter(m => m && m.text).slice(-60);
+let busy = false, pending = null;
+const log = $('#chatLog'), input = $('#chatInput');
+const save = () => LS.quiet(K.chat, chat.slice(-60));
+const noteText = () => (S.draft.isSample ? '' : S.draft.text.trim());
+
+function cleanChat(t) {
+  return String(t || '').replace(/<think>[\s\S]*?(<\/think>|$)/g, '').replace(/\\\(|\\\)|\\\[|\\\]|\$\$?/g, '')
+    .replace(/\\frac\s*\{([^{}]+)\}\s*\{([^{}]+)\}/g, '$1/$2').replace(/\\(?:cdot|times)/g, '·').replace(/^\s+/, '');
+}
+const isSheet = t => /^\s*#\s/m.test(t) || /\[\[.+\]\]/.test(t);
+
+function bubble(m, i) {
+  const who = m.role === 'user' ? 'me' : 'ai';
+  const body = esc(m.text).replace(/\[\[([^\]]+)\]\]/g, '<span class="sk">✎ Skizze: $1</span>');
+  const acts = m.role === 'assistant' && !m.pending && m.text
+    ? `<div class="msg-acts"><button class="btn btn-sm ${isSheet(m.text) ? 'btn-primary' : ''}" data-take="${i}">${isSheet(m.text) ? 'Als Lernzettel übernehmen' : 'Als Notiz'}</button><button class="btn btn-sm" data-append="${i}">Anhängen</button><button class="btn btn-sm btn-ghost" data-copy="${i}">Kopieren</button></div>` : '';
+  return `<div class="msg ${who}${m.note ? ' sys' : ''}"><div class="bub">${body || '<span class="spin dark"></span>'}</div>${m.by ? `<div class="by">${esc(m.by)}</div>` : ''}${acts}</div>`;
+}
+function render(scroll) {
+  log.innerHTML = chat.length ? chat.map(bubble).join('') : `<div class="chat-empty"><b>Frag Tizian etwas</b><span>„Erkläre mir die Zellatmung“, „Mach mir einen Lernzettel über Vulkane mit Skizze“ oder „Löse: 3x + 5 = 20“. Antworten kannst du mit einem Tipp aufs Blatt übernehmen.</span></div>`;
+  if (scroll !== false) log.scrollTop = log.scrollHeight;
+}
+function status() {
+  const b = $('#chatState'), srv = AI.srv && AI.srv.on && AI.loaded === 'server';
+  if (AI.state === 'ready') { b.className = 'badge ok'; b.innerHTML = `<i></i>${srv ? (AI.srvPrivate && AI.srvPrivate() ? 'Eigener Rechner' : 'Server') : 'bereit'}`; }
+  else if (AI.state === 'loading') { b.className = 'badge'; b.innerHTML = '<i></i>lädt …'; }
+  else { b.className = 'badge off'; b.innerHTML = '<i></i>nicht geladen'; }
+  $('#chatSend').textContent = busy ? 'Stopp' : 'Senden';
+  $('#chatSend').classList.toggle('btn-danger', busy); $('#chatSend').classList.toggle('btn-primary', !busy);
+}
+document.addEventListener('tw-ai-state', () => {
+  status();
+  if (AI.state === 'ready' && pending) { const p = pending; pending = null; ask(p.text, p.prompt); }
+  if (AI.state === 'idle' && pending && !AI.running) { pending = null; dropPlaceholder(); }
+});
+function dropPlaceholder() { if (chat.length && chat[chat.length - 1].pending) { chat.pop(); render(); } }
+
+function history(limit) {
+  return chat.filter(m => !m.pending && !m.note).slice(-limit).map(m => ({ role: m.role, content: m.text.slice(0, 2500) }));
+}
+/* Eine Anfrage an Tizian: text = sichtbare Nachricht, prompt = was das Modell bekommt (Standard: text) */
+async function ask(text, prompt) {
+  if (busy) return;
+  const calc = TW.solver.calcTask(text);
+  if (calc && !prompt) {                                 // reine Rechenzeilen: exakter Rechner, ohne KI
+    chat.push({ role: 'user', text }, { role: 'assistant', text: calc.join('\n'), by: 'Rechner' }); save(); render(); return;
+  }
+  if (AI.state !== 'ready') {
+    const srv = AI.srv && AI.srv.on;
+    if (!AI.gpu && !srv) {
+      chat.push({ role: 'user', text }, { role: 'assistant', note: true, text: 'Tizian läuft auf diesem Gerät nicht lokal. Richte unter „Text & KI → Tizian → Server statt lokal“ deinen Laptop oder einen Server ein.' });
+      save(); render(); return;
+    }
+    chat.push({ role: 'user', text }, { role: 'assistant', text: '', pending: true }); render();
+    pending = { text, prompt, queued: true };
+    if (AI.state !== 'loading') $('#btnLoadModel').click();
+    return;
+  }
+  busy = true; status();
+  if (!(chat.length && chat[chat.length - 1].pending)) chat.push({ role: 'user', text }, { role: 'assistant', text: '', pending: true });
+  else if (chat[chat.length - 2] && chat[chat.length - 2].text !== text) chat.splice(chat.length - 1, 0, { role: 'user', text });
+  const msg = chat[chat.length - 1]; render();
+  const ctx = $('#chatCtx').checked && noteText() ? `\n\nAktueller Notiztext (zur Orientierung):\n${noteText().slice(0, 3000)}` : '';
+  const hist = history(9);
+  if (hist.length && hist[hist.length - 1].role === 'user') hist.pop();          // die aktuelle Frage kommt gleich (ggf. als ausführlicher Auftrag)
+  const msgs = [{ role: 'system', content: CHAT_SYS + ctx }, ...hist, { role: 'user', content: prompt || text }];
+  let cur = '';
+  AI.running = true;
+  try {
+    const r = await AI.generate(msgs, { max_new_tokens: 900, do_sample: false, repetition_penalty: 1.05 }, x => {
+      cur += x; msg.text = cleanChat(cur); const b = log.lastElementChild && log.lastElementChild.querySelector('.bub');
+      if (b) { b.textContent = msg.text; log.scrollTop = log.scrollHeight; }
+    });
+    msg.text = cleanChat(r.text || cur).trim() + (r.interrupted ? ' …' : '');
+    if (!msg.text) msg.text = '(keine Antwort)';
+  } catch (e) {
+    msg.text = 'Fehler: ' + ((e && e.message) || e); msg.note = true;
+  }
+  delete msg.pending; AI.running = false; busy = false;
+  save(); render(); status();
+}
+function send() {
+  if (busy) { AI.interrupt(); return; }
+  const t = input.value.trim(); if (!t) return;
+  input.value = ''; autoGrow();
+  ask(t);
+}
+$('#chatSend').addEventListener('click', send);
+input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); } });
+function autoGrow() { input.style.height = 'auto'; input.style.height = Math.min(160, input.scrollHeight) + 'px'; }
+input.addEventListener('input', autoGrow);
+
+/* Schnell-Aktionen */
+$('#chatChips').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b || busy) return;
+  const act = b.dataset.act, note = noteText(), extra = input.value.trim();
+  if (act === 'aufgaben') {
+    const t = extra || note;
+    if (!t) { toast('Schreib die Aufgaben ins Eingabefeld oder in den Notiztext.'); return; }
+    input.value = ''; autoGrow();
+    ask(extra ? `Löse diese Aufgaben:\n${extra}` : 'Löse die Aufgaben aus meinem Notiztext.', `Löse die folgenden Aufgaben vollständig. Nummeriere die Lösungen wie die Aufgaben, zeige bei Rechnungen kurz den Rechenweg und schreibe am Ende jeweils „Ergebnis: …“.\n\n${t.slice(0, 4000)}`);
+    return;
+  }
+  if (act === 'lernzettel') {
+    const src = extra || note;
+    if (!src) { toast('Schreib ein Thema ins Eingabefeld (z. B. „Vulkane“) oder fülle den Notiztext.'); input.focus(); return; }
+    input.value = ''; autoGrow();
+    const fromText = !extra && note;
+    ask(fromText ? 'Mach einen Lernzettel aus meinem Notiztext – mit Skizze.' : `Mach einen Lernzettel über: ${extra} – mit Skizze.`,
+      (fromText ? `Erstelle einen übersichtlichen Lernzettel aus diesem Text:\n${note.slice(0, 4000)}\n\n` : `Erstelle einen übersichtlichen Lernzettel über: ${extra}\n\n`) +
+      'Halte dich genau an das Lernzettel-Format (# Titel, ## Abschnitte, - Stichpunkte, **fett**) und füge genau 1–2 Skizzen ein: einen Ablauf [[A -> B -> C]] und/oder eine Mindmap [[Thema: a, b, c]]. Höchstens etwa 25 Zeilen.');
+    return;
+  }
+  if (!note) { toast('Der Notiztext ist leer oder noch die Beispielnotiz.'); return; }
+  if (act === 'zusammenfassen') ask('Fasse meinen Notiztext zusammen.', `Fasse diesen Text in 5–8 Stichpunkten zusammen (Format „- …“), behalte alle Zahlen und Fachbegriffe:\n\n${note.slice(0, 5000)}`);
+  if (act === 'quiz') ask('Stell mir Quizfragen zu meinem Notiztext.', `Erstelle 5 Quizfragen zu diesem Text. Format: „1. Frage“ und darunter „Antwort: …“. Nur Fakten aus dem Text:\n\n${note.slice(0, 5000)}`);
+});
+
+/* Antworten übernehmen */
+log.addEventListener('click', async e => {
+  const t = e.target.closest('[data-take],[data-append],[data-copy]'); if (!t) return;
+  const i = +(t.dataset.take || t.dataset.append || t.dataset.copy), m = chat[i]; if (!m) return;
+  if (t.dataset.copy !== undefined) { try { await navigator.clipboard.writeText(m.text); toast('Kopiert.'); } catch (err) { toast('Kopieren nicht möglich.'); } return; }
+  const text = m.text.replace(/\s+…$/, '').trim();
+  if (t.dataset.append !== undefined) {
+    if (S.draft.isSample || !S.draft.text.trim()) { toast('Anhängen geht nur an eine eigene Notiz. Nimm „Als Notiz“.'); return; }
+    A.snapshot('Chat-Antwort angehängt');
+    A.setDraft({ title: S.draft.title, text: S.draft.text.replace(/\s+$/, '') + '\n\n' + text, isSample: false, imports: (S.draft.imports || 0) + 1 });
+    toast('An die Notiz angehängt.'); return;
+  }
+  const has = S.draft.text.trim() && !S.draft.isSample;
+  if (has && !(await confirmDialog('Aktuelle Notiz ersetzen?', 'Die Antwort wird als neue Notiz übernommen. Mit dem Rückgängig-Pfeil kannst du die bisherige Notiz einmal wiederherstellen.', 'Ersetzen'))) return;
+  const h = /^\s*#\s+(.+)$/m.exec(text);
+  A.snapshot('Chat-Antwort als Notiz');
+  A.setDraft({ title: h ? h[1].trim() : 'Notiz von Tizian', text, isSample: false, imports: 1 });
+  toast(isSheet(text) ? 'Lernzettel aufs Blatt übernommen.' : 'Als Notiz übernommen.');
+  if (window.matchMedia('(max-width:900px)').matches) A.setView('stage');
+});
+$('#chatClear').addEventListener('click', async () => {
+  if (!chat.length || busy) return;
+  if (!(await confirmDialog('Chat leeren?', 'Alle Nachrichten werden auf diesem Gerät gelöscht.', 'Leeren', true))) return;
+  chat = []; save(); render();
+});
+
+/* Foto anhängen: Texterkennung, Text landet im Eingabefeld */
+$('#chatAttach').addEventListener('click', () => $('#chatFile').click());
+$('#chatFile').addEventListener('change', e => { const f = Array.from(e.target.files || []); e.target.value = ''; if (f.length) A.runImport(f, 'chat'); });
+A.chatAttach = text => {
+  A.setMode('chat');
+  input.value = (input.value.trim() ? input.value.trim() + '\n\n' : '') + text;
+  autoGrow(); input.focus();
+  toast('Text aus dem Bild steht im Eingabefeld. Ergänze deine Frage und tippe „Senden“.', 4500);
+};
+window.TWApp.chat = { ask, get: () => chat };
+
+render(); status();
+})();
+/* ===== Glas-Animationen: Lichtstreif beim Antippen, gleitende Auswahl in Seitenleiste und Umschaltern ===== */
+(function () {
+'use strict';
+const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+const SEL = '.btn,.chip,.seg button,.icon-btn,.rail nav button';
+const sweep = el => { if (!el || reduce.matches) return; el.classList.remove('sweep'); void el.offsetWidth; el.classList.add('sweep'); };
+
+document.addEventListener('pointerdown', e => {
+  const b = e.target.closest && e.target.closest(SEL);
+  if (!b || b.disabled) return;
+  sweep(b.matches('.rail nav button') ? b.querySelector('.ic') : b);
+}, { passive: true });
+document.addEventListener('animationend', e => { if (e.animationName === 'qm-sweep') e.target.classList.remove('sweep'); });
+
+/* Gleitende Glas-Auswahl: folgt dem Knopf mit .on (bzw. dessen Teil `part`) */
+function glider(box, part) {
+  if (box.querySelector(':scope > .glider')) return;
+  const g = document.createElement('i'); g.className = 'glider'; g.setAttribute('aria-hidden', 'true');
+  box.append(g); box.classList.add('has-glider');
+  let last = null;
+  const place = () => {
+    const on = box.querySelector(':scope > button.on'), t = on && (part ? on.querySelector(part) : on);
+    if (!t) { g.style.opacity = 0; last = null; return; }
+    const b = box.getBoundingClientRect(), r = t.getBoundingClientRect();
+    if (!b.width || !r.width) return;                                   // gerade versteckt
+    const x = r.left - b.left - box.clientLeft, y = r.top - b.top - box.clientTop;
+    const first = !last, moved = last && (Math.abs(x - last.x) > 1 || Math.abs(y - last.y) > 1);
+    if (first) g.classList.add('instant');
+    g.style.width = r.width + 'px'; g.style.height = r.height + 'px';
+    g.style.transform = `translate(${x}px,${y}px)`; g.style.opacity = 1;
+    last = { x, y };
+    if (first) { void g.offsetWidth; g.classList.remove('instant'); }
+    else if (moved) sweep(g);
+  };
+  const mo = new MutationObserver(place);
+  box.querySelectorAll(':scope > button').forEach(btn => mo.observe(btn, { attributes: true, attributeFilter: ['class'] }));
+  new ResizeObserver(place).observe(box);
+  place();
+}
+const init = () => {
+  document.querySelectorAll('.seg').forEach(s => glider(s));
+  const nav = document.querySelector('.rail nav'); if (nav) glider(nav, '.ic');
+};
+init();
+window.TWApp.fx = { sweep, glider };
 })();
 </script>
 </body>

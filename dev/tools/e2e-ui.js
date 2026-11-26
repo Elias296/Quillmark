@@ -24,7 +24,7 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'OK   ' : 'FAIL ') + m); 
   const pw = await ev(() => document.querySelector('#panel').getBoundingClientRect().width);
   ok(pw >= 420 && pw / 1180 >= 0.38 && pw / 1180 <= 0.42, `Sidebar ${Math.round(pw)} px = ${(pw / 11.8).toFixed(1)} % der Breite`);
   ok(await ev(() => !document.querySelector('#zoomSeg') && !!document.querySelector('.pill #zoomLabel') && !!document.querySelector('.pill #pgLabel')), 'Zoom und Seiten in der Bottom-Pill, keine Leiste über dem Blatt');
-  ok(await ev(() => [...document.querySelectorAll('#modeSeg .t-long')].map(e => e.textContent).join('|')) === 'Text & KI|Handschrift|Papier & Export', 'Tab-Namen');
+  ok(await ev(() => [...document.querySelectorAll('#modeSeg .t-long')].map(e => e.textContent).join('|')) === 'Text & KI|Chat|Handschrift|Papier & Export', 'Tab-Namen');
   ok(await ev(() => [...document.querySelectorAll('.topbar .actions > *')].map(e => e.id).join(',')) === 'btnUndo,btnExport', 'Kopfzeile rechts: Rückgängig, Exportieren');
   ok(await ev(() => !!document.querySelector('.rail #modeSeg') && !!document.querySelector('.rail #btnSettings') && !document.querySelector('#modeSeg #btnSettings')), 'Seitenleiste: Schritte und Einstellungen');
   await shot('ui_1_text');

@@ -123,6 +123,15 @@ function classifyLine(raw) {
   const line = raw.replace(/\t/g, '    ').replace(/[   ]/g, ' ');
   if (!line.trim()) return { type: 'blank' };
   let m;
+  /* Skizzen: [[A -> B -> C]] = Ablauf, [[Thema: a, b, c]] = Mindmap; Bilder: ![Text](bild:ID) */
+  if ((m = /^\s*\[\[\s*(.+?)\s*\]\]\s*$/.exec(line))) {
+    const body = m[1];
+    if (/->|→|=>/.test(body)) return { type: 'flow', items: body.split(/\s*(?:->|→|=>)\s*/).map(s => s.trim()).filter(Boolean).slice(0, 12) };
+    const mm = /^([^:]{1,60}):\s*(.+)$/.exec(body);
+    if (mm) return { type: 'mind', center: mm[1].trim(), items: mm[2].split(/\s*[,;]\s*/).map(s => s.trim()).filter(Boolean).slice(0, 10) };
+    return { type: 'flow', items: [body.trim()] };
+  }
+  if ((m = /^\s*!\[([^\]]*)\]\(bild:([A-Za-z0-9_-]+)\)\s*$/.exec(line))) return { type: 'img', alt: m[1], id: m[2] };
   if (/^[\s|:+-]+$/.test(line) && line.includes('|')) return { type: 'sep' };      // Markdown-Trennzeile |---|---|
   if (/\S\s*\|\s*\S/.test(line) && !/^\s*#/.test(line)) {                    // einfache Tabellenzeile: Zellen durch | getrennt
     const cells = line.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map(c => c.trim());
@@ -146,7 +155,7 @@ TW.layout = function (note, settings, own) {
   let page = null, lastRow = -1, pendingBlank = 0, charSeq = 0;
   const seedBase = settings.style === 'locker' ? 7331 : (settings.style === 'eigen' ? 4242 : 1009);
 
-  function newPage() { page = { strokes: [], glyphs: [], rowsUsed: [] }; pages.push(page); lastRow = -1; }
+  function newPage() { page = { strokes: [], glyphs: [], rowsUsed: [], images: [] }; pages.push(page); lastRow = -1; }
   newPage();
   const rowsFor = em => Math.max(1, Math.ceil(em * 1.2 / grid.S - 1e-9));
   const yOf = r => grid.y0 + r * grid.S;
@@ -238,6 +247,101 @@ TW.layout = function (note, settings, own) {
     return place;
   }
 
+  /* ---------- Skizzen-Bausteine (handgezeichnet, als echte Stiftstriche) ---------- */
+  const skRnd = mulberry32(hash32(seedBase + 777, 31));
+  const jit = v => v + (skRnd() - 0.5) * (st.ptJ > 0.5 ? 0.9 : 0.35);
+  function skStroke(pts, w) { const q = TW.toQuads(pts.map(p => [jit(p[0]), jit(p[1])])); if (q) { q.w = w || penW; q.fb = false; page.strokes.push(q); } }
+  function skLine(x0, y0, x1, y1, w) { skStroke([[x0, y0], [(x0 + x1) / 2, (y0 + y1) / 2], [x1, y1]], w); }
+  function skBox(x0, y0, x1, y1) {
+    const r = Math.min(4, (y1 - y0) / 3), pts = [];
+    const arc = (cx, cy, a0) => { for (let k = 0; k <= 2; k++) { const a = (a0 + k * 45) * Math.PI / 180; pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); } };
+    pts.push([x0 + r, y0]); pts.push([(x0 + x1) / 2, y0]); arc(x1 - r, y0 + r, 270); pts.push([x1, (y0 + y1) / 2]); arc(x1 - r, y1 - r, 0);
+    pts.push([(x0 + x1) / 2, y1]); arc(x0 + r, y1 - r, 90); pts.push([x0, (y0 + y1) / 2]); arc(x0 + r, y0 + r, 180); pts.push([x0 + r + 0.6, y0 + 0.2]);
+    skStroke(pts, penW * 0.95);
+  }
+  function skArrow(x0, y0, x1, y1) {
+    skLine(x0, y0, x1, y1, penW * 0.95);
+    const a = Math.atan2(y1 - y0, x1 - x0), L = 4.6;
+    for (const d of [-0.5, 0.5]) skStroke([[x1 - L * Math.cos(a + d), y1 - L * Math.sin(a + d)], [x1, y1]], penW * 0.95);
+  }
+  /* Beschriftung als Wörter mit Abständen (Leerzeichen haben keinen Pfad) */
+  function label(text, em) {
+    const parts = []; let width = 0;
+    for (const t of String(text).split(/\s+/).filter(Boolean)) {
+      const w = makeWord(t, em); if (!w.items.length) continue;
+      const gap = parts.length ? spaceW(em) : 0; parts.push({ items: w.items, gap }); width += gap + w.width;
+    }
+    return { parts, width, em };
+  }
+  function fitLabel(text, em, maxW) {
+    let l = label(text, em);
+    if (l.width > maxW) { const k = Math.max(0.6, maxW / l.width); em *= k; l = label(text, em); }
+    let t = String(text).trim();
+    while (l.width > maxW && t.length > 1) {                     // passt auch verkleinert nicht: kürzen mit „…“
+      t = t.includes(' ') ? t.replace(/\s+\S+\s*$/, '') : t.slice(0, -1);
+      l = label(t.replace(/[\s.,;:–-]+$/, '') + '…', em);
+    }
+    return l;
+  }
+  function emitLabel(l, x, row, wmul) { for (const p of l.parts) { x += p.gap; x = emit(p.items, x, row, l.em, wmul || 1, false); } }
+  /* Rasterzeilen am Stück reservieren (passt der Block nicht mehr, neue Seite) */
+  function reserve(n, extra) {
+    n = Math.max(1, Math.min(n, grid.rows));
+    let r = lastRow < 0 ? 0 : lastRow + rowsFor(E) + (extra || 0);
+    if (r + n - 1 > grid.rows - 1) { newPage(); r = 0; }
+    lastRow = r + n - 1; page.rowsUsed.push(r);
+    return r;
+  }
+  const boxY = row => { const b = yOf(row); return [b - Math.max(grid.S * 0.74, E * 0.98), b + Math.max(grid.S * 0.26, E * 0.36)]; };
+  function drawFlow(items, extra) {
+    const em = E * 0.95, padX = em * 0.55, gapX = Math.max(18, em * 1.9), maxW = grid.right - grid.left - padX * 2 - 26;
+    const ls = items.map(t => fitLabel(t, em, maxW));
+    const lines = [[]]; let x = grid.left;
+    ls.forEach(l => {
+      const w = l.width + padX * 2;
+      if (lines[lines.length - 1].length && x + gapX + w > grid.right) lines.push([]);      // passt nicht mehr: neue Zeile, Pfeil vom Rand
+      const cur = lines[lines.length - 1], bx = cur.length ? x + gapX : grid.left + (lines.length > 1 ? 26 : 0);
+      cur.push({ l, x0: bx, x1: bx + w }); x = bx + w;
+    });
+    const r0 = reserve(lines.length * 2 - 1, extra);
+    lines.forEach((ln, li) => {
+      const row = r0 + li * 2, [y0, y1] = boxY(row), ym = (y0 + y1) / 2;
+      if (li > 0) skArrow(grid.left + 4, ym, ln[0].x0 - 2, ym);
+      ln.forEach((b, k) => {
+        skBox(b.x0, y0, b.x1, y1); emitLabel(b.l, b.x0 + padX, row);
+        if (k < ln.length - 1) skArrow(b.x1 + 3, ym, ln[k + 1].x0 - 3, ym);
+        else if (li < lines.length - 1) skLine(b.x1 + 3, ym, Math.min(grid.right, b.x1 + 14), ym, penW * 0.95);
+      });
+    });
+  }
+  function drawMind(center, items, extra) {
+    const emC = E * 1.02, em = E * 0.92, padX = em * 0.5, cw = grid.right - grid.left;
+    const cl = fitLabel(center, emC, cw * 0.38), cW = cl.width + padX * 2.4;
+    const L = items.slice(0, Math.ceil(items.length / 2)), R = items.slice(Math.ceil(items.length / 2));
+    const side = (cw - cW) / 2 - 22 - padX * 2;
+    const rows = Math.max(1, Math.max(L.length, R.length) * 2 - 1), r0 = reserve(rows, extra);
+    const cRow = r0 + Math.floor((rows - 1) / 2), cx = (grid.left + grid.right) / 2;      // Mitte vertikal zentriert
+    const [cy0, cy1] = boxY(cRow), cx0 = cx - cW / 2, cx1 = cx + cW / 2;
+    skBox(cx0, cy0, cx1, cy1); skBox(cx0 + 1.6, cy0 + 1.6, cx1 - 1.6, cy1 - 1.6); emitLabel(cl, cx0 + padX * 1.2, cRow, 1.3);
+    const put = (arr, left) => arr.forEach((t, k) => {
+      const row = r0 + Math.floor((rows - (arr.length * 2 - 1)) / 2) + k * 2, l = fitLabel(t, em, side), w = l.width + padX * 2, [y0, y1] = boxY(row);
+      const bx0 = left ? cx0 - 22 - w : cx1 + 22, bx1 = bx0 + w;
+      skBox(bx0, y0, bx1, y1); emitLabel(l, bx0 + padX, row);
+      skLine(left ? cx0 - 1 : cx1 + 1, (cy0 + cy1) / 2, left ? bx1 + 1 : bx0 - 1, (y0 + y1) / 2, penW * 0.9);
+    });
+    put(L, true); put(R, false);
+  }
+  function drawImage(id, alt, extra) {
+    const meta = note.images && note.images[id];
+    if (!meta || !meta.w || !meta.h) return flow(`[Bild fehlt${alt ? ': ' + alt : ''}]`, E, 1, grid.left, grid.left, extra);
+    const cw = grid.right - grid.left, ratio = meta.h / meta.w, maxH = (grid.maxBaseline - grid.y0) * 0.55;
+    let w = Math.min(cw, meta.w / 2), h = w * ratio;
+    if (h > maxH) { h = maxH; w = h / ratio; }
+    const rows = Math.ceil((h + grid.S * 0.35) / grid.S), r0 = reserve(rows, extra);
+    page.images.push({ id, x: grid.left + (cw - w) / 2, y: yOf(r0) - grid.S + grid.S * 0.2, w, h, alt: alt || '' });
+    return { page, row: r0 };
+  }
+
   const sup = settings.autoSup !== false ? TW.typo : (x => x);
   const title = sup((note.title || '').trim());
   const lines = sup(note.text || '').replace(/\r\n?/g, '\n').split('\n').map(classifyLine);
@@ -263,7 +367,12 @@ TW.layout = function (note, settings, own) {
     }
     const extra = prev === 'title' ? 1 : (prev === 'h' ? 0 : pendingBlank);
     let place = null;
-    if (L.type === 'row') {
+    if (L.type === 'flow' || L.type === 'mind' || L.type === 'img') {
+      const ex = prev === null ? 0 : Math.max(1, extra);
+      if (L.type === 'flow') drawFlow(L.items, ex); else if (L.type === 'mind') drawMind(L.center, L.items, ex); else drawImage(L.id, L.alt, ex);
+      prev = 'body'; pendingBlank = 1;
+      continue;
+    } else if (L.type === 'row') {
       /* Tabellenzeile: Spalten gleich breit, alle Zellen beginnen auf derselben Rasterzeile */
       const n = L.cells.length, gap = E * 0.9, colW = (grid.right - grid.left) / n;
       const startPage = page, startLast = lastRow;
@@ -300,7 +409,7 @@ TW.layout = function (note, settings, own) {
     }
     if (place) { prev = 'body'; pendingBlank = 0; }
   }
-  let nStrokes = 0, nGlyphs = 0;
-  for (const p of pages) { nStrokes += p.strokes.length; nGlyphs += p.glyphs.length; }
-  return { pages, grid, settings, unmapped, fallback, stats: { strokes: nStrokes, glyphs: nGlyphs, pages: pages.length }, em: E };
+  let nStrokes = 0, nGlyphs = 0, nImages = 0;
+  for (const p of pages) { nStrokes += p.strokes.length; nGlyphs += p.glyphs.length; nImages += p.images.length; }
+  return { pages, grid, settings, unmapped, fallback, stats: { strokes: nStrokes, glyphs: nGlyphs, pages: pages.length, images: nImages }, em: E };
 };

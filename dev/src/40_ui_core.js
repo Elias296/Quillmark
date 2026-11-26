@@ -7,7 +7,7 @@ const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const K = { draft: 'tintenwerk.entwurf.v1', undo: 'tintenwerk.undo.v1', settings: 'tintenwerk.einstellungen.v1', own: 'tintenwerk.handschrift.v1', ui: 'tintenwerk.ui.v1', server: 'tintenwerk.server.v1' };
+const K = { draft: 'tintenwerk.entwurf.v1', undo: 'tintenwerk.undo.v1', settings: 'tintenwerk.einstellungen.v1', own: 'tintenwerk.handschrift.v1', ui: 'tintenwerk.ui.v1', server: 'tintenwerk.server.v1', images: 'tintenwerk.bilder.v1', chat: 'tintenwerk.chat.v1' };
 
 const SAMPLE_MARK = 'Dies ist eine Beispielnotiz von Quillmark.';
 const SAMPLE = {
@@ -88,7 +88,7 @@ function setMode(mode) {
   S.mode = mode; saveUi();
   $$('#modeSeg button').forEach(b => b.classList.toggle('on', b.dataset.mode === mode));
   $$('#panel > section').forEach(s => { s.hidden = s.dataset.panel !== mode; });
-  $('#panel').scrollTop = 0;
+  $('#panel').scrollTop = 0; $('#panel').dataset.mode = mode;
   closePop();
   if (mode === 'schrift') renderTiles();
   if (mode !== 'import') refreshBlattPanel();
@@ -103,12 +103,45 @@ $('#modeSeg').addEventListener('click', e => { const b = e.target.closest('butto
 $('#viewSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setView(b.dataset.view); });
 
 /* ---------- Vorschau (gleiche Layout-Daten wie PDF & .goodnotes) ---------- */
+/* ---------- Bilder im Lernzettel: Daten in IndexedDB, Maße in localStorage ---------- */
+S.imgMeta = LS.get(K.images, {}) || {};
+const IMG_CACHE = new Map();
+function loadImg(id) {
+  if (IMG_CACHE.has(id)) return IMG_CACHE.get(id).p;
+  const el = new Image(); const ent = { el, ok: false };
+  ent.p = IDB.get('img:' + id).then(src => new Promise(res => {
+    if (!src) { res(null); return; }
+    el.onload = () => { ent.ok = true; res(el); }; el.onerror = () => res(null); el.src = src;
+  })).catch(() => null);
+  IMG_CACHE.set(id, ent);
+  return ent.p;
+}
+async function ensureImages(layout) { const ids = new Set(); for (const p of layout.pages) for (const im of (p.images || [])) ids.add(im.id); await Promise.all([...ids].map(loadImg)); }
+function dataUrlBytes(u) { const b = atob(u.slice(u.indexOf(',') + 1)); const a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
+/* Für PDF/.goodnotes: { id: { jpeg, pw, ph } } aller Bilder im Layout */
+async function exportImages(layout) {
+  const out = {};
+  for (const p of layout.pages) for (const im of (p.images || [])) {
+    if (out[im.id]) continue;
+    const src = await IDB.get('img:' + im.id).catch(() => null), meta = S.imgMeta[im.id];
+    if (src && meta && /^data:image\/jpeg/.test(src)) out[im.id] = { jpeg: dataUrlBytes(src), pw: meta.w, ph: meta.h };
+  }
+  return out;
+}
 function renderPage(ctx, layout, pi, scale, mark) {
   const P = TW.paper(layout.settings), page = layout.pages[pi];
   ctx.save(); ctx.scale(scale, scale);
   ctx.fillStyle = P.bg; ctx.fillRect(0, 0, TW.PAGE_W, TW.PAGE_H);
   ctx.fillStyle = P.line;
   for (const r of P.rects) ctx.fillRect(r[0], r[1], r[2], r[3]);
+  if (page) for (const im of (page.images || [])) {
+    const ent = IMG_CACHE.get(im.id);
+    if (ent && ent.ok) ctx.drawImage(ent.el, im.x, im.y, im.w, im.h);
+    else {
+      ctx.fillStyle = '#EEF0F3'; ctx.fillRect(im.x, im.y, im.w, im.h);
+      if (!ent) loadImg(im.id).then(el => { if (el) drawSheet(); });
+    }
+  }
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   if (page) for (const s of page.strokes) {
     ctx.strokeStyle = (mark && s.fb) ? '#D97706' : layout.settings.ink;
@@ -147,7 +180,7 @@ let layT = 0;
 function relayout(now) {
   clearTimeout(layT);
   const run = () => {
-    S.layout = TW.layout(S.draft, S.settings, S.own);
+    S.layout = TW.layout(Object.assign({}, S.draft, { images: S.imgMeta }), S.settings, S.own);
     updatePager(); drawSheet(); updateWarnings(); updateEditorStats();
   };
   if (now) run(); else layT = setTimeout(run, 140);
@@ -367,12 +400,14 @@ function loadImage(file) {
     img.src = url;
   });
 }
-async function cropOne(file, idx, total) {
+async function cropOne(file, idx, total, mode) {
   const { img, url } = await loadImage(file);
   crop.img = img; cropImg.src = url;
   crop.rect = crop.last ? Object.assign({}, crop.last) : { x: 0, y: 0, w: 1, h: 1 };
   $('#cropCount').textContent = total > 1 ? `Bild ${idx + 1} von ${total}` : file.name || '';
-  renderLangBar(); openModal('#cropModal'); fitCrop(); paintCrop();
+  renderLangBar(); $('.lang-bar').hidden = mode === 'image';
+  $('#cropOk').textContent = mode === 'image' ? 'Bild einfügen' : 'Zuschneiden & Text erkennen';
+  openModal('#cropModal'); fitCrop(); paintCrop();
   const action = await new Promise(r => { crop.resolve = r; });
   crop.resolve = null;
   let canvas = null;
@@ -381,10 +416,12 @@ async function cropOne(file, idx, total) {
     const sx = Math.round(r.x * img.naturalWidth), sy = Math.round(r.y * img.naturalHeight);
     const sw = Math.max(8, Math.round(r.w * img.naturalWidth)), sh = Math.max(8, Math.round(r.h * img.naturalHeight));
     let k = 1; const long = Math.max(sw, sh);
-    if (long > 2800) k = 2800 / long; else if (sw < 1100) k = Math.min(2, 2200 / long);
+    if (mode === 'image') k = Math.min(1, 1600 / long);          // Bild für den Lernzettel: höchstens 1600 px
+    else if (long > 2800) k = 2800 / long; else if (sw < 1100) k = Math.min(2, 2200 / long);
     canvas = document.createElement('canvas');          // Offscreen-Canvas: nur der Ausschnitt geht in die OCR
     canvas.width = Math.round(sw * k); canvas.height = Math.round(sh * k);
     const c = canvas.getContext('2d'); c.imageSmoothingQuality = 'high';
+    if (mode === 'image') { c.fillStyle = '#fff'; c.fillRect(0, 0, canvas.width, canvas.height); }      // Transparenz → Weiß (JPEG)
     c.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
   }
   URL.revokeObjectURL(url); cropImg.removeAttribute('src'); crop.img = null;
@@ -568,6 +605,7 @@ async function runImport(files, mode) {
   $('#ocrStatus').hidden = true;
   if (OCR.cancelled) return;
   if (!texts.length) { toast('Es wurde kein Text erkannt. Ausschnitt größer wählen?', 5000); return; }
+  if (mode === 'chat' && APP.chatAttach) { APP.chatAttach(texts.join('\n\n')); return; }
   if (mode === 'solve' && APP.solveText) { APP.solveText(texts.join('\n\n'), `${texts.length} ${texts.length === 1 ? 'Seite' : 'Seiten'} erkannt`); return; }
   const prevText = $('#stagingCard').hidden ? '' : $('#stagingText').value.trim();
   const conf = confN ? ` Erkennungssicherheit laut OCR: ca. ${Math.round(confSum / confN)} %.` : '';
@@ -608,7 +646,7 @@ $('#panel').addEventListener('scroll', () => { if (!pop.hidden) closePop(); }, {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePop(); });
 
 /* Schnittstellen für die weiteren Teile */
-const APP = { infoFill, closePop, runImport, $, $$, clamp, esc, K, LS, IDB, S, SAMPLE_MARK, toast, confirmDialog, openModal, closeModal, downloadBlob, safeName, setMode, setView, relayout, drawSheet, renderPage, snapshot, setDraft, syncDraftUi, saveSettings, syncZoom, showStaging };
+const APP = { cropOne, loadImg, ensureImages, exportImages, infoFill, closePop, runImport, $, $$, clamp, esc, K, LS, IDB, S, SAMPLE_MARK, toast, confirmDialog, openModal, closeModal, downloadBlob, safeName, setMode, setView, relayout, drawSheet, renderPage, snapshot, setDraft, syncDraftUi, saveSettings, syncZoom, showStaging };
 window.TWApp.APP = APP;
 let renderTiles = () => {}, refreshBlattPanel = () => {}, updateWarnings = () => {};
 APP.hook = (name, fn) => { if (name === 'tiles') renderTiles = fn; else if (name === 'blatt') refreshBlattPanel = fn; else if (name === 'warn') updateWarnings = fn; };
