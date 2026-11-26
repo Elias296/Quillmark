@@ -7,7 +7,7 @@
    Leer gelassen startet Quillmark ganz normal nur lokal, ohne Anmelde-Knopf.
    ========================================================================== */
 window.QM_CONFIG = Object.assign({
-  supabaseUrl: '',                                         // z. B. 'https://abcdefghijklmnop.supabase.co'
-  supabaseKey: '',                                         // z. B. 'sb_publishable_…'
+  supabaseUrl: 'https://xluqowehujxmbpqlswks.supabase.co',
+  supabaseKey: 'sb_publishable_iQMtMF3r5uq3q34VZuZUWg_kyN5IGjj',
   returnUrl: 'https://elias296.github.io/Quillmark/'       // Rückkehradresse nach Google-Login und E-Mail-Links
 }, window.QM_CONFIG || {});

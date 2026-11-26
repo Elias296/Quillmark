@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Datenschutzerklärung – Quillmark</title>
+<meta name="description" content="Datenschutzerklärung der Web-App Quillmark: lokale Speicherung, freiwilliges Konto über Supabase und Anmeldung mit Google.">
+<style>
+:root{--bg:#0B0C0E;--card:#15161A;--text:#F4F4F5;--muted:#A1A1AA;--line:rgba(255,255,255,.12);--link:#E4E4E7}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#F6F6F7;--card:#FFFFFF;--text:#0B0C0E;--muted:#52525B;--line:rgba(0,0,0,.12);--link:#18181B}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:32px 16px 64px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+header a{color:var(--muted);text-decoration:none;font-weight:600}
+h1{font-size:28px;line-height:1.2;margin:8px 0 4px;letter-spacing:-.3px}
+h2{font-size:19px;margin:32px 0 8px}
+h3{font-size:16px;margin:20px 0 6px}
+p,li{color:var(--text)}
+.muted{color:var(--muted)}
+section{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:4px 20px 16px;margin-top:16px}
+ul{padding-left:20px}
+li{margin:4px 0}
+a{color:var(--link);text-underline-offset:3px}
+code{font-size:14px;background:rgba(127,127,127,.15);border-radius:6px;padding:1px 6px}
+</style>
+</head>
+<body>
+<main>
+  <header><a href="./">← Zurück zu Quillmark</a></header>
+  <h1>Datenschutzerklärung</h1>
+  <p class="muted">für die Web-App Quillmark unter https://elias296.github.io/Quillmark/ · Stand: 26. November 2026</p>
+
+  <section>
+    <h2>Kurz gesagt</h2>
+    <ul>
+      <li>Deine Notizen, Bilder, deine eigene Handschrift, der Chat und alle Einstellungen bleiben <b>nur auf deinem Gerät</b> (im Browser-Speicher). Wir haben keinen Zugriff darauf.</li>
+      <li>Ein Konto ist <b>freiwillig</b>. Wenn du eines anlegst, speichern wir dafür nur deine Anmeldedaten bei unserem Anmeldedienst Supabase – keine Notizen.</li>
+      <li>Bei der <b>Anmeldung mit Google</b> erhalten wir von Google nur deine E-Mail-Adresse, deinen Namen, dein Profilbild und eine Google-Kennung, um dein Konto zuzuordnen.</li>
+      <li>Es gibt <b>kein Tracking, keine Werbung und keine Analyse-Werkzeuge</b>.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>1. Verantwortlich</h2>
+    <p>Verantwortlich für diese Web-App ist der Betreiber des GitHub-Kontos <b>Elias296</b>.</p>
+    <p>Kontakt für Datenschutzanfragen (z. B. Auskunft oder Löschung deines Kontos): über die Seite
+      <a href="https://github.com/Elias296/Quillmark/issues">github.com/Elias296/Quillmark/issues</a>.
+      Schreibe dort bitte keine persönlichen Daten öffentlich hinein – ein kurzer Hinweis genügt, wir melden uns dann für die weitere Klärung.</p>
+  </section>
+
+  <section>
+    <h2>2. Hosting der Web-App</h2>
+    <p>Quillmark wird über <b>GitHub Pages</b> (GitHub, Inc., 88 Colin P. Kelly Jr. St., San Francisco, CA 94107, USA) ausgeliefert.
+      Beim Aufruf verarbeitet GitHub technisch notwendige Verbindungsdaten wie deine IP-Adresse, um die Seite auszuliefern und vor Missbrauch zu schützen.
+      Details: <a href="https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement">Datenschutzerklärung von GitHub</a>.
+      Rechtsgrundlage ist unser berechtigtes Interesse an einer sicheren Bereitstellung (Art. 6 Abs. 1 lit. f DSGVO).</p>
+  </section>
+
+  <section>
+    <h2>3. Daten auf deinem Gerät</h2>
+    <p>Quillmark speichert im Browser deines Geräts (<code>localStorage</code> und <code>IndexedDB</code>): deine Notizen samt Papierkorb, eingefügte Bilder,
+      deine selbst gezeichnete Handschrift, den Chat mit der KI „Tizian“, Blatt- und App-Einstellungen sowie – wenn du angemeldet bist – deine Anmeldesitzung.
+      Diese Daten werden nicht an uns übertragen. Du kannst sie jederzeit in der App unter „Datenschutz &amp; Speicher“ löschen.
+      Texterkennung (OCR), Handschrift und Export (.goodnotes, PDF) laufen vollständig auf deinem Gerät.</p>
+  </section>
+
+  <section>
+    <h2>4. Freiwilliges Konto (Supabase)</h2>
+    <p>Für Konten nutzen wir <b>Supabase Auth</b> der Supabase, Inc. (970 Toa Payoh North #07-04, Singapore 318992). Das Projekt wird in der Region Frankfurt (EU) betrieben.
+      Supabase verarbeitet die Daten in unserem Auftrag (Auftragsverarbeitung nach Art. 28 DSGVO).</p>
+    <h3>Welche Daten?</h3>
+    <ul>
+      <li>bei Registrierung mit E-Mail: E-Mail-Adresse, Passwort (nur als verschlüsselter Hash), Zeitpunkte von Registrierung, Bestätigung und letzter Anmeldung</li>
+      <li>bei Anmeldung mit Google: siehe Abschnitt 5</li>
+      <li>technische Daten zur Sicherheit, z. B. IP-Adresse und Browser-Kennung bei Anmeldeversuchen (Schutz vor Missbrauch)</li>
+    </ul>
+    <h3>Wozu?</h3>
+    <p>Nur um dein Konto anzulegen, dich anzumelden, deine E-Mail-Adresse zu bestätigen und dir auf Wunsch einen Link zum Zurücksetzen des Passworts zu schicken.
+      Notizen, Bilder und Handschrift werden dabei <b>nicht</b> an Supabase übertragen.
+      Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Nutzung des von dir gewünschten Kontos) und für die Sicherheitsdaten Art. 6 Abs. 1 lit. f DSGVO.</p>
+    <h3>E-Mails</h3>
+    <p>Bestätigungs- und Passwort-Links verschickt Supabase in unserem Auftrag an die von dir angegebene Adresse. Werbe-E-Mails versenden wir nicht.</p>
+    <h3>Wie lange?</h3>
+    <p>Bis du dein Konto löschen lässt. Eine Löschung kannst du jederzeit über den Kontakt in Abschnitt 1 verlangen; Notizen auf deinem Gerät bleiben davon unberührt.
+      Details zu Supabase: <a href="https://supabase.com/privacy">supabase.com/privacy</a>.</p>
+  </section>
+
+  <section>
+    <h2>5. Anmeldung mit Google</h2>
+    <p>Wenn du „Mit Google fortfahren“ wählst, wirst du zu Google (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland) weitergeleitet und meldest dich dort an.
+      Google teilt Quillmark über Supabase danach mit deiner Zustimmung nur Folgendes mit (Berechtigungen <code>openid</code>, <code>email</code>, <code>profile</code>):</p>
+    <ul>
+      <li>deine E-Mail-Adresse und ob sie bestätigt ist</li>
+      <li>deinen Namen und die Adresse deines Profilbilds</li>
+      <li>eine eindeutige Google-Kennung, damit dein Konto bei der nächsten Anmeldung wiedererkannt wird</li>
+    </ul>
+    <p>Wir nutzen diese Daten ausschließlich, um dein Quillmark-Konto anzulegen und dich anzumelden. Wir erhalten keinen Zugriff auf dein Google-Passwort,
+      deine E-Mails, Kontakte, Dateien oder andere Google-Dienste, verkaufen die Daten nicht, geben sie nicht an Dritte weiter (außer an Supabase als Anmeldedienst)
+      und verwenden sie nicht für Werbung oder zum Trainieren von KI-Modellen.
+      Die Nutzung von Informationen aus Google-APIs hält sich an die
+      <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, einschließlich der Anforderungen zur eingeschränkten Nutzung („Limited Use“).</p>
+    <p>Du kannst Quillmark den Zugriff jederzeit unter <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a> entziehen.
+      Was Google selbst verarbeitet, regelt die <a href="https://policies.google.com/privacy">Datenschutzerklärung von Google</a>.</p>
+  </section>
+
+  <section>
+    <h2>6. Nachgeladene Dienste (nur bei Bedarf)</h2>
+    <ul>
+      <li><b>jsDelivr</b> (cdn.jsdelivr.net): Programmteile für Texterkennung, die lokale KI und – nur beim Anmelden – das Anmelde-Skript von Supabase. Dabei sieht der Anbieter technisch bedingt deine IP-Adresse; Inhalte deiner Notizen werden nicht übertragen.</li>
+      <li><b>Hugging Face</b> (huggingface.co): Download des KI-Modells für „Tizian“, nur wenn du das Modell ausdrücklich lädst.</li>
+      <li><b>Eigener KI-Server</b>: Nur wenn du in der App „Text auf Server verarbeiten“ einschaltest, gehen die Texte, die Tizian bearbeiten soll, an die von dir selbst eingetragene Adresse.</li>
+    </ul>
+    <p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO bzw. bei von dir ausgelösten Funktionen Art. 6 Abs. 1 lit. b DSGVO.</p>
+  </section>
+
+  <section>
+    <h2>7. Cookies und Tracking</h2>
+    <p>Quillmark setzt keine Tracking- oder Werbe-Cookies und nutzt keine Analyse-Dienste. Die Speicherung im Browser (Abschnitt 3) dient nur den Funktionen der App.</p>
+  </section>
+
+  <section>
+    <h2>8. Datenübermittlung in Drittländer</h2>
+    <p>GitHub, Supabase und Google können Daten auch außerhalb der EU (z. B. in den USA) verarbeiten. Dies erfolgt auf Grundlage des EU-US Data Privacy Framework
+      bzw. von EU-Standardvertragsklauseln der jeweiligen Anbieter.</p>
+  </section>
+
+  <section>
+    <h2>9. Deine Rechte</h2>
+    <p>Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch (Art. 15–21 DSGVO).
+      Einwilligungen kannst du jederzeit widerrufen. Außerdem kannst du dich bei einer Datenschutz-Aufsichtsbehörde beschweren.</p>
+  </section>
+
+  <p class="muted" style="margin-top:32px">Änderungen dieser Erklärung werden auf dieser Seite veröffentlicht.</p>
+</main>
+</body>
+</html>

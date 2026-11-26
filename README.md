@@ -59,9 +59,12 @@ Bilder und Handschrift bleiben bei An- und Abmeldung auf dem Gerät (Geräte-Syn
 das Anmelde-Skript (`@supabase/supabase-js@2.118.0`, mit SRI-Prüfsumme) kommt erst beim Tipp auf „Anmelden“ bzw. bei einer
 gespeicherten Sitzung von jsDelivr. Ohne Eintrag in der Konfiguration startet Quillmark wie bisher rein lokal, ohne Anmelde-Knopf.
 
+Datenschutzerklärung (auch für Googles Branding-Prüfung): https://elias296.github.io/Quillmark/datenschutz.html – Quelle `datenschutz.html`,
+verlinkt am Ende von „Text & KI“, im Anmelde-Dialog und unter „Datenschutz & Speicher“.
+
 ### Einrichtung
 1. **Supabase-Projekt** anlegen (supabase.com → New project).
-2. **Konfiguration im Code:** In `dev/src/39_config.js` nur zwei Werte eintragen, dann `dev/tools/build.sh` ausführen:
+2. **Konfiguration im Code** (für dieses Projekt erledigt): In `dev/src/39_config.js` nur zwei Werte eintragen, dann `dev/tools/build.sh` ausführen:
    - `supabaseUrl`: Project URL, z. B. `https://abcdefghijklmnop.supabase.co` (Project Settings → Data API / API)
    - `supabaseKey`: der **Publishable key** (`sb_publishable_…`, Project Settings → API Keys).
      Niemals den Secret Key bzw. `service_role`-Key eintragen – Quillmark erkennt ihn und lässt Konten dann ausgeschaltet.

@@ -330,6 +330,9 @@ pre.log:empty{display:none}
 .auth-foot{margin-top:16px;text-align:center}
 #authForm .lbl:first-child{margin-top:14px}
 
+.legal{text-align:center;margin:4px 0 8px}
+.legal a,.auth-foot a,.modal-body a[href$="datenschutz.html"]{color:var(--muted);text-underline-offset:3px}
+.legal a:hover,.auth-foot a:hover{color:var(--text)}
 /* ---------- Meine Notizen ---------- */
 .note-list{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
 .note-row{display:flex;align-items:center;gap:6px;padding:4px 4px 4px 0;border-radius:18px;border:1px solid var(--line);background:var(--glass)}
@@ -582,6 +585,7 @@ pre.log:empty{display:none}
           </div>
         </details>
       </div>
+      <p class="hint legal"><a href="datenschutz.html">Datenschutzerklärung</a></p>
     </section>
 
     <!-- ============ Chat ============ -->
@@ -867,7 +871,7 @@ pre.log:empty{display:none}
           <button type="button" class="linkbtn" id="authBack" hidden>Zurück zur Anmeldung</button>
         </div>
       </form>
-      <p class="hint auth-foot">Ein Konto ist freiwillig. Notizen, Handschrift und Backups bleiben auf diesem Gerät – auch nach dem Abmelden.</p>
+      <p class="hint auth-foot">Ein Konto ist freiwillig. Notizen, Handschrift und Backups bleiben auf diesem Gerät – auch nach dem Abmelden. <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung</a></p>
     </div>
   </div>
 </div>
@@ -901,6 +905,7 @@ pre.log:empty{display:none}
   <div class="modal-card mid">
     <div class="modal-head"><h2 tabindex="-1">Datenschutz &amp; Speicher</h2><button class="btn" data-close>Schließen</button></div>
     <div class="modal-body">
+      <p style="margin-bottom:12px"><a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung lesen</a></p>
       <h4>Alles bleibt auf deinem Gerät</h4>
       <p>Entwurf, Undo-Stand und Einstellungen liegen im lokalen Browserspeicher (<code>localStorage</code>), deine eigene Handschrift zusätzlich in <code>IndexedDB</code> dieses Geräts. Es gibt kein Konto, kein Tracking, keine Analyse-Skripte und keinen Server von Quillmark. Screenshots, OCR-Text und KI-Verarbeitung verlassen das iPad nicht – Ausnahme: der Server-Modus von Tizian, wenn du ihn einschaltest.</p>
       <div class="warnbox" id="privServer" hidden style="margin-top:8px"></div>
@@ -2354,8 +2359,8 @@ TW.solver = (function () {
    Leer gelassen startet Quillmark ganz normal nur lokal, ohne Anmelde-Knopf.
    ========================================================================== */
 window.QM_CONFIG = Object.assign({
-  supabaseUrl: '',                                         // z. B. 'https://abcdefghijklmnop.supabase.co'
-  supabaseKey: '',                                         // z. B. 'sb_publishable_…'
+  supabaseUrl: 'https://xluqowehujxmbpqlswks.supabase.co',
+  supabaseKey: 'sb_publishable_iQMtMF3r5uq3q34VZuZUWg_kyN5IGjj',
   returnUrl: 'https://elias296.github.io/Quillmark/'       // Rückkehradresse nach Google-Login und E-Mail-Links
 }, window.QM_CONFIG || {});
 /* ==========================================================================
