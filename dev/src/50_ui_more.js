@@ -455,6 +455,15 @@ function srvEndpoint(u) {
   return u + '/v1/chat/completions';
 }
 const srvHost = () => { try { return new URL(srvEndpoint(SRV.url)).host; } catch (e) { return SRV.url || 'Server'; } };
+/* Eigener Rechner: Tailscale-Netz (*.ts.net, 100.64.0.0/10), Heimnetz (10.x, 192.168.x, 172.16–31.x, *.local) oder dieses Gerät */
+function srvPrivate(host) {
+  const h = String(host || srvHost()).replace(/:\d+$/, '').toLowerCase();
+  if (/\.ts\.net$|\.local$|^localhost$|^127\./.test(h)) return true;
+  const m = /^(\d+)\.(\d+)\.\d+\.\d+$/.exec(h); if (!m) return false;
+  const a = +m[1], b = +m[2];
+  return a === 10 || (a === 192 && b === 168) || (a === 172 && b >= 16 && b <= 31) || (a === 100 && b >= 64 && b <= 127);
+}
+AI.srvPrivate = srvPrivate;
 AI.srvHost = srvHost;
 /* Manche Modelle (z. B. Gemma bei einigen Anbietern) lehnen System-Anweisungen ab: dann in die erste Nutzer-Nachricht einbetten */
 function mergeSystem(messages) {
@@ -545,12 +554,14 @@ document.addEventListener('tw-ai-state', () => {
   const b = $('#gpuBadge'), on = SRV.on && AI.loaded === 'server';
   if (on) {
     if (!AI.gpuBadge) AI.gpuBadge = [b.className, b.innerHTML, b.title];
-    b.className = 'badge'; b.innerHTML = '<i></i>Server'; b.title = 'Tizian läuft auf ' + srvHost();
+    const own = srvPrivate();
+    b.className = own ? 'badge ok' : 'badge'; b.innerHTML = own ? '<i></i>Eigener Rechner' : '<i></i>Server'; b.title = 'Tizian läuft auf ' + srvHost();
   } else if (AI.gpuBadge) { [b.className, b.innerHTML, b.title] = AI.gpuBadge; AI.gpuBadge = null; }
   $('#localOpts').hidden = on;
-  $('#aiOne').textContent = on ? `Läuft auf deinem Server (${srvHost()}) – Texte werden dorthin gesendet.` : 'Lokale KI: macht deinen Text flüssiger, direkt auf dem iPad.';
+  $('#aiOne').textContent = !on ? 'Lokale KI: macht deinen Text flüssiger, direkt auf dem iPad.'
+    : srvPrivate() ? `Läuft auf deinem Rechner (${srvHost()}) im privaten Netz.` : `Läuft auf einem Server (${srvHost()}) – Texte werden dorthin gesendet.`;
   const err = $('#aiError'); if (on) err.hidden = true; else if (!AI.gpu && err.textContent) err.hidden = false;
-  $('#srvBadge').hidden = !on;
+  $('#srvBadge').hidden = !on || srvPrivate();
 });
 $('#srvUrl').value = SRV.url; $('#srvModel').value = SRV.model; $('#srvKey').value = SRV.key;
 ['srvUrl', 'srvModel', 'srvKey'].forEach(id => $('#' + id).addEventListener('change', e => {
@@ -562,8 +573,11 @@ $('#srvOn').addEventListener('change', async e => {
   if (!e.target.checked) { SRV.on = false; saveSrv(); applyServer(); toast('Server-Modus aus. Tizian arbeitet wieder lokal.'); return; }
   SRV.url = $('#srvUrl').value.trim(); SRV.model = $('#srvModel').value.trim(); SRV.key = $('#srvKey').value.trim();
   if (!srvEndpoint(SRV.url)) { e.target.checked = false; toast('Bitte zuerst die Server-Adresse eintragen.'); $('#srvUrl').focus(); return; }
-  const ok = await confirmDialog('Texte an einen Server senden?',
-    `Solange der Server-Modus an ist, gehen die Texte, die Tizian glätten oder lösen soll, an:\n${srvHost()}\n\nDort werden sie verarbeitet – sie verlassen also dein iPad. Nutze nur einen Server, dem du vertraust, am besten deinen eigenen. Ein API-Schlüssel wird nur auf diesem Gerät gespeichert.`, 'Server nutzen');
+  const ok = srvPrivate()
+    ? await confirmDialog('Tizian auf deinem Rechner nutzen?',
+      `Solange der Server-Modus an ist, gehen die Texte, die Tizian glätten oder lösen soll, an:\n${srvHost()}\n\nDas ist eine Adresse in deinem privaten Netz (z. B. dein Laptop über Tailscale). Die Texte verlassen also das iPad, bleiben aber bei deinen eigenen Geräten.`, 'Rechner nutzen')
+    : await confirmDialog('Texte an einen Server senden?',
+      `Solange der Server-Modus an ist, gehen die Texte, die Tizian glätten oder lösen soll, an:\n${srvHost()}\n\nDort werden sie verarbeitet – sie verlassen also dein iPad. Nutze nur einen Server, dem du vertraust, am besten deinen eigenen. Ein API-Schlüssel wird nur auf diesem Gerät gespeichert.`, 'Server nutzen');
   if (!ok) { e.target.checked = false; return; }
   SRV.on = true; saveSrv(); applyServer(); toast(`Tizian läuft jetzt auf ${srvHost()}.`);
 });
@@ -871,7 +885,7 @@ window.TWApp.termCheck = termCheck;
 
 /* ---------- Datenschutz & Speicher ---------- */
 async function refreshSettingsModal() {
-  const ps = $('#privServer'); ps.hidden = !(SRV.on && AI.loaded === 'server'); ps.innerHTML = `<b>Server-Modus ist an:</b> Texte, die Tizian bearbeiten soll, gehen an <code>${esc(srvHost())}</code>. Ausschalten unter Text &amp; KI → Tizian → „Server statt lokal“.`;
+  const ps = $('#privServer'); ps.hidden = !(SRV.on && AI.loaded === 'server'); ps.innerHTML = `<b>Server-Modus ist an:</b> Texte, die Tizian bearbeiten soll, gehen an <code>${esc(srvHost())}</code>${srvPrivate() ? ' (dein eigener Rechner im privaten Netz)' : ''}. Ausschalten unter Text &amp; KI → Tizian → „Server statt lokal“.`;
   let bytes = 0;
   for (const k of Object.values(K)) { try { const v = localStorage.getItem(k); if (v) bytes += v.length * 2; } catch (e) { /* egal */ } }
   let extra = '';

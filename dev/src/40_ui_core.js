@@ -14,7 +14,7 @@ const SAMPLE = {
   title: 'Willkommen im Tintenwerk',
   text: 'Willkommen im Tintenwerk\n\n' + SAMPLE_MARK + ' Sie zeigt, wie dein Text als echte Vektor-Handschrift auf einem Goodnotes-Blatt aussieht.\n\n' +
     '# So funktioniert es\n- Screenshots importieren und Text lokal erkennen lassen\n- Text prüfen, korrigieren und auf Wunsch natürlicher formulieren\n- Schriftstil, Papier und Tinte wählen\n- Als native .goodnotes-Datei oder PDF exportieren\n\n' +
-    '## Gut zu wissen\n1. Jede Zeile sitzt exakt auf der Grundlinie.\n2. Die Schrift lässt sich in Goodnotes mit Lasso und Radierer bearbeiten.\n3. Alles bleibt auf deinem iPad – 100 % lokal.\n\n' +
+    '## Gut zu wissen\n1. Jede Zeile sitzt exakt auf der Grundlinie.\n2. Die Schrift lässt sich in Goodnotes mit Lasso und Radierer bearbeiten.\n3. Deine Notizen und deine Handschrift bleiben auf deinem iPad.\n\n' +
     'Tippe auf „Neue Notiz“ oder importiere deinen ersten Screenshot.'
 };
 

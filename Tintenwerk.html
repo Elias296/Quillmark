@@ -318,7 +318,7 @@ pre.log:empty{display:none}
       </div>
 
       <div class="card" id="aiCard">
-        <div class="card-h"><h3>Tizian</h3><span class="badge off" id="gpuBadge"><i></i>wird geprüft</span><span class="badge warn" id="srvBadge" hidden title="Texte werden an deinen Server gesendet">Texte verlassen das Gerät</span><span class="grow"></span><button class="info" data-info="ki" aria-label="Info zur lokalen KI">ⓘ</button></div>
+        <div class="card-h"><h3>Tizian</h3><span class="badge off" id="gpuBadge"><i></i>wird geprüft</span><span class="badge warn" id="srvBadge" hidden title="Texte werden an den Server gesendet">Texte verlassen das Gerät</span><span class="grow"></span><button class="info" data-info="ki" aria-label="Info zur lokalen KI">ⓘ</button></div>
         <p class="one" id="aiOne">Lokale KI: macht deinen Text flüssiger, direkt auf dem iPad.</p>
         <button class="btn btn-primary btn-block" id="btnRewrite" disabled>Text jetzt glätten</button>
         <div id="modelProg" hidden style="margin-top:12px">
@@ -341,7 +341,7 @@ pre.log:empty{display:none}
         <details class="fold" id="srvFold">
           <summary>Server statt lokal</summary>
           <div class="fold-body">
-            <p class="hint" style="margin-bottom:6px">Für Geräte, auf denen Tizian lokal nicht startet. Anleitung für einen kostenlosen Server: ⓘ</p>
+            <p class="hint" style="margin-bottom:6px">Für Geräte, auf denen Tizian lokal nicht startet – z. B. mit Ollama auf deinem eigenen Laptop. Anleitung: ⓘ</p>
             <label class="switch"><input type="checkbox" id="srvOn"><span>Text auf Server verarbeiten</span></label>
             <label class="lbl" for="srvUrl">Server-Adresse</label>
             <input class="field" id="srvUrl" type="url" inputmode="url" placeholder="https://name-tizian.hf.space" autocomplete="off" autocapitalize="off" spellcheck="false">
@@ -463,7 +463,7 @@ pre.log:empty{display:none}
 <template id="info-text"><h4>Formatierung</h4><ul><li><code># Titel</code>, <code>## Abschnitt</code> – Überschriften</li><li><code>- Punkt</code> oder <code>1. Punkt</code> – Listen</li><li>Leerzeile – neuer Absatz</li><li><code>**fett**</code> – kräftiger Strich</li><li><code>a | b | c</code> – Tabellenzeile</li><li><code>x^2</code> oder <code>x2</code> wird zu x²</li></ul><label class="switch"><input type="checkbox" data-opt="autoSup"><span>Hochzahlen automatisch setzen</span></label><p>Der Text wird automatisch lokal gespeichert.</p></template>
 <template id="info-ocr"><h4>Texterkennung</h4><p>Läuft vollständig im Browser mit Tesseract.js. Die Sprachen wählst du im Zuschnitt-Fenster (z. B. ES für Spanisch) – nur dann werden Akzente wie á, ñ zuverlässig erkannt. Jede Sprache lädt beim ersten Mal einige MB Sprachdaten. Es wird nur der zugeschnittene Ausschnitt verarbeitet.</p><p>Formeln und komplexe Tabellen werden nur als einfacher Text erkannt – bitte prüfen.</p></template>
 <template id="info-ki"><h4>Tizian – lokale KI</h4><p id="gpuDetail"></p><ul><li>Läuft über WebGPU auf dem Gerät, Texte verlassen das iPad nicht – außer du schaltest „Text auf Server verarbeiten“ ein.</li><li>Das Modell wird erst nach deinem Tipp geladen (kein automatischer Download).</li><li>Ein Fakten-Wächter vergleicht Zahlen, Namen und Fachbegriffe mit dem Original.</li><li>Der Entwurf ändert sich erst mit „Tizians Fassung übernehmen“.</li></ul><p>Tintenwerk verspricht keine Umgehung von KI-Detektoren – es geht um bessere, eigene Notizen. Editor, Handschrift und Export funktionieren auch ohne KI.</p></template>
-<template id="info-server"><h4>Tizian auf einem Server</h4><p>Die App spricht jede <b>OpenAI-kompatible</b> Chat-Schnittstelle an (<code>/v1/chat/completions</code>).</p><p><b>Kostenlos:</b> einen eigenen Hugging-Face-Space mit der Vorlage aus dem Tintenwerk-Repository (<code>server/huggingface-space</code>) anlegen. Läuft auf der Gratis-CPU, antwortet langsamer als lokal und schläft nach längerer Pause ein – der erste Aufruf danach dauert 1–2 Minuten.</p><p>Im Server-Modus verlassen die Texte für Tizian das iPad. Alles andere (Handschrift, Export, Texterkennung) bleibt lokal.</p></template>
+<template id="info-server"><h4>Tizian auf einem anderen Rechner</h4><p>Die App spricht jede <b>OpenAI-kompatible</b> Chat-Schnittstelle an (<code>/v1/chat/completions</code>).</p><p><b>Empfohlen – eigener Laptop (kostenlos, privat):</b></p><ol><li>Auf dem Laptop <b>Ollama</b> mit einem Modell, Freigabe <code>OLLAMA_ORIGINS=https://elias296.github.io</code>.</li><li><b>Tailscale</b> auf Laptop und iPad mit demselben Konto, auf dem Laptop <code>tailscale serve --bg 11434</code>.</li><li>Hier die Adresse <code>https://…ts.net</code> und den Modellnamen aus <code>ollama list</code> eintragen, Schlüssel leer lassen.</li></ol><p>Die Texte bleiben dabei in deinem privaten Tailscale-Netz. Der Laptop muss laufen und darf nicht schlafen.</p><p><b>Alternative – OpenRouter:</b> Adresse <code>https://openrouter.ai/api/v1</code>, ein Modell mit <code>:free</code> und dein API-Schlüssel. Kostenlos mit Tageslimit; die Texte gehen an fremde Anbieter, die sie speichern dürfen.</p><p>Handschrift, Texterkennung und Export bleiben immer auf dem iPad.</p></template>
 <template id="info-solve"><h4>Aufgaben lösen</h4><p>Buchseite fotografieren oder Screenshot senden → Zuschnitt → Texterkennung → Tizian löst jede Aufgabe. Reine Rechenzeilen wie <code>345 + 678 =</code> rechnet ein exakter Rechner.</p><p><b>Grenzen:</b> nur Text, kein Bildverständnis (Zeichnungen, Diagramme, Formeln). Kleine lokale Modelle machen Fehler, besonders in Mathe. Bitte Lösungen prüfen.</p></template>
 <template id="info-style"><h4>Schriftstile</h4><p>Alle Stile bestehen aus echten Vektor-Stiftpfaden. In Goodnotes lässt sich die Schrift mit Lasso und Radierer bearbeiten.</p><p>Bei „Meine eigene Handschrift“ werden fehlende Zeichen durch die Standardschrift ergänzt.</p></template>
 <template id="info-studio"><h4>Zeichenstudio</h4><p>Zeichen antippen und mit dem Apple Pencil schreiben. Gespeichert werden Stiftpfade mit Druck, relativ zur Grundlinie.</p><p>iPadOS kann lokale Browserdaten nach längerer Inaktivität löschen – sichere deine Handschrift unter „Sicherung“ als JSON.</p></template>
@@ -1931,7 +1931,7 @@ const SAMPLE = {
   title: 'Willkommen im Tintenwerk',
   text: 'Willkommen im Tintenwerk\n\n' + SAMPLE_MARK + ' Sie zeigt, wie dein Text als echte Vektor-Handschrift auf einem Goodnotes-Blatt aussieht.\n\n' +
     '# So funktioniert es\n- Screenshots importieren und Text lokal erkennen lassen\n- Text prüfen, korrigieren und auf Wunsch natürlicher formulieren\n- Schriftstil, Papier und Tinte wählen\n- Als native .goodnotes-Datei oder PDF exportieren\n\n' +
-    '## Gut zu wissen\n1. Jede Zeile sitzt exakt auf der Grundlinie.\n2. Die Schrift lässt sich in Goodnotes mit Lasso und Radierer bearbeiten.\n3. Alles bleibt auf deinem iPad – 100 % lokal.\n\n' +
+    '## Gut zu wissen\n1. Jede Zeile sitzt exakt auf der Grundlinie.\n2. Die Schrift lässt sich in Goodnotes mit Lasso und Radierer bearbeiten.\n3. Deine Notizen und deine Handschrift bleiben auf deinem iPad.\n\n' +
     'Tippe auf „Neue Notiz“ oder importiere deinen ersten Screenshot.'
 };
 
@@ -2987,6 +2987,15 @@ function srvEndpoint(u) {
   return u + '/v1/chat/completions';
 }
 const srvHost = () => { try { return new URL(srvEndpoint(SRV.url)).host; } catch (e) { return SRV.url || 'Server'; } };
+/* Eigener Rechner: Tailscale-Netz (*.ts.net, 100.64.0.0/10), Heimnetz (10.x, 192.168.x, 172.16–31.x, *.local) oder dieses Gerät */
+function srvPrivate(host) {
+  const h = String(host || srvHost()).replace(/:\d+$/, '').toLowerCase();
+  if (/\.ts\.net$|\.local$|^localhost$|^127\./.test(h)) return true;
+  const m = /^(\d+)\.(\d+)\.\d+\.\d+$/.exec(h); if (!m) return false;
+  const a = +m[1], b = +m[2];
+  return a === 10 || (a === 192 && b === 168) || (a === 172 && b >= 16 && b <= 31) || (a === 100 && b >= 64 && b <= 127);
+}
+AI.srvPrivate = srvPrivate;
 AI.srvHost = srvHost;
 /* Manche Modelle (z. B. Gemma bei einigen Anbietern) lehnen System-Anweisungen ab: dann in die erste Nutzer-Nachricht einbetten */
 function mergeSystem(messages) {
@@ -3077,12 +3086,14 @@ document.addEventListener('tw-ai-state', () => {
   const b = $('#gpuBadge'), on = SRV.on && AI.loaded === 'server';
   if (on) {
     if (!AI.gpuBadge) AI.gpuBadge = [b.className, b.innerHTML, b.title];
-    b.className = 'badge'; b.innerHTML = '<i></i>Server'; b.title = 'Tizian läuft auf ' + srvHost();
+    const own = srvPrivate();
+    b.className = own ? 'badge ok' : 'badge'; b.innerHTML = own ? '<i></i>Eigener Rechner' : '<i></i>Server'; b.title = 'Tizian läuft auf ' + srvHost();
   } else if (AI.gpuBadge) { [b.className, b.innerHTML, b.title] = AI.gpuBadge; AI.gpuBadge = null; }
   $('#localOpts').hidden = on;
-  $('#aiOne').textContent = on ? `Läuft auf deinem Server (${srvHost()}) – Texte werden dorthin gesendet.` : 'Lokale KI: macht deinen Text flüssiger, direkt auf dem iPad.';
+  $('#aiOne').textContent = !on ? 'Lokale KI: macht deinen Text flüssiger, direkt auf dem iPad.'
+    : srvPrivate() ? `Läuft auf deinem Rechner (${srvHost()}) im privaten Netz.` : `Läuft auf einem Server (${srvHost()}) – Texte werden dorthin gesendet.`;
   const err = $('#aiError'); if (on) err.hidden = true; else if (!AI.gpu && err.textContent) err.hidden = false;
-  $('#srvBadge').hidden = !on;
+  $('#srvBadge').hidden = !on || srvPrivate();
 });
 $('#srvUrl').value = SRV.url; $('#srvModel').value = SRV.model; $('#srvKey').value = SRV.key;
 ['srvUrl', 'srvModel', 'srvKey'].forEach(id => $('#' + id).addEventListener('change', e => {
@@ -3094,8 +3105,11 @@ $('#srvOn').addEventListener('change', async e => {
   if (!e.target.checked) { SRV.on = false; saveSrv(); applyServer(); toast('Server-Modus aus. Tizian arbeitet wieder lokal.'); return; }
   SRV.url = $('#srvUrl').value.trim(); SRV.model = $('#srvModel').value.trim(); SRV.key = $('#srvKey').value.trim();
   if (!srvEndpoint(SRV.url)) { e.target.checked = false; toast('Bitte zuerst die Server-Adresse eintragen.'); $('#srvUrl').focus(); return; }
-  const ok = await confirmDialog('Texte an einen Server senden?',
-    `Solange der Server-Modus an ist, gehen die Texte, die Tizian glätten oder lösen soll, an:\n${srvHost()}\n\nDort werden sie verarbeitet – sie verlassen also dein iPad. Nutze nur einen Server, dem du vertraust, am besten deinen eigenen. Ein API-Schlüssel wird nur auf diesem Gerät gespeichert.`, 'Server nutzen');
+  const ok = srvPrivate()
+    ? await confirmDialog('Tizian auf deinem Rechner nutzen?',
+      `Solange der Server-Modus an ist, gehen die Texte, die Tizian glätten oder lösen soll, an:\n${srvHost()}\n\nDas ist eine Adresse in deinem privaten Netz (z. B. dein Laptop über Tailscale). Die Texte verlassen also das iPad, bleiben aber bei deinen eigenen Geräten.`, 'Rechner nutzen')
+    : await confirmDialog('Texte an einen Server senden?',
+      `Solange der Server-Modus an ist, gehen die Texte, die Tizian glätten oder lösen soll, an:\n${srvHost()}\n\nDort werden sie verarbeitet – sie verlassen also dein iPad. Nutze nur einen Server, dem du vertraust, am besten deinen eigenen. Ein API-Schlüssel wird nur auf diesem Gerät gespeichert.`, 'Server nutzen');
   if (!ok) { e.target.checked = false; return; }
   SRV.on = true; saveSrv(); applyServer(); toast(`Tizian läuft jetzt auf ${srvHost()}.`);
 });
@@ -3403,7 +3417,7 @@ window.TWApp.termCheck = termCheck;
 
 /* ---------- Datenschutz & Speicher ---------- */
 async function refreshSettingsModal() {
-  const ps = $('#privServer'); ps.hidden = !(SRV.on && AI.loaded === 'server'); ps.innerHTML = `<b>Server-Modus ist an:</b> Texte, die Tizian bearbeiten soll, gehen an <code>${esc(srvHost())}</code>. Ausschalten unter Text &amp; KI → Tizian → „Server statt lokal“.`;
+  const ps = $('#privServer'); ps.hidden = !(SRV.on && AI.loaded === 'server'); ps.innerHTML = `<b>Server-Modus ist an:</b> Texte, die Tizian bearbeiten soll, gehen an <code>${esc(srvHost())}</code>${srvPrivate() ? ' (dein eigener Rechner im privaten Netz)' : ''}. Ausschalten unter Text &amp; KI → Tizian → „Server statt lokal“.`;
   let bytes = 0;
   for (const k of Object.values(K)) { try { const v = localStorage.getItem(k); if (v) bytes += v.length * 2; } catch (e) { /* egal */ } }
   let extra = '';
