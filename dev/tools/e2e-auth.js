@@ -64,7 +64,7 @@ function fakeAuth(opts = {}) {
   const watch = pg => { pg.on('pageerror', e => errs.push(e.message)); pg.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errs.push(m.text()); }); };
   async function ctxWith(auth, viewport, cfg = CFG) {
     const ctx = await b.newContext({ viewport: viewport || { width: 1180, height: 820 }, acceptDownloads: true });
-    if (cfg) await ctx.addInitScript(c => { window.QM_CONFIG = c; }, cfg);
+    await ctx.addInitScript(c => { window.QM_CONFIG = c; }, cfg);
     const sdkHits = { n: 0 };
     await ctx.route('https://cdn.jsdelivr.net/npm/@supabase/**', r => { sdkHits.n++; r.fulfill({ path: SDK, headers: Object.assign({ 'content-type': 'text/javascript' }, CORS) }); });
     if (auth) await ctx.route(SB + '/**', r => auth.handle(r));
@@ -72,7 +72,7 @@ function fakeAuth(opts = {}) {
   }
 
   // ---------- 0. Ohne Konfiguration: normaler lokaler Start
-  { const { ctx, sdkHits } = await ctxWith(null, null, null); const pg = await ctx.newPage(); watch(pg); const reqs = []; pg.on('request', r => reqs.push(r.url()));
+  { const { ctx, sdkHits } = await ctxWith(null, null, { supabaseUrl: '', supabaseKey: '' }); const pg = await ctx.newPage(); watch(pg); const reqs = []; pg.on('request', r => reqs.push(r.url()));
     await pg.goto(APP); await pg.waitForTimeout(300);
     ok(await pg.evaluate(() => document.querySelector('#btnAccount').hidden && document.querySelector('#btnProfile').hidden && TWApp.APP.auth.configured === false), 'Unkonfiguriert: kein Anmelde-Knopf, App startet lokal');
     ok(sdkHits.n === 0 && !reqs.some(u => /supabase/.test(u)), 'Unkonfiguriert: nichts von Supabase geladen');
