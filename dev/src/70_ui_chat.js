@@ -56,7 +56,8 @@ const isSheet = t => /^\s*#\s/m.test(t) || /\[\[.+\]\]/.test(t);
 
 function bubble(m, i) {
   const who = m.role === 'user' ? 'me' : 'ai';
-  const body = esc(m.text).replace(/\[\[([^\]]+)\]\]/g, '<span class="sk">✎ Skizze: $1</span>');
+  const body = esc(m.text).replace(/\[\[([^\]]+)\]\]/g, '<span class="sk">✎ Skizze: $1</span>')
+    .replace(/^#{1,3}\s+(.+)$/gm, '<b class="h">$1</b>').replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>');
   const acts = m.role === 'assistant' && !m.pending && m.text
     ? `<div class="msg-acts"><button class="btn btn-sm ${isSheet(m.text) ? 'btn-primary' : ''}" data-take="${i}">${isSheet(m.text) ? 'Als Lernzettel übernehmen' : 'Als Notiz'}</button><button class="btn btn-sm" data-append="${i}">Anhängen</button><button class="btn btn-sm btn-ghost" data-copy="${i}">Kopieren</button></div>` : '';
   return `<div class="msg ${who}${m.note ? ' sys' : ''}"><div class="bub">${body || '<span class="spin dark"></span>'}</div>${m.by ? `<div class="by">${esc(m.by)}</div>` : ''}${acts}</div>`;
@@ -86,7 +87,9 @@ function history(limit) {
 /* Eine Anfrage an Tizian: text = sichtbare Nachricht, prompt = was das Modell bekommt (Standard: text) */
 async function ask(text, prompt) {
   if (busy) return;
-  const calc = TW.solver.calcTask(text);
+  // „Was ist 5+5?“, „wie viel ist 12 * 3“, „5+5“ → exakter Rechner
+  const q = text.trim().replace(/^(?:was|wie ?viel)\s+(?:ist|sind|ergibt|ergeben|macht|gibt)\s+/i, '').replace(/\s*[?!.]+$/, '');
+  const calc = TW.solver.calcTask(text) || (/^[\d\s.,+\-−–×xX·*÷:/()]+$/.test(q) && /\d\s*[-+−–×xX·*÷:/]\s*[\d(]/.test(q) ? TW.solver.calcTask(q + ' =') : null);
   if (calc && !prompt) {                                 // reine Rechenzeilen: exakter Rechner, ohne KI
     chat.push({ role: 'user', text }, { role: 'assistant', text: calc.join('\n'), by: 'Rechner' }); save(); render(); return;
   }
