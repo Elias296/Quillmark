@@ -32,10 +32,15 @@ $('#imgFile').addEventListener('change', async e => {
 
 /* ---------- Chat ---------- */
 const CHAT_SYS = 'Du heißt Tizian und bist der Lern-Assistent in der App Quillmark. Antworte auf Deutsch (außer bei Fragen in einer anderen Sprache), freundlich, klar und eher kurz. ' +
-  'Erfinde keine Fakten; wenn du etwas nicht weißt, sag es. Erledige Aufgaben vollständig und zeige bei Rechnungen kurz den Rechenweg. ' +
+  'Erfinde keine Fakten; wenn du etwas nicht weißt, sag es. Erledige Aufgaben vollständig. ' +
   'Wenn du einen Lernzettel schreibst, nutze dieses Format, weil die App es als Handschrift auf ein Blatt zeichnet: erste Zeile „# Titel“, Abschnitte mit „## …“, ' +
   'Stichpunkte mit „- “, wichtige Begriffe **fett**. Skizzen stehen jeweils allein in einer Zeile: Ablauf als [[Schritt 1 -> Schritt 2 -> Schritt 3]] ' +
   'oder Mindmap als [[Thema: Punkt, Punkt, Punkt]] (höchstens 6 Punkte, je 1–3 Wörter). Verwende kein LaTeX und keine Tabellen mit Strichen.';
+/* Rechenweg nur, wenn danach gefragt wird */
+const WAY_RE = /rechenweg|lösungsweg|lösungsschritt|schritt für schritt|erklär|zeig.{0,20}(?:weg|wie|schritt)|wie (?:kommt|rechnet|geht|komme|rechne)|warum|begründ/i;
+const waySys = way => way
+  ? ' Der Nutzer möchte den Rechen- bzw. Lösungsweg sehen: zeige ihn kurz und verständlich.'
+  : ' Bei Rechnungen und Aufgaben nenne nur das Ergebnis bzw. die Lösung – ohne Rechenweg, Zwischenschritte oder Erklärung, außer der Nutzer bittet ausdrücklich darum.';
 const ACTIONS = {
   lernzettel: { label: 'Lernzettel', need: 'topic' },
   zusammenfassen: { label: 'Zusammenfassen', need: 'note' },
@@ -91,7 +96,8 @@ async function ask(text, prompt) {
   const q = text.trim().replace(/^(?:was|wie ?viel)\s+(?:ist|sind|ergibt|ergeben|macht|gibt)\s+/i, '').replace(/\s*[?!.]+$/, '');
   const calc = TW.solver.calcTask(text) || (/^[\d\s.,+\-−–×xX·*÷:/()]+$/.test(q) && /\d\s*[-+−–×xX·*÷:/]\s*[\d(]/.test(q) ? TW.solver.calcTask(q + ' =') : null);
   if (calc && !prompt) {                                 // reine Rechenzeilen: exakter Rechner, ohne KI
-    chat.push({ role: 'user', text }, { role: 'assistant', text: calc.join('\n'), by: 'Rechner' }); save(); render(); return;
+    const res = calc.length === 1 && !/=\s*[._\s?…□]*$/.test(text.trim()) ? calc[0].replace(/^.*=\s*/, '') : calc.join('\n');   // Frage „Was ist 5+5?“ → nur „10“
+    chat.push({ role: 'user', text }, { role: 'assistant', text: res, by: 'Rechner' }); save(); render(); return;
   }
   if (AI.state !== 'ready') {
     const srv = AI.srv && AI.srv.on;
@@ -111,7 +117,7 @@ async function ask(text, prompt) {
   const ctx = $('#chatCtx').checked && noteText() ? `\n\nAktueller Notiztext (zur Orientierung):\n${noteText().slice(0, 3000)}` : '';
   const hist = history(9);
   if (hist.length && hist[hist.length - 1].role === 'user') hist.pop();          // die aktuelle Frage kommt gleich (ggf. als ausführlicher Auftrag)
-  const msgs = [{ role: 'system', content: CHAT_SYS + ctx }, ...hist, { role: 'user', content: prompt || text }];
+  const msgs = [{ role: 'system', content: CHAT_SYS + waySys(WAY_RE.test(text)) + ctx }, ...hist, { role: 'user', content: prompt || text }];
   let cur = '';
   AI.running = true;
   try {
@@ -146,7 +152,7 @@ $('#chatChips').addEventListener('click', e => {
     const t = extra || note;
     if (!t) { toast('Schreib die Aufgaben ins Eingabefeld oder in den Notiztext.'); return; }
     input.value = ''; autoGrow();
-    ask(extra ? `Löse diese Aufgaben:\n${extra}` : 'Löse die Aufgaben aus meinem Notiztext.', `Löse die folgenden Aufgaben vollständig. Nummeriere die Lösungen wie die Aufgaben, zeige bei Rechnungen kurz den Rechenweg und schreibe am Ende jeweils „Ergebnis: …“.\n\n${t.slice(0, 4000)}`);
+    ask(extra ? `Löse diese Aufgaben:\n${extra}` : 'Löse die Aufgaben aus meinem Notiztext.', `Löse die folgenden Aufgaben vollständig. Nummeriere die Lösungen wie die Aufgaben, ${WAY_RE.test(extra || '') ? 'zeige bei Rechnungen kurz den Rechenweg und schreibe am Ende jeweils „Ergebnis: …“' : 'gib zu jeder Aufgabe nur die Lösung bzw. das Ergebnis an, ohne Rechenweg'}.\n\n${t.slice(0, 4000)}`);
     return;
   }
   if (act === 'lernzettel') {
