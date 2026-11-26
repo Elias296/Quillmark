@@ -288,6 +288,30 @@ pre.log:empty{display:none}
 .spin.dark{border-color:rgba(255,255,255,.22);border-top-color:#fff}
 @keyframes sp{to{transform:rotate(360deg)}}
 
+/* ---------- Export: Formatwahl, Prüfdetails ---------- */
+.ex-choice{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.ex-opt{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;min-height:96px;padding:14px 16px;border-radius:20px;border:1px solid var(--line-2);background:var(--glass);color:var(--text)}
+.ex-opt b{font-size:17px}
+.ex-opt small{font-size:13px;color:var(--muted);line-height:1.35}
+.ex-opt:hover{background:var(--glass-2)}
+.ex-opt.on{border-color:rgba(255,255,255,.55);background:var(--glass-3)}
+.ex-opt:disabled{opacity:.7}
+.ex-tech{margin-top:14px;border-top:1px solid var(--line);padding-top:4px}
+.ex-tech>summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted)}
+.ex-tech>summary::-webkit-details-marker{display:none}
+.ex-tech>summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid var(--dim);border-bottom:2px solid var(--dim);transform:rotate(45deg) translateY(-3px)}
+.ex-tech[open]>summary::after{transform:rotate(-135deg)}
+
+/* ---------- Meine Notizen ---------- */
+.note-list{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.note-row{display:flex;align-items:center;gap:6px;padding:4px 4px 4px 0;border-radius:18px;border:1px solid var(--line);background:var(--glass)}
+.note-row.on{border-color:rgba(255,255,255,.45);background:var(--glass-2)}
+.note-open{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:10px 14px;border:0;background:transparent;color:var(--text);border-radius:16px;min-height:var(--tap)}
+.note-open b{font-size:15px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.note-open small{font-size:12.5px;color:var(--muted)}
+.note-empty{color:var(--muted);font-size:14px;padding:10px 2px}
+#btnNotes{width:48px;height:48px;background:var(--glass);border:1px solid var(--line)}
+
 /* ---------- Glas-Animationen: Lichtstreif beim Antippen, gleitende Auswahl ---------- */
 .btn,.chip,.seg button,.icon-btn,.rail nav .ic{position:relative;overflow:hidden;transition:transform .18s cubic-bezier(.3,1.4,.5,1),background .15s,color .15s,box-shadow .2s}
 .btn::after,.chip::after,.seg button::after,.icon-btn::after,.rail nav .ic::after,.glider::after{content:"";position:absolute;inset:-1px;pointer-events:none;border-radius:inherit;z-index:2;opacity:0;transform:translateX(-130%);
@@ -324,12 +348,61 @@ pre.log:empty{display:none}
   .topbar{padding:0 12px 0 10px}
   .title-input{font-size:19px}
 }
+/* Handy: beschriftete Navigation unten, Inhalt in voller Breite, kompakte Zoomleiste */
 @media (max-width:640px){
-  .rail{width:64px;margin-left:8px}
-  .rail nav button{width:58px}.rail nav button .t-long{display:none}
-  .title-input{font-size:17px}
+  :root{--navh:64px}
+  .app{flex-direction:column}
+  .rail{position:fixed;z-index:40;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));width:auto;height:var(--navh);margin:0;flex-direction:row;border-radius:32px;padding:5px 6px;gap:4px}
+  .rail .logo,.rail .grow{display:none}
+  .rail nav{flex:1 1 auto;min-width:0;height:100%;flex-direction:row;gap:0;justify-content:space-between}
+  .rail nav button{flex:1 1 0;width:auto;min-width:0;min-height:0;height:100%;gap:3px;padding:3px 0;border-radius:24px}
+  .rail nav button .ic{width:44px;height:30px;border-radius:15px}
+  .rail nav button .ic svg{width:19px;height:19px}
+  .rail nav button .t-long{display:none}
+  .rail nav button .t-short{display:block;font-size:11px;font-weight:600;line-height:1.1;white-space:nowrap}
+  .rail nav .glider{border-radius:15px}
+  .rail .icon-btn{width:44px;height:44px;flex:none;align-self:center}
+  .shell{height:100%}
+  main{padding:0 8px}
+  .panel{inset:0 8px calc(var(--navh) + 16px + env(safe-area-inset-bottom)) 8px}
+  .stage{inset:0 8px calc(var(--navh) + 16px + env(safe-area-inset-bottom)) 8px;border-radius:24px}
+  .subtabs{padding:0 8px 8px}
+  .topbar{flex-basis:60px;height:60px;padding:0 8px;gap:6px}
+  .topbar .icon-btn,#btnNotes{width:44px;height:44px}
+  .cta{width:44px;height:44px;padding:0;border-radius:50%}
+  .cta .cta-t{display:none}
+  .title-input{font-size:17px;padding:0 8px;min-width:0}
+  .card{padding:14px;border-radius:22px}
+  details.fold{margin:14px -14px -14px;padding:0 14px}
+  .card-h{flex-wrap:wrap;row-gap:4px}
+  .card-h h3{white-space:nowrap}
+  .btn-sm{white-space:nowrap}
+  .chip{min-height:40px;padding:0 13px;font-size:13.5px}
+  .composer{gap:6px;padding:4px}
+  .composer .icon-btn{width:40px;height:40px}
+  .composer .btn{padding:0 14px}
+  .composer textarea{min-width:0;padding:10px 4px}
+  .msg{max-width:94%}
+  .pill{left:8px;right:8px;bottom:10px;transform:none;justify-content:space-between;padding:4px}
+  .pill .icon-btn{width:40px;height:40px}
+  .pill .lab{min-width:0;padding:0 6px;font-size:13px}
+  .pill span.lab{min-width:44px}
+  .pill .sep{margin:0 2px}
+  .toast{bottom:calc(var(--navh) + 24px + env(safe-area-inset-bottom));max-width:calc(100% - 24px)}
+  .ex-choice{grid-template-columns:1fr}
+  .ex-opt{min-height:0}
+  .modal{padding:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom))}
+  .modal-card{border-radius:22px}
+  .modal-head{padding:10px 10px 10px 16px}
+  .modal-body{padding:14px 16px}
+  #sampleBadge{display:none}
   .cmp{grid-template-columns:1fr}
   .tiles{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
+@media (max-width:360px){
+  .pill .icon-btn{width:36px;height:36px}
+  .pill .lab{font-size:12px;padding:0 3px}
+  .pill span.lab{min-width:38px}
 }
 </style>
 </head>
@@ -353,14 +426,14 @@ pre.log:empty{display:none}
 </aside>
 <div class="shell">
 <header class="topbar">
+  <button class="icon-btn" id="btnNotes" title="Meine Notizen" aria-label="Meine Notizen" aria-haspopup="dialog"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="13" height="17" rx="2.5"/><path d="M8 8h5M8 12h5M8 16h3"/><path d="M20 7v12a2 2 0 0 1-2 2H8"/></svg></button>
   <input class="title-input" id="noteTitle" type="text" placeholder="Titel der Notiz" aria-label="Titel der aktuellen Notiz" autocomplete="off" spellcheck="false">
   <div class="actions">
     <button class="icon-btn" id="btnUndo" title="Rückgängig" aria-label="Letzte Übernahme rückgängig machen" disabled>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>
     </button>
-    <button class="btn btn-primary cta" id="btnExport">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>
-      Exportieren
+    <button class="btn btn-primary cta" id="btnExport" aria-label="Exportieren" aria-haspopup="dialog">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg><span class="cta-t">Exportieren</span>
     </button>
   </div>
 </header>
@@ -386,13 +459,13 @@ pre.log:empty{display:none}
         <input type="file" id="fileInput" accept="image/*" multiple hidden>
         <button class="btn btn-block" id="btnPick" style="margin-top:12px">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="m4 18 5-5 4 4 3-3 4 4"/></svg>
-          Screenshots importieren
+          Text aus Foto erkennen
           <span class="grow"></span>
         </button>
         <input type="file" id="imgFile" accept="image/*" hidden>
         <button class="btn btn-block" id="btnImg" style="margin-top:8px">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m4 17 5-5 4 4 2-2 5 5"/><path d="M15 4v6M12 7h6"/></svg>
-          Bild in den Lernzettel einfügen
+          Bild aufs Blatt setzen
           <span class="grow"></span>
         </button>
         <div id="ocrStatus" hidden style="margin-top:12px">
@@ -583,7 +656,7 @@ pre.log:empty{display:none}
 
 <!-- ============ Info-Popover (Progressive Disclosure) ============ -->
 <div class="pop" id="pop" hidden role="dialog"></div>
-<template id="info-text"><h4>Formatierung</h4><ul><li><code>[[A -&gt; B -&gt; C]]</code> – Ablauf-Skizze, <code>[[Thema: a, b, c]]</code> – Mindmap</li><li>„Bild in den Lernzettel einfügen“ setzt <code>![Bild](bild:…)</code></li><li><code># Titel</code>, <code>## Abschnitt</code> – Überschriften</li><li><code>- Punkt</code> oder <code>1. Punkt</code> – Listen</li><li>Leerzeile – neuer Absatz</li><li><code>**fett**</code> – kräftiger Strich</li><li><code>a | b | c</code> – Tabellenzeile</li><li><code>x^2</code> oder <code>x2</code> wird zu x²</li></ul><label class="switch"><input type="checkbox" data-opt="autoSup"><span>Hochzahlen automatisch setzen</span></label><p>Der Text wird automatisch lokal gespeichert.</p></template>
+<template id="info-text"><h4>Formatierung</h4><ul><li><code>[[A -&gt; B -&gt; C]]</code> – Ablauf-Skizze, <code>[[Thema: a, b, c]]</code> – Mindmap</li><li>„Bild aufs Blatt setzen“ setzt <code>![Bild](bild:…)</code></li><li><code># Titel</code>, <code>## Abschnitt</code> – Überschriften</li><li><code>- Punkt</code> oder <code>1. Punkt</code> – Listen</li><li>Leerzeile – neuer Absatz</li><li><code>**fett**</code> – kräftiger Strich</li><li><code>a | b | c</code> – Tabellenzeile</li><li><code>x^2</code> oder <code>x2</code> wird zu x²</li></ul><label class="switch"><input type="checkbox" data-opt="autoSup"><span>Hochzahlen automatisch setzen</span></label><p>Der Text wird automatisch lokal gespeichert.</p></template>
 <template id="info-ocr"><h4>Texterkennung</h4><p>Läuft vollständig im Browser mit Tesseract.js. Die Sprachen wählst du im Zuschnitt-Fenster (z. B. ES für Spanisch) – nur dann werden Akzente wie á, ñ zuverlässig erkannt. Jede Sprache lädt beim ersten Mal einige MB Sprachdaten. Es wird nur der zugeschnittene Ausschnitt verarbeitet.</p><p>Formeln und komplexe Tabellen werden nur als einfacher Text erkannt – bitte prüfen.</p></template>
 <template id="info-ki"><h4>Tizian – lokale KI</h4><p id="gpuDetail"></p><ul><li>Läuft über WebGPU auf dem Gerät, Texte verlassen das iPad nicht – außer du schaltest „Text auf Server verarbeiten“ ein.</li><li>Das Modell wird erst nach deinem Tipp geladen (kein automatischer Download).</li><li>Ein Fakten-Wächter vergleicht Zahlen, Namen und Fachbegriffe mit dem Original.</li><li>Der Entwurf ändert sich erst mit „Tizians Fassung übernehmen“.</li></ul><p>Quillmark verspricht keine Umgehung von KI-Detektoren – es geht um bessere, eigene Notizen. Editor, Handschrift und Export funktionieren auch ohne KI.</p></template>
 <template id="info-server"><h4>Tizian auf einem anderen Rechner</h4><p>Die App spricht jede <b>OpenAI-kompatible</b> Chat-Schnittstelle an (<code>/v1/chat/completions</code>).</p><p><b>Empfohlen – eigener Laptop (kostenlos, privat):</b></p><ol><li>Auf dem Laptop <b>Ollama</b> mit einem Modell, Freigabe <code>OLLAMA_ORIGINS=https://elias296.github.io</code>.</li><li><b>Tailscale</b> auf Laptop und iPad mit demselben Konto, auf dem Laptop <code>tailscale serve --bg 11434</code>.</li><li>Hier die Adresse <code>https://…ts.net</code> und den Modellnamen aus <code>ollama list</code> eintragen, Schlüssel leer lassen.</li></ol><p>Die Texte bleiben dabei in deinem privaten Tailscale-Netz. Der Laptop muss laufen und darf nicht schlafen.</p><p><b>Alternative – OpenRouter:</b> Adresse <code>https://openrouter.ai/api/v1</code>, ein Modell mit <code>:free</code> und dein API-Schlüssel. Kostenlos mit Tageslimit; die Texte gehen an fremde Anbieter, die sie speichern dürfen.</p><p>Handschrift, Texterkennung und Export bleiben immer auf dem iPad.</p></template>
@@ -702,13 +775,13 @@ pre.log:empty{display:none}
 <!-- ============ Export ============ -->
 <div class="modal" id="exportModal" hidden>
   <div class="modal-card">
-    <div class="modal-head"><h2>Exportieren</h2><button class="btn" data-close>Schließen</button></div>
+    <div class="modal-head"><h2 tabindex="-1">Exportieren</h2><button class="btn" data-close>Schließen</button></div>
     <div class="modal-body">
       <p id="exportSummary" style="margin-bottom:10px"></p>
       <div id="exportWarn"></div>
-      <div class="stack" style="margin-top:10px">
-        <button class="btn btn-primary btn-block" id="exGn">.goodnotes neu erzeugen</button>
-        <button class="btn btn-block" id="exPdf">Stattdessen als Standard-PDF exportieren</button>
+      <div class="ex-choice" role="group" aria-label="Format wählen">
+        <button class="ex-opt" id="exGn"><b>Goodnotes</b><small>Echte Handschrift – in Goodnotes radier- und verschiebbar</small></button>
+        <button class="ex-opt" id="exPdf"><b>PDF</b><small>Für jede App, zum Drucken oder Teilen</small></button>
       </div>
       <div id="exportResult" hidden style="margin-top:14px">
         <div class="infobox" id="exportResultMsg"></div>
@@ -717,8 +790,35 @@ pre.log:empty{display:none}
           <a class="btn btn-block" id="exDownload" download>In „Dateien“ sichern (Download)</a>
         </div>
       </div>
-      <ul class="checks" id="exportChecks"></ul>
-      <p class="hint" style="margin-top:12px">Hinweis: Das .goodnotes-Format wurde aus der untersuchten Referenzdatei abgeleitet (ZIP, Protobuf-Ereignisse, Apple-LZ4, TPL-Stiftpfade). Es ist keine offizielle Spezifikation; künftige Goodnotes-Versionen können sich anders verhalten. Der Suchindex der Seite wird leer angelegt – Goodnotes erkennt Handschrift erst nach eigener Indizierung.</p>
+      <details class="ex-tech" id="exTech" hidden>
+        <summary id="exTechSum">Technische Prüfung</summary>
+        <ul class="checks" id="exportChecks"></ul>
+        <p class="hint" style="margin-top:12px">Das .goodnotes-Format wurde aus einer Referenzdatei abgeleitet (ZIP, Protobuf-Ereignisse, Apple-LZ4, TPL-Stiftpfade). Es ist keine offizielle Spezifikation; künftige Goodnotes-Versionen können sich anders verhalten. Der Suchindex der Seite wird leer angelegt – Goodnotes erkennt Handschrift erst nach eigener Indizierung.</p>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Meine Notizen ============ -->
+<div class="modal" id="notesModal" hidden>
+  <div class="modal-card mid">
+    <div class="modal-head"><h2 tabindex="-1">Meine Notizen</h2><button class="btn" data-close>Schließen</button></div>
+    <div class="modal-body">
+      <button class="btn btn-primary btn-block" id="notesNew">+ Neue Notiz</button>
+      <ul class="note-list" id="notesList" aria-label="Notizen"></ul>
+      <details class="ex-tech" id="trashFold">
+        <summary id="trashSum">Papierkorb</summary>
+        <p class="hint" style="margin:4px 0 8px">Notizen im Papierkorb werden nach 30 Tagen endgültig gelöscht.</p>
+        <ul class="note-list" id="trashList" aria-label="Papierkorb"></ul>
+        <button class="btn btn-danger btn-block" id="trashEmpty" style="margin-top:8px">Papierkorb leeren</button>
+      </details>
+      <h4 style="margin-top:20px">Komplett-Backup</h4>
+      <p>Eine Datei mit allen Notizen (auch Papierkorb), eingefügten Bildern, deiner eigenen Handschrift und den Blatteinstellungen. Später unter „Backup öffnen“ wieder in Quillmark laden – auch auf einem anderen Gerät.</p>
+      <div class="row" style="margin-top:10px">
+        <button class="btn grow" id="backupSave">Backup speichern</button>
+        <button class="btn grow" id="backupOpen">Backup öffnen</button>
+        <input type="file" id="backupFile" accept="application/json,.json" hidden>
+      </div>
     </div>
   </div>
 </div>
@@ -726,7 +826,7 @@ pre.log:empty{display:none}
 <!-- ============ Datenschutz & Speicher ============ -->
 <div class="modal" id="settingsModal" hidden>
   <div class="modal-card mid">
-    <div class="modal-head"><h2>Datenschutz &amp; Speicher</h2><button class="btn" data-close>Schließen</button></div>
+    <div class="modal-head"><h2 tabindex="-1">Datenschutz &amp; Speicher</h2><button class="btn" data-close>Schließen</button></div>
     <div class="modal-body">
       <h4>Alles bleibt auf deinem Gerät</h4>
       <p>Entwurf, Undo-Stand und Einstellungen liegen im lokalen Browserspeicher (<code>localStorage</code>), deine eigene Handschrift zusätzlich in <code>IndexedDB</code> dieses Geräts. Es gibt kein Konto, kein Tracking, keine Analyse-Skripte und keinen Server von Quillmark. Screenshots, OCR-Text und KI-Verarbeitung verlassen das iPad nicht – Ausnahme: der Server-Modus von Tizian, wenn du ihn einschaltest.</p>
@@ -736,7 +836,7 @@ pre.log:empty{display:none}
 
       <h4>Gezielt löschen</h4>
       <div class="stack">
-        <button class="btn btn-block" id="delDraft">Entwürfe löschen (Notiz, Bilder, Chat &amp; Undo-Stand)</button>
+        <button class="btn btn-block" id="delDraft">Alle Notizen löschen (Notizen, Papierkorb, Bilder, Chat &amp; Undo-Stand)</button>
         <button class="btn btn-block" id="delOwn">Eigene Handschrift zurücksetzen</button>
         <button class="btn btn-block" id="delModel">Heruntergeladenes KI-Modell aus dem Cache entfernen</button>
         <button class="btn btn-danger btn-block" id="delAll">Komplett-Reset (alles löschen)</button>
@@ -763,7 +863,7 @@ pre.log:empty{display:none}
 <!-- ============ Hosting-Info ============ -->
 <div class="modal" id="hostModal" hidden>
   <div class="modal-card mid">
-    <div class="modal-head"><h2>HTTPS-Hosting &amp; Home-Bildschirm</h2><button class="btn" data-close>Schließen</button></div>
+    <div class="modal-head"><h2 tabindex="-1">HTTPS-Hosting &amp; Home-Bildschirm</h2><button class="btn" data-close>Schließen</button></div>
     <div class="modal-body">
       <p>Quillmark ist eine einzige Datei: <code>index.html</code>. Öffnest du sie direkt aus der Dateien-App (<code>file://</code>), schränkt Safari Sicherheitsfunktionen ein: <b>WebGPU</b> (lokale KI), Web-Worker für die OCR, der Browser-Cache für Modelle und „Zum Home-Bildschirm“ funktionieren dann nicht oder nur teilweise.</p>
       <h4>Deshalb: einmal kostenlos unter einer festen https://-Adresse ablegen</h4>
@@ -789,7 +889,7 @@ pre.log:empty{display:none}
       <h4 id="confirmTitle" style="font-size:17px"></h4>
       <p id="confirmText" style="margin-top:6px;white-space:pre-line"></p>
     </div>
-    <div class="modal-foot"><span class="grow"></span><button class="btn" id="confirmNo">Abbrechen</button><button class="btn btn-primary" id="confirmYes">OK</button></div>
+    <div class="modal-foot"><span class="grow"></span><button class="btn" id="confirmNo" data-autofocus>Abbrechen</button><button class="btn btn-primary" id="confirmYes">OK</button></div>
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -2180,15 +2280,15 @@ const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const K = { draft: 'tintenwerk.entwurf.v1', undo: 'tintenwerk.undo.v1', settings: 'tintenwerk.einstellungen.v1', own: 'tintenwerk.handschrift.v1', ui: 'tintenwerk.ui.v1', server: 'tintenwerk.server.v1', images: 'tintenwerk.bilder.v1', chat: 'tintenwerk.chat.v1' };
+const K = { draft: 'tintenwerk.entwurf.v1', undo: 'tintenwerk.undo.v1', settings: 'tintenwerk.einstellungen.v1', own: 'tintenwerk.handschrift.v1', ui: 'tintenwerk.ui.v1', server: 'tintenwerk.server.v1', images: 'tintenwerk.bilder.v1', chat: 'tintenwerk.chat.v1', notes: 'tintenwerk.notizen.v1' };
 
 const SAMPLE_MARK = 'Dies ist eine Beispielnotiz von Quillmark.';
 const SAMPLE = {
   title: 'Willkommen bei Quillmark',
   text: 'Willkommen bei Quillmark\n\n' + SAMPLE_MARK + ' Sie zeigt, wie dein Text als echte Vektor-Handschrift auf einem Goodnotes-Blatt aussieht.\n\n' +
-    '# So funktioniert es\n- Screenshots importieren und Text lokal erkennen lassen\n- Text prüfen, korrigieren und auf Wunsch natürlicher formulieren\n- Schriftstil, Papier und Tinte wählen\n- Als native .goodnotes-Datei oder PDF exportieren\n\n' +
+    '# So funktioniert es\n- Text aus Fotos und Screenshots lokal erkennen lassen\n- Text prüfen, korrigieren und auf Wunsch natürlicher formulieren\n- Schriftstil, Papier und Tinte wählen\n- Als native .goodnotes-Datei oder PDF exportieren\n\n' +
     '## Gut zu wissen\n1. Jede Zeile sitzt exakt auf der Grundlinie.\n2. Die Schrift lässt sich in Goodnotes mit Lasso und Radierer bearbeiten.\n3. Deine Notizen und deine Handschrift bleiben auf deinem iPad.\n\n' +
-    'Tippe auf „Neue Notiz“ oder importiere deinen ersten Screenshot.'
+    'Tippe auf „Eigene Notiz starten“ – oder lass Text aus einem Foto erkennen.'
 };
 
 /* ---------- Speicher ---------- */
@@ -2248,6 +2348,49 @@ function confirmDialog(title, text, okLabel, danger) {
 }
 function openModal(id) { $(id).hidden = false; }
 function closeModal(id) { $(id).hidden = true; }
+/* Dialog-Fokus (W3C „Dialog (Modal)“): beim Öffnen in den Dialog, Tab bleibt darin, Escape schließt, danach zurück zum Auslöser */
+const modalStack = [];
+const FOCUSABLE = 'button:not([disabled]),[href],input:not([disabled]):not([type=hidden]):not([type=file]),select:not([disabled]),textarea:not([disabled]),summary,[tabindex]:not([tabindex="-1"])';
+const focusablesIn = m => [...m.querySelectorAll(FOCUSABLE)].filter(e => e.getClientRects().length && !e.closest('[hidden]'));
+function modalOpened(m) {
+  if (modalStack.some(x => x.m === m)) return;
+  const opener = document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
+  modalStack.push({ m, opener });
+  $('.app').inert = true;
+  requestAnimationFrame(() => {
+    if (m.hidden || m.contains(document.activeElement)) return;
+    const t = m.querySelector('[data-autofocus]') || m.querySelector('.modal-head h2[tabindex]') || focusablesIn(m)[0] || m.querySelector('.modal-card');
+    if (t) { if (!t.hasAttribute('tabindex') && !t.matches(FOCUSABLE)) t.setAttribute('tabindex', '-1'); t.focus({ preventScroll: true }); }
+  });
+}
+function modalClosed(m) {
+  const i = modalStack.findIndex(x => x.m === m); if (i < 0) return;
+  const { opener } = modalStack.splice(i, 1)[0];
+  if (!modalStack.length) $('.app').inert = false;
+  const top = modalStack[modalStack.length - 1];
+  if (opener && document.contains(opener) && opener.getClientRects().length && !opener.closest('[inert]')) opener.focus({ preventScroll: true });
+  else if (top) { const f = focusablesIn(top.m)[0]; if (f) f.focus({ preventScroll: true }); }
+}
+const modalObs = new MutationObserver(rs => rs.forEach(r => (r.target.hidden ? modalClosed : modalOpened)(r.target)));
+$$('.modal').forEach(m => {
+  m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
+  const h = m.querySelector('.modal-head h2, #confirmTitle');
+  if (h) { if (!h.id) h.id = m.id + 'Title'; m.setAttribute('aria-labelledby', h.id); }
+  modalObs.observe(m, { attributes: true, attributeFilter: ['hidden'] });
+});
+document.addEventListener('keydown', e => {
+  const top = modalStack[modalStack.length - 1]; if (!top || top.m.hidden) return;
+  if (e.key === 'Escape') {
+    const c = top.m.id === 'confirmModal' ? $('#confirmNo') : top.m.querySelector('.modal-head [data-close]');
+    if (c) { e.preventDefault(); c.click(); }
+  } else if (e.key === 'Tab') {
+    const f = focusablesIn(top.m); if (!f.length) { e.preventDefault(); return; }
+    const first = f[0], last = f[f.length - 1], a = document.activeElement;
+    if (!top.m.contains(a)) { e.preventDefault(); first.focus(); }
+    else if (e.shiftKey && (a === first || !f.includes(a))) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
+  }
+});
 $$('[data-close]').forEach(b => b.addEventListener('click', () => { b.closest('.modal').hidden = true; }));
 function downloadBlob(blob, name) {
   const a = document.createElement('a'), url = URL.createObjectURL(blob);
@@ -2414,11 +2557,21 @@ window.addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(()
 const editor = $('#editor'), titleInput = $('#noteTitle');
 function syncDraftUi() {
   editor.value = S.draft.text; titleInput.value = S.draft.title;
-  $('#sampleBadge').hidden = !S.draft.isSample;
+  syncSampleUi();
   $('#btnUndo').disabled = !S.undo;
   $('#btnUndo').title = S.undo ? 'Rückgängig: ' + (S.undo.reason || 'letzter Import') : 'Letzten Import rückgängig machen';
   updateAppendOption();
 }
+/* Erster Besuch: „Eigene Notiz starten“ hervorheben, Export zurücknehmen */
+function syncSampleUi() {
+  const smp = !!S.draft.isSample, nb = $('#btnNew'), ex = $('#btnExport');
+  $('#sampleBadge').hidden = !smp;
+  nb.className = 'btn btn-sm ' + (smp ? 'btn-primary' : 'btn-ghost');
+  nb.textContent = smp ? 'Eigene Notiz starten' : 'Neue Notiz';
+  nb.setAttribute('aria-label', smp ? 'Eigene Notiz starten' : 'Neue leere Notiz');
+  ex.classList.toggle('btn-primary', !smp);
+}
+function markOwn() { if (S.draft.isSample) { S.draft.isSample = false; syncSampleUi(); updateAppendOption(); } }
 function updateEditorStats() {
   const t = S.draft.text.trim(), words = t ? t.split(/\s+/).length : 0;
   $('#editorStats').textContent = `${words.toLocaleString('de-DE')} Wörter · ${S.draft.text.length.toLocaleString('de-DE')} Zeichen · automatisch lokal gespeichert`;
@@ -2433,13 +2586,11 @@ function applyTypo(el, key) {
 editor.addEventListener('change', () => applyTypo(editor, 'text'));
 titleInput.addEventListener('change', () => applyTypo(titleInput, 'title'));
 editor.addEventListener('input', () => {
-  S.draft.text = editor.value;
-  if (S.draft.isSample) { S.draft.isSample = false; $('#sampleBadge').hidden = true; updateAppendOption(); }
+  S.draft.text = editor.value; markOwn();
   saveDraft(); relayout();
 });
 titleInput.addEventListener('input', () => {
-  S.draft.title = titleInput.value;
-  if (S.draft.isSample) { S.draft.isSample = false; $('#sampleBadge').hidden = true; updateAppendOption(); }
+  S.draft.title = titleInput.value; markOwn();
   saveDraft(); relayout();
 });
 function snapshot(reason) {
@@ -2454,14 +2605,7 @@ $('#btnUndo').addEventListener('click', () => {
   setDraft({ title: u.title, text: u.text, isSample: u.isSample, imports: u.imports });
   toast('Vorheriger Stand wiederhergestellt.');
 });
-$('#btnNew').addEventListener('click', async () => {
-  const has = S.draft.text.trim() && !S.draft.isSample;
-  if (has && !(await confirmDialog('Neue leere Notiz?', 'Der aktuelle Entwurf wird geleert. Mit dem Rückgängig-Pfeil kannst du ihn einmal wiederherstellen.', 'Leeren'))) return;
-  if (has) snapshot('Notiz geleert');
-  setDraft({ title: '', text: '', isSample: false, imports: 0 });
-  setMode('import'); editor.focus();
-  toast('Neue leere Notiz angelegt.');
-});
+$('#btnNew').addEventListener('click', () => APP.notes.newNote());      // die bisherige Notiz bleibt unter „Meine Notizen“
 
 /* ---------- Übernahme aus dem Prüfungsfenster ---------- */
 function updateAppendOption() {
@@ -2820,7 +2964,7 @@ $('#panel').addEventListener('scroll', () => { if (!pop.hidden) closePop(); }, {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePop(); });
 
 /* Schnittstellen für die weiteren Teile */
-const APP = { cropOne, loadImg, ensureImages, exportImages, infoFill, closePop, runImport, $, $$, clamp, esc, K, LS, IDB, S, SAMPLE_MARK, toast, confirmDialog, openModal, closeModal, downloadBlob, safeName, setMode, setView, relayout, drawSheet, renderPage, snapshot, setDraft, syncDraftUi, saveSettings, syncZoom, showStaging };
+const APP = { syncSampleUi, modalStack, cropOne, loadImg, ensureImages, exportImages, infoFill, closePop, runImport, $, $$, clamp, esc, K, LS, IDB, S, SAMPLE_MARK, toast, confirmDialog, openModal, closeModal, downloadBlob, safeName, setMode, setView, relayout, drawSheet, renderPage, snapshot, setDraft, syncDraftUi, saveSettings, syncZoom, showStaging };
 window.TWApp.APP = APP;
 let renderTiles = () => {}, refreshBlattPanel = () => {}, updateWarnings = () => {};
 APP.hook = (name, fn) => { if (name === 'tiles') renderTiles = fn; else if (name === 'blatt') refreshBlattPanel = fn; else if (name === 'warn') updateWarnings = fn; };
@@ -3065,6 +3209,15 @@ $('#drawCancel').addEventListener('click', async () => {
 });
 
 /* ---------- JSON-Sicherung ---------- */
+function cleanGlyphs(glyphs) {
+  const clean = {}; let n = 0;
+  for (const [ch, g] of Object.entries(glyphs || {})) {
+    if ([...ch].length !== 1 || !g || !Array.isArray(g.s) || !g.s.length || typeof g.w !== 'number') continue;
+    if (!g.s.every(s => Array.isArray(s) && s.length >= 6 && s.length % 3 === 0 && s.every(Number.isFinite))) continue;
+    clean[ch] = { s: g.s, w: g.w, wf: Array.isArray(g.wf) ? g.wf : g.s.map(() => 1), p: Array.isArray(g.p) ? g.p : g.s.map(() => 0.5) }; n++;
+  }
+  return { clean, n };
+}
 $('#btnOwnExport').addEventListener('click', () => {
   if (!ownCount() && !Object.keys(S.own.glyphs).length) { toast('Es gibt noch keine gezeichneten Zeichen.'); return; }
   const data = { app: 'Quillmark', typ: 'handschrift', v: 1, einheiten: 'Grundlinie y=0, x-Höhe 50, Oberlänge 100; Punkte als [x, y, Ecke]', erstellt: new Date().toISOString(), glyphs: S.own.glyphs };
@@ -3077,12 +3230,7 @@ $('#ownFile').addEventListener('change', async e => {
   try {
     const data = JSON.parse(await f.text());
     if (!data || data.typ !== 'handschrift' || typeof data.glyphs !== 'object') throw new Error('Keine Quillmark-Handschrift-Sicherung.');
-    const clean = {}; let n = 0;
-    for (const [ch, g] of Object.entries(data.glyphs)) {
-      if ([...ch].length !== 1 || !g || !Array.isArray(g.s) || !g.s.length || typeof g.w !== 'number') continue;
-      if (!g.s.every(s => Array.isArray(s) && s.length >= 6 && s.length % 3 === 0 && s.every(Number.isFinite))) continue;
-      clean[ch] = { s: g.s, w: g.w, wf: Array.isArray(g.wf) ? g.wf : g.s.map(() => 1), p: Array.isArray(g.p) ? g.p : g.s.map(() => 0.5) }; n++;
-    }
+    const { clean, n } = cleanGlyphs(data.glyphs);
     if (!n) throw new Error('Die Datei enthält keine gültigen Zeichen.');
     const has = Object.keys(S.own.glyphs).length;
     if (has && !(await confirmDialog('Sicherung importieren?', `${n} Zeichen aus der Datei ersetzen gleichnamige vorhandene Zeichen (${has} vorhanden).`, 'Importieren'))) return;
@@ -3611,8 +3759,15 @@ function openExport() {
   const L = S.layout, st = L.stats;
   $('#exportSummary').innerHTML = `<b>${esc(S.draft.title || 'Unbenannte Notiz')}</b><br>${st.pages} ${st.pages === 1 ? 'Seite' : 'Seiten'} A5 · ${st.strokes.toLocaleString('de-DE')} einzelne Vektor-Stiftstriche · Schrift: ${{ klar: 'Klar & ordentlich', locker: 'Locker & geschwungen', eigen: 'Meine eigene Handschrift' }[S.settings.style]}`;
   $('#exportWarn').innerHTML = warnHtml() + (S.draft.isSample ? '<div class="infobox" style="margin-top:8px">Du exportierst gerade die <b>Beispielnotiz</b>.</div>' : '') + (st.strokes === 0 ? '<div class="warnbox" style="margin-top:8px">Die Notiz ist leer – es würde ein leeres Blatt exportiert.</div>' : '');
-  $('#exportResult').hidden = true; $('#exportChecks').innerHTML = '';
+  $('#exportResult').hidden = true; $('#exportChecks').innerHTML = ''; $('#exTech').hidden = true; $('#exTech').open = false;
+  $$('.ex-opt').forEach(b => b.classList.remove('on'));
   openModal('#exportModal');
+}
+function showChecks(v) {
+  const ok = v.checks.filter(c => c.ok).length;
+  $('#exportChecks').innerHTML = checksHtml(v.checks);
+  $('#exTechSum').textContent = `Technische Prüfung: ${ok} von ${v.checks.length} bestanden`;
+  $('#exTech').hidden = false; $('#exTech').open = !v.ok;
 }
 async function finishExport(bytes, name, mime, msg) {
   EX.blob = new Blob([bytes], { type: mime }); EX.name = name;
@@ -3631,12 +3786,13 @@ async function exportGoodnotes(btn) {
   A.relayout(true);
   const L = S.layout;
   if (L.unmapped.size && !(await confirmDialog('Zeichen ohne Vektorpfad', `${L.unmapped.size} Zeichen (${[...L.unmapped.keys()].join(' ')}) können nicht gezeichnet werden und würden im Export fehlen. Trotzdem exportieren?`, 'Trotzdem exportieren'))) return;
-  const label = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Datei wird erzeugt …';
+  const label = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin ' + (btn.classList.contains('btn-primary') ? '' : 'dark') + '"></span> Datei wird erzeugt …';
+  $$('.ex-opt').forEach(b => b.classList.toggle('on', b === btn));
   try {
     const title = (S.draft.title || '').trim() || 'Quillmark-Notiz';
     const g = await TW.buildGoodnotes(L, title, await thumbnailJpeg(), await A.exportImages(L));
     const v = await TW.verifyGoodnotes(g.zip, L);
-    $('#exportChecks').innerHTML = checksHtml(v.checks);
+    showChecks(v);
     if (!v.ok) { toast('Interne Prüfung fehlgeschlagen – die Datei wurde nicht bereitgestellt.', 6000); openModal('#exportModal'); return; }
     openModal('#exportModal');
     await finishExport(g.zip, safeName(title) + '.goodnotes', 'application/octet-stream',
@@ -3648,20 +3804,18 @@ async function exportPdf(btn) {
   A.relayout(true);
   const L = S.layout;
   if (L.unmapped.size && !(await confirmDialog('Zeichen ohne Vektorpfad', `${L.unmapped.size} Zeichen (${[...L.unmapped.keys()].join(' ')}) würden im PDF fehlen. Trotzdem exportieren?`, 'Trotzdem exportieren'))) return;
-  const label = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin dark"></span> PDF wird erzeugt …';
+  const label = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin ' + (btn.classList.contains('btn-primary') ? '' : 'dark') + '"></span> PDF wird erzeugt …';
+  $$('.ex-opt').forEach(b => b.classList.toggle('on', b === btn));
   try {
     const title = (S.draft.title || '').trim() || 'Quillmark-Notiz';
     const pdf = await TW.buildPdf(L, title, await A.exportImages(L));
-    $('#exportChecks').innerHTML = '';
+    $('#exportChecks').innerHTML = ''; $('#exTech').hidden = true;
     openModal('#exportModal');
     await finishExport(pdf, safeName(title) + '.pdf', 'application/pdf', `<b>${esc(safeName(title))}.pdf</b> ist fertig (${(pdf.length / 1024).toFixed(0)} KB). Papier und Vektor-Handschrift sind identisch zur Vorschau aufgeteilt.`);
   } catch (e) { toast('PDF-Export fehlgeschlagen: ' + ((e && e.message) || e), 6000); }
   finally { btn.disabled = false; btn.innerHTML = label; }
 }
-$('#btnExport').addEventListener('click', () => {      // ein Tap: Fenster öffnen und .goodnotes direkt erzeugen (PDF bleibt im Fenster wählbar)
-  openExport();
-  if (S.layout.stats.strokes > 0) exportGoodnotes($('#exGn'));
-});
+$('#btnExport').addEventListener('click', () => openExport());      // erst Format wählen – erzeugt wird nichts ungefragt
 $('#exGn').addEventListener('click', e => exportGoodnotes(e.currentTarget));
 $('#exPdf').addEventListener('click', e => exportPdf(e.currentTarget));
 $('#btnExportGn').addEventListener('click', e => { openExport(); exportGoodnotes(e.currentTarget); });
@@ -3726,11 +3880,13 @@ async function refreshSettingsModal() {
 $('#btnSettings').addEventListener('click', () => { refreshSettingsModal(); openModal('#settingsModal'); });
 $('#btnHostInfo').addEventListener('click', () => openModal('#hostModal'));
 $('#delDraft').addEventListener('click', async () => {
-  if (!(await confirmDialog('Entwürfe löschen?', 'Die aktuelle Notiz und der Undo-Stand werden unwiderruflich gelöscht.', 'Löschen', true))) return;
+  if (!(await confirmDialog('Alle Notizen löschen?', 'Alle Notizen (auch im Papierkorb), eingefügte Bilder, der Chat und der Undo-Stand werden unwiderruflich gelöscht. Tipp: vorher unter „Meine Notizen“ ein Backup speichern.', 'Alles löschen', true))) return;
   LS.del(K.draft); LS.del(K.undo); S.undo = null;
-  for (const id of Object.keys(S.imgMeta || {})) IDB.del('img:' + id);          // eingefügte Bilder gehören zu den Entwürfen
-  S.imgMeta = {}; LS.del(K.images); LS.del(K.chat);
-  A.setDraft({ title: '', text: '', isSample: false, imports: 0 }); toast('Entwürfe, Bilder und Chat gelöscht.'); refreshSettingsModal();
+  for (const id of Object.keys(S.imgMeta || {})) IDB.del('img:' + id);          // eingefügte Bilder gehören zu den Notizen
+  S.imgMeta = {}; LS.del(K.images);
+  if (window.TWApp.chat) window.TWApp.chat.clear(); else LS.del(K.chat);          // derselbe Löschvorgang wie „Chat leeren“
+  if (A.notes) A.notes.wipe(); else LS.del(K.notes);
+  A.setDraft({ title: '', text: '', isSample: false, imports: 0 }); toast('Notizen, Bilder und Chat gelöscht.'); refreshSettingsModal();
 });
 $('#delOwn').addEventListener('click', async () => {
   if (!(await confirmDialog('Eigene Handschrift zurücksetzen?', 'Alle gezeichneten Zeichen werden gelöscht. Tipp: vorher als JSON sichern.', 'Zurücksetzen', true))) return;
@@ -3751,6 +3907,8 @@ $('#delAll').addEventListener('click', async () => {
   try { const d = await IDB.open().catch(() => null); if (d) d.close(); await new Promise(r => { const q = indexedDB.deleteDatabase('tintenwerk'); q.onsuccess = q.onerror = q.onblocked = r; }); } catch (e) { /* egal */ }
   location.reload();
 });
+
+A.saveOwn = saveOwn; A.cleanGlyphs = cleanGlyphs; A.refreshPanels = () => { renderTiles(); refreshBlattPanel(); };
 
 /* ---------- Start ---------- */
 function makeTouchIcon() {         // Home-Bildschirm-Symbol zur Laufzeit erzeugen (Einzeldatei, keine Bilddatei nötig)
@@ -4088,10 +4246,15 @@ log.addEventListener('click', async e => {
   toast(isSheet(text) ? 'Lernzettel aufs Blatt übernommen.' : 'Als Notiz übernommen.');
   if (window.matchMedia('(max-width:900px)').matches) A.setView('stage');
 });
+/* Ein gemeinsamer Löschvorgang für „Leeren“ und „Alle Notizen löschen“: Speicher UND geöffneter Verlauf */
+function clearChat() {
+  if (busy) AI.interrupt();
+  chat = []; pending = null; save(); render();
+}
 $('#chatClear').addEventListener('click', async () => {
   if (!chat.length || busy) return;
   if (!(await confirmDialog('Chat leeren?', 'Alle Nachrichten werden auf diesem Gerät gelöscht.', 'Leeren', true))) return;
-  chat = []; save(); render();
+  clearChat();
 });
 
 /* Foto anhängen: Texterkennung, Text landet im Eingabefeld */
@@ -4103,9 +4266,210 @@ A.chatAttach = text => {
   autoGrow(); input.focus();
   toast('Text aus dem Bild steht im Eingabefeld. Ergänze deine Frage und tippe „Senden“.', 4500);
 };
-window.TWApp.chat = { ask, get: () => chat };
+/* Handy: kurzer Platzhalter, damit er nicht umbricht */
+const phone = matchMedia('(max-width: 640px)'), longPh = input.placeholder;
+const syncPh = () => { input.placeholder = phone.matches ? 'Frag Tizian …' : longPh; };
+syncPh(); if (phone.addEventListener) phone.addEventListener('change', syncPh);
+window.TWApp.chat = { ask, get: () => chat, clear: clearChat };
 
 render(); status();
+})();
+/* ==========================================================================
+   Quillmark – Meine Notizen (mehrere Lernzettel, Papierkorb) und Komplett-Backup
+   Die geöffnete Notiz lebt wie bisher in S.draft; die Liste hält alle Notizen.
+   ========================================================================== */
+(function () {
+'use strict';
+const A = window.TWApp.APP;
+const { $, S, K, LS, IDB, esc, toast, confirmDialog, openModal, closeModal, downloadBlob } = A;
+const DAY = 864e5, TRASH_DAYS = 30;
+const newId = () => 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const isEmpty = d => !String(d.text || '').trim() && !String(d.title || '').trim();
+const IMG_RE = /!\[[^\]]*\]\(bild:([A-Za-z0-9_-]+)\)/g;
+
+let N = LS.get(K.notes, null);
+if (!N || !Array.isArray(N.list)) {                       // Umstieg: der bisherige Einzel-Entwurf wird die erste Notiz
+  N = { active: null, list: [] };
+  if (!S.draft.isSample && !isEmpty(S.draft)) { N.active = newId(); N.list.push(fromDraft(N.active)); }
+}
+N.list = N.list.filter(e => !(e.deleted && Date.now() - e.deleted > TRASH_DAYS * DAY));   // alter Papierkorb
+persist();
+
+function fromDraft(id) {
+  const t = Date.now();
+  return { id, title: S.draft.title || '', text: S.draft.text || '', imports: S.draft.imports || 0, created: t, updated: t, deleted: 0 };
+}
+function persist() { LS.set(K.notes, N); }
+const live = () => N.list.filter(e => !e.deleted).sort((a, b) => b.updated - a.updated);
+const trashed = () => N.list.filter(e => e.deleted).sort((a, b) => b.deleted - a.deleted);
+
+/* Geöffnete Notiz in die Liste übernehmen (leere Notizen werden nicht aufgehoben, die Beispielnotiz nie) */
+let lastKey = '';
+function commit() {
+  if (S.draft.isSample) return;
+  const key = N.active + '\u0000' + S.draft.title + '\u0000' + S.draft.text;
+  if (key === lastKey) return;
+  lastKey = key;
+  let e = N.active && N.list.find(x => x.id === N.active);
+  if (isEmpty(S.draft)) { if (e) { N.list = N.list.filter(x => x !== e); persist(); } return; }
+  if (!N.active) N.active = newId();
+  if (!e) { e = fromDraft(N.active); N.list.push(e); }
+  else if (e.title !== S.draft.title || e.text !== S.draft.text) e.updated = Date.now();
+  e.title = S.draft.title || ''; e.text = S.draft.text || ''; e.imports = S.draft.imports || 0; e.deleted = 0;
+  persist();
+}
+setInterval(commit, 1500);
+addEventListener('pagehide', commit);
+document.addEventListener('visibilitychange', () => { if (document.hidden) commit(); });
+
+function load(e) {
+  N.active = e ? e.id : newId(); persist();
+  S.undo = null; LS.del(K.undo);                          // Rückgängig gilt nur innerhalb einer Notiz
+  A.setDraft(e ? { title: e.title, text: e.text, isSample: false, imports: e.imports || 0 } : { title: '', text: '', isSample: false, imports: 0 });
+  lastKey = '';
+}
+function openNote(id) {
+  commit();
+  const e = N.list.find(x => x.id === id && !x.deleted); if (!e) return;
+  if (id !== N.active || S.draft.isSample) load(e);
+  closeModal('#notesModal');
+  toast(`„${label(e)}“ geöffnet.`);
+}
+function newNote() {
+  commit();
+  const fromSample = !!S.draft.isSample;
+  load(null);
+  closeModal('#notesModal');
+  A.setMode('import'); requestAnimationFrame(() => $('#editor').focus());
+  toast(fromSample ? 'Deine erste Notiz: Text schreiben, einfügen oder „Text aus Foto erkennen“.' : 'Neue Notiz angelegt. Die vorige findest du unter „Meine Notizen“.', 4200);
+}
+function trash(id) {
+  commit();
+  const e = N.list.find(x => x.id === id); if (!e) return;
+  e.deleted = Date.now();
+  if (id === N.active) load(live()[0] || null);
+  persist(); render();
+  toast(`„${label(e)}“ liegt im Papierkorb.`);
+}
+function restore(id) {
+  const e = N.list.find(x => x.id === id); if (!e) return;
+  e.deleted = 0; e.updated = Date.now(); persist(); render();
+  toast(`„${label(e)}“ wiederhergestellt.`);
+}
+async function purge(ids, what) {
+  if (!ids.length) return;
+  if (!(await confirmDialog(what, 'Das lässt sich nicht rückgängig machen. Bilder, die nur in diesen Notizen vorkommen, werden ebenfalls gelöscht.', 'Endgültig löschen', true))) return;
+  N.list = N.list.filter(e => !ids.includes(e.id)); persist(); gcImages(); render();
+}
+/* Bilder löschen, auf die keine Notiz mehr verweist */
+function gcImages() {
+  const refs = new Set(), add = t => { for (const m of String(t || '').matchAll(IMG_RE)) refs.add(m[1]); };
+  N.list.forEach(e => add(e.text)); add(S.draft.text); if (S.undo) add(S.undo.text);
+  let n = 0;
+  for (const id of Object.keys(S.imgMeta || {})) if (!refs.has(id)) { delete S.imgMeta[id]; IDB.del('img:' + id); n++; }
+  if (n) LS.quiet(K.images, S.imgMeta);
+}
+function wipe() { N = { active: null, list: [] }; lastKey = ''; persist(); }
+
+/* ---------- Liste ---------- */
+const label = e => (e.title || '').trim() || (e.text || '').trim().split('\n')[0].replace(/^#+\s*/, '').slice(0, 60) || 'Ohne Titel';
+function when(t) {
+  const d = new Date(t), now = new Date(), hm = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  if (d.toDateString() === now.toDateString()) return 'heute, ' + hm;
+  if (d.toDateString() === new Date(now - DAY).toDateString()) return 'gestern, ' + hm;
+  return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ', ' + hm;
+}
+const words = t => { const s = String(t || '').trim(); return s ? s.split(/\s+/).length : 0; };
+const BIN = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>';
+function render() {
+  commit();
+  const L = live(), T = trashed(), act = S.draft.isSample ? null : N.active;
+  $('#notesList').innerHTML = L.length ? L.map(e => `<li class="note-row${e.id === act ? ' on' : ''}">
+      <button class="note-open" data-open="${e.id}"${e.id === act ? ' aria-current="true"' : ''}><b>${esc(label(e))}</b><small>${e.id === act ? 'Geöffnet · ' : ''}geändert ${when(e.updated)} · ${words(e.text).toLocaleString('de-DE')} Wörter</small></button>
+      <button class="icon-btn" data-trash="${e.id}" aria-label="„${esc(label(e))}“ in den Papierkorb" title="In den Papierkorb">${BIN}</button></li>`).join('')
+    : '<li class="note-empty">Noch keine eigenen Notizen. Tippe auf „Neue Notiz“.</li>';
+  $('#trashSum').textContent = `Papierkorb (${T.length})`;
+  $('#trashList').innerHTML = T.length ? T.map(e => `<li class="note-row">
+      <span class="note-open"><b>${esc(label(e))}</b><small>gelöscht ${when(e.deleted)}</small></span>
+      <button class="btn btn-sm" data-restore="${e.id}">Wiederherstellen</button>
+      <button class="btn btn-sm btn-ghost" data-purge="${e.id}" aria-label="„${esc(label(e))}“ endgültig löschen">Löschen</button></li>`).join('')
+    : '<li class="note-empty">Der Papierkorb ist leer.</li>';
+  $('#trashEmpty').hidden = !T.length;
+}
+function keepFocus(fn) { return e => { fn(e); if (!$('#notesModal').hidden && !$('#notesModal').contains(document.activeElement)) $('#notesNew').focus(); }; }
+
+$('#btnNotes').addEventListener('click', () => { render(); openModal('#notesModal'); });
+$('#notesNew').addEventListener('click', newNote);
+$('#notesList').addEventListener('click', keepFocus(e => {
+  const o = e.target.closest('[data-open]'), t = e.target.closest('[data-trash]');
+  if (t) trash(t.dataset.trash); else if (o) openNote(o.dataset.open);
+}));
+$('#trashList').addEventListener('click', keepFocus(e => {
+  const r = e.target.closest('[data-restore]'), p = e.target.closest('[data-purge]');
+  if (r) restore(r.dataset.restore);
+  else if (p) { const x = N.list.find(n => n.id === p.dataset.purge); purge([p.dataset.purge], `„${x ? label(x) : 'Notiz'}“ endgültig löschen?`); }
+}));
+$('#trashEmpty').addEventListener('click', () => purge(trashed().map(e => e.id), `Papierkorb leeren (${trashed().length})?`));
+
+/* ---------- Komplett-Backup ---------- */
+async function saveBackup() {
+  commit();
+  const images = {};
+  for (const [id, meta] of Object.entries(S.imgMeta || {})) {
+    const data = await IDB.get('img:' + id).catch(() => null);
+    if (typeof data === 'string') images[id] = { w: meta.w, h: meta.h, t: meta.t || 0, data };
+  }
+  const glyphs = (S.own && S.own.glyphs) || {};
+  const data = { app: 'Quillmark', typ: 'backup', v: 1, erstellt: new Date().toISOString(), active: N.active, notes: N.list, settings: S.settings, own: { v: 1, glyphs }, images };
+  downloadBlob(new Blob([JSON.stringify(data)], { type: 'application/json' }), `Quillmark-Backup-${new Date().toISOString().slice(0, 10)}.json`);
+  toast(`Backup gespeichert: ${N.list.length} Notizen, ${Object.keys(images).length} Bilder, ${Object.keys(glyphs).length} eigene Zeichen.`, 4500);
+}
+function readBackup(data) {
+  if (!data || data.app !== 'Quillmark' || data.typ !== 'backup' || !Array.isArray(data.notes)) throw new Error('Das ist keine Quillmark-Backup-Datei.');
+  const num = v => (Number.isFinite(+v) && +v > 0 ? +v : 0);
+  const notes = data.notes.filter(e => e && typeof e.id === 'string' && /^[\w-]{1,40}$/.test(e.id) && typeof e.text === 'string')
+    .map(e => ({ id: e.id, title: String(e.title || '').slice(0, 300), text: e.text.slice(0, 500000), imports: num(e.imports), created: num(e.created) || Date.now(), updated: num(e.updated) || Date.now(), deleted: num(e.deleted) }));
+  const images = {};
+  for (const [id, m] of Object.entries(data.images || {})) {
+    if (/^[A-Za-z0-9_-]{1,40}$/.test(id) && m && typeof m.data === 'string' && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(m.data) && num(m.w) && num(m.h)) images[id] = m;
+  }
+  const own = A.cleanGlyphs(data.own && data.own.glyphs);
+  const settings = {};
+  for (const [k, v] of Object.entries(data.settings || {})) if (k in TW.DEFAULT_SETTINGS && typeof v === typeof TW.DEFAULT_SETTINGS[k]) settings[k] = v;
+  return { notes, images, own, settings, active: typeof data.active === 'string' ? data.active : null };
+}
+async function openBackup(file) {
+  let B;
+  try { B = readBackup(JSON.parse(await file.text())); } catch (err) { toast('Backup konnte nicht geöffnet werden: ' + (err instanceof SyntaxError ? 'Die Datei ist beschädigt.' : err.message), 6000); return; }
+  const ni = Object.keys(B.images).length;
+  const msg = `${B.notes.length} ${B.notes.length === 1 ? 'Notiz' : 'Notizen'} und ${ni} ${ni === 1 ? 'Bild' : 'Bilder'} werden hinzugefügt. Gibt es eine Notiz schon, gewinnt die neuere Fassung.` +
+    (B.own.n ? `\nDeine eigene Handschrift wird durch die aus dem Backup ersetzt (${B.own.n} Zeichen).` : '') +
+    (Object.keys(B.settings).length ? '\nDie Blatt- und Schrifteinstellungen werden aus dem Backup übernommen.' : '');
+  if (!(await confirmDialog('Backup öffnen?', msg, 'Übernehmen'))) return;
+  commit();
+  let changedActive = false;
+  for (const b of B.notes) {
+    const e = N.list.find(x => x.id === b.id);
+    if (!e) N.list.push(b);
+    else if (b.updated > e.updated) { Object.assign(e, b); if (e.id === N.active) changedActive = true; }
+  }
+  for (const [id, m] of Object.entries(B.images)) {
+    try { await IDB.set('img:' + id, m.data); S.imgMeta[id] = { w: +m.w, h: +m.h, t: +m.t || Date.now() }; } catch (e) { /* einzelnes Bild übersprungen */ }
+  }
+  LS.quiet(K.images, S.imgMeta);
+  if (B.own.n) { S.own = { v: 1, glyphs: B.own.clean }; A.saveOwn(); }
+  if (Object.keys(B.settings).length) { Object.assign(S.settings, B.settings); A.saveSettings(); }
+  persist();
+  const target = (S.draft.isSample || isEmpty(S.draft)) ? (live().find(e => e.id === B.active) || live()[0]) : (changedActive ? N.list.find(e => e.id === N.active) : null);
+  if (target) load(target);
+  A.refreshPanels(); A.relayout(true); render();
+  toast(`Backup übernommen: ${B.notes.length} Notizen, ${ni} Bilder${B.own.n ? `, ${B.own.n} eigene Zeichen` : ''}.`, 4500);
+}
+$('#backupSave').addEventListener('click', () => saveBackup().catch(e => toast('Backup fehlgeschlagen: ' + ((e && e.message) || e), 6000)));
+$('#backupOpen').addEventListener('click', () => $('#backupFile').click());
+$('#backupFile').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) openBackup(f); });
+
+A.notes = { newNote, openNote, wipe, commit, list: () => N };
 })();
 /* ===== Glas-Animationen: Lichtstreif beim Antippen, gleitende Auswahl in Seitenleiste und Umschaltern ===== */
 (function () {

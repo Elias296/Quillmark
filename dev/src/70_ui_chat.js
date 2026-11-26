@@ -190,10 +190,15 @@ log.addEventListener('click', async e => {
   toast(isSheet(text) ? 'Lernzettel aufs Blatt übernommen.' : 'Als Notiz übernommen.');
   if (window.matchMedia('(max-width:900px)').matches) A.setView('stage');
 });
+/* Ein gemeinsamer Löschvorgang für „Leeren“ und „Alle Notizen löschen“: Speicher UND geöffneter Verlauf */
+function clearChat() {
+  if (busy) AI.interrupt();
+  chat = []; pending = null; save(); render();
+}
 $('#chatClear').addEventListener('click', async () => {
   if (!chat.length || busy) return;
   if (!(await confirmDialog('Chat leeren?', 'Alle Nachrichten werden auf diesem Gerät gelöscht.', 'Leeren', true))) return;
-  chat = []; save(); render();
+  clearChat();
 });
 
 /* Foto anhängen: Texterkennung, Text landet im Eingabefeld */
@@ -205,7 +210,11 @@ A.chatAttach = text => {
   autoGrow(); input.focus();
   toast('Text aus dem Bild steht im Eingabefeld. Ergänze deine Frage und tippe „Senden“.', 4500);
 };
-window.TWApp.chat = { ask, get: () => chat };
+/* Handy: kurzer Platzhalter, damit er nicht umbricht */
+const phone = matchMedia('(max-width: 640px)'), longPh = input.placeholder;
+const syncPh = () => { input.placeholder = phone.matches ? 'Frag Tizian …' : longPh; };
+syncPh(); if (phone.addEventListener) phone.addEventListener('change', syncPh);
+window.TWApp.chat = { ask, get: () => chat, clear: clearChat };
 
 render(); status();
 })();

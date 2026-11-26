@@ -238,6 +238,15 @@ $('#drawCancel').addEventListener('click', async () => {
 });
 
 /* ---------- JSON-Sicherung ---------- */
+function cleanGlyphs(glyphs) {
+  const clean = {}; let n = 0;
+  for (const [ch, g] of Object.entries(glyphs || {})) {
+    if ([...ch].length !== 1 || !g || !Array.isArray(g.s) || !g.s.length || typeof g.w !== 'number') continue;
+    if (!g.s.every(s => Array.isArray(s) && s.length >= 6 && s.length % 3 === 0 && s.every(Number.isFinite))) continue;
+    clean[ch] = { s: g.s, w: g.w, wf: Array.isArray(g.wf) ? g.wf : g.s.map(() => 1), p: Array.isArray(g.p) ? g.p : g.s.map(() => 0.5) }; n++;
+  }
+  return { clean, n };
+}
 $('#btnOwnExport').addEventListener('click', () => {
   if (!ownCount() && !Object.keys(S.own.glyphs).length) { toast('Es gibt noch keine gezeichneten Zeichen.'); return; }
   const data = { app: 'Quillmark', typ: 'handschrift', v: 1, einheiten: 'Grundlinie y=0, x-Höhe 50, Oberlänge 100; Punkte als [x, y, Ecke]', erstellt: new Date().toISOString(), glyphs: S.own.glyphs };
@@ -250,12 +259,7 @@ $('#ownFile').addEventListener('change', async e => {
   try {
     const data = JSON.parse(await f.text());
     if (!data || data.typ !== 'handschrift' || typeof data.glyphs !== 'object') throw new Error('Keine Quillmark-Handschrift-Sicherung.');
-    const clean = {}; let n = 0;
-    for (const [ch, g] of Object.entries(data.glyphs)) {
-      if ([...ch].length !== 1 || !g || !Array.isArray(g.s) || !g.s.length || typeof g.w !== 'number') continue;
-      if (!g.s.every(s => Array.isArray(s) && s.length >= 6 && s.length % 3 === 0 && s.every(Number.isFinite))) continue;
-      clean[ch] = { s: g.s, w: g.w, wf: Array.isArray(g.wf) ? g.wf : g.s.map(() => 1), p: Array.isArray(g.p) ? g.p : g.s.map(() => 0.5) }; n++;
-    }
+    const { clean, n } = cleanGlyphs(data.glyphs);
     if (!n) throw new Error('Die Datei enthält keine gültigen Zeichen.');
     const has = Object.keys(S.own.glyphs).length;
     if (has && !(await confirmDialog('Sicherung importieren?', `${n} Zeichen aus der Datei ersetzen gleichnamige vorhandene Zeichen (${has} vorhanden).`, 'Importieren'))) return;
@@ -784,8 +788,15 @@ function openExport() {
   const L = S.layout, st = L.stats;
   $('#exportSummary').innerHTML = `<b>${esc(S.draft.title || 'Unbenannte Notiz')}</b><br>${st.pages} ${st.pages === 1 ? 'Seite' : 'Seiten'} A5 · ${st.strokes.toLocaleString('de-DE')} einzelne Vektor-Stiftstriche · Schrift: ${{ klar: 'Klar & ordentlich', locker: 'Locker & geschwungen', eigen: 'Meine eigene Handschrift' }[S.settings.style]}`;
   $('#exportWarn').innerHTML = warnHtml() + (S.draft.isSample ? '<div class="infobox" style="margin-top:8px">Du exportierst gerade die <b>Beispielnotiz</b>.</div>' : '') + (st.strokes === 0 ? '<div class="warnbox" style="margin-top:8px">Die Notiz ist leer – es würde ein leeres Blatt exportiert.</div>' : '');
-  $('#exportResult').hidden = true; $('#exportChecks').innerHTML = '';
+  $('#exportResult').hidden = true; $('#exportChecks').innerHTML = ''; $('#exTech').hidden = true; $('#exTech').open = false;
+  $$('.ex-opt').forEach(b => b.classList.remove('on'));
   openModal('#exportModal');
+}
+function showChecks(v) {
+  const ok = v.checks.filter(c => c.ok).length;
+  $('#exportChecks').innerHTML = checksHtml(v.checks);
+  $('#exTechSum').textContent = `Technische Prüfung: ${ok} von ${v.checks.length} bestanden`;
+  $('#exTech').hidden = false; $('#exTech').open = !v.ok;
 }
 async function finishExport(bytes, name, mime, msg) {
   EX.blob = new Blob([bytes], { type: mime }); EX.name = name;
@@ -804,12 +815,13 @@ async function exportGoodnotes(btn) {
   A.relayout(true);
   const L = S.layout;
   if (L.unmapped.size && !(await confirmDialog('Zeichen ohne Vektorpfad', `${L.unmapped.size} Zeichen (${[...L.unmapped.keys()].join(' ')}) können nicht gezeichnet werden und würden im Export fehlen. Trotzdem exportieren?`, 'Trotzdem exportieren'))) return;
-  const label = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Datei wird erzeugt …';
+  const label = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin ' + (btn.classList.contains('btn-primary') ? '' : 'dark') + '"></span> Datei wird erzeugt …';
+  $$('.ex-opt').forEach(b => b.classList.toggle('on', b === btn));
   try {
     const title = (S.draft.title || '').trim() || 'Quillmark-Notiz';
     const g = await TW.buildGoodnotes(L, title, await thumbnailJpeg(), await A.exportImages(L));
     const v = await TW.verifyGoodnotes(g.zip, L);
-    $('#exportChecks').innerHTML = checksHtml(v.checks);
+    showChecks(v);
     if (!v.ok) { toast('Interne Prüfung fehlgeschlagen – die Datei wurde nicht bereitgestellt.', 6000); openModal('#exportModal'); return; }
     openModal('#exportModal');
     await finishExport(g.zip, safeName(title) + '.goodnotes', 'application/octet-stream',
@@ -821,20 +833,18 @@ async function exportPdf(btn) {
   A.relayout(true);
   const L = S.layout;
   if (L.unmapped.size && !(await confirmDialog('Zeichen ohne Vektorpfad', `${L.unmapped.size} Zeichen (${[...L.unmapped.keys()].join(' ')}) würden im PDF fehlen. Trotzdem exportieren?`, 'Trotzdem exportieren'))) return;
-  const label = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin dark"></span> PDF wird erzeugt …';
+  const label = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin ' + (btn.classList.contains('btn-primary') ? '' : 'dark') + '"></span> PDF wird erzeugt …';
+  $$('.ex-opt').forEach(b => b.classList.toggle('on', b === btn));
   try {
     const title = (S.draft.title || '').trim() || 'Quillmark-Notiz';
     const pdf = await TW.buildPdf(L, title, await A.exportImages(L));
-    $('#exportChecks').innerHTML = '';
+    $('#exportChecks').innerHTML = ''; $('#exTech').hidden = true;
     openModal('#exportModal');
     await finishExport(pdf, safeName(title) + '.pdf', 'application/pdf', `<b>${esc(safeName(title))}.pdf</b> ist fertig (${(pdf.length / 1024).toFixed(0)} KB). Papier und Vektor-Handschrift sind identisch zur Vorschau aufgeteilt.`);
   } catch (e) { toast('PDF-Export fehlgeschlagen: ' + ((e && e.message) || e), 6000); }
   finally { btn.disabled = false; btn.innerHTML = label; }
 }
-$('#btnExport').addEventListener('click', () => {      // ein Tap: Fenster öffnen und .goodnotes direkt erzeugen (PDF bleibt im Fenster wählbar)
-  openExport();
-  if (S.layout.stats.strokes > 0) exportGoodnotes($('#exGn'));
-});
+$('#btnExport').addEventListener('click', () => openExport());      // erst Format wählen – erzeugt wird nichts ungefragt
 $('#exGn').addEventListener('click', e => exportGoodnotes(e.currentTarget));
 $('#exPdf').addEventListener('click', e => exportPdf(e.currentTarget));
 $('#btnExportGn').addEventListener('click', e => { openExport(); exportGoodnotes(e.currentTarget); });
@@ -899,11 +909,13 @@ async function refreshSettingsModal() {
 $('#btnSettings').addEventListener('click', () => { refreshSettingsModal(); openModal('#settingsModal'); });
 $('#btnHostInfo').addEventListener('click', () => openModal('#hostModal'));
 $('#delDraft').addEventListener('click', async () => {
-  if (!(await confirmDialog('Entwürfe löschen?', 'Die aktuelle Notiz und der Undo-Stand werden unwiderruflich gelöscht.', 'Löschen', true))) return;
+  if (!(await confirmDialog('Alle Notizen löschen?', 'Alle Notizen (auch im Papierkorb), eingefügte Bilder, der Chat und der Undo-Stand werden unwiderruflich gelöscht. Tipp: vorher unter „Meine Notizen“ ein Backup speichern.', 'Alles löschen', true))) return;
   LS.del(K.draft); LS.del(K.undo); S.undo = null;
-  for (const id of Object.keys(S.imgMeta || {})) IDB.del('img:' + id);          // eingefügte Bilder gehören zu den Entwürfen
-  S.imgMeta = {}; LS.del(K.images); LS.del(K.chat);
-  A.setDraft({ title: '', text: '', isSample: false, imports: 0 }); toast('Entwürfe, Bilder und Chat gelöscht.'); refreshSettingsModal();
+  for (const id of Object.keys(S.imgMeta || {})) IDB.del('img:' + id);          // eingefügte Bilder gehören zu den Notizen
+  S.imgMeta = {}; LS.del(K.images);
+  if (window.TWApp.chat) window.TWApp.chat.clear(); else LS.del(K.chat);          // derselbe Löschvorgang wie „Chat leeren“
+  if (A.notes) A.notes.wipe(); else LS.del(K.notes);
+  A.setDraft({ title: '', text: '', isSample: false, imports: 0 }); toast('Notizen, Bilder und Chat gelöscht.'); refreshSettingsModal();
 });
 $('#delOwn').addEventListener('click', async () => {
   if (!(await confirmDialog('Eigene Handschrift zurücksetzen?', 'Alle gezeichneten Zeichen werden gelöscht. Tipp: vorher als JSON sichern.', 'Zurücksetzen', true))) return;
@@ -924,6 +936,8 @@ $('#delAll').addEventListener('click', async () => {
   try { const d = await IDB.open().catch(() => null); if (d) d.close(); await new Promise(r => { const q = indexedDB.deleteDatabase('tintenwerk'); q.onsuccess = q.onerror = q.onblocked = r; }); } catch (e) { /* egal */ }
   location.reload();
 });
+
+A.saveOwn = saveOwn; A.cleanGlyphs = cleanGlyphs; A.refreshPanels = () => { renderTiles(); refreshBlattPanel(); };
 
 /* ---------- Start ---------- */
 function makeTouchIcon() {         // Home-Bildschirm-Symbol zur Laufzeit erzeugen (Einzeldatei, keine Bilddatei nötig)

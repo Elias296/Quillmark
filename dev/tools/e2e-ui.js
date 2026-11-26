@@ -60,7 +60,7 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'OK   ' : 'FAIL ') + m); 
   await pg.fill('#editor', 'Der Graph y=x2 heißt Normalparabel. Es gilt a < b > c und x^3.'); await pg.locator('#editor').blur(); await pg.waitForTimeout(250);
   ok(/y=x² /.test(await pg.inputValue('#editor')) && /x³/.test(await pg.inputValue('#editor')), 'Editor: x2 und x^3 werden zu x² und x³');
   ok(await ev(() => TWApp.S.layout.unmapped.size === 0 && TWApp.S.layout.pages[0].glyphs.some(g => g.ch === '<')), 'Blatt: < und > werden gezeichnet');
-  await pg.fill('#noteTitle', '<b>Titel</b> & <i>x</i>'); await pg.click('#btnExport'); await pg.waitForSelector('#exportResult:not([hidden])', { timeout: 30000 });
+  await pg.fill('#noteTitle', '<b>Titel</b> & <i>x</i>'); await pg.click('#btnExport'); await pg.click('#exGn'); await pg.waitForSelector('#exportResult:not([hidden])', { timeout: 30000 });
   ok(await ev(() => !document.querySelector('#exportSummary b b') && /<b>Titel<\/b>/.test(document.querySelector('#exportSummary').textContent)), 'HTML: spitze Klammern im Titel werden escaped angezeigt');
   await pg.click('#exportModal [data-close]');
 
