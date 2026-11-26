@@ -16,7 +16,7 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'OK   ' : 'FAIL ') + m); 
   await ctx.route('https://cdn.jsdelivr.net/**', r => r.request().url().includes('@huggingface/transformers') ? r.fulfill({ contentType: 'text/javascript', body: FAKE_TF }) : r.abort());
   const pg = await ctx.newPage(); const errs = [];
   pg.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errs.push(m.text()); }); pg.on('pageerror', e => errs.push('PAGEERROR ' + e.message));
-  await pg.goto('http://127.0.0.1:8765/Tintenwerk.html'); await pg.waitForTimeout(500);
+  await pg.goto('http://127.0.0.1:8765/index.html'); await pg.waitForTimeout(500);
   const shot = n => pg.screenshot({ path: path.join(out, n + '.png') });
   const ev = f => pg.evaluate(f);
 

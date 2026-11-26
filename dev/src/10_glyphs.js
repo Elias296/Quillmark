@@ -1,6 +1,6 @@
 'use strict';
 /* ==========================================================================
-   Tintenwerk – Engine (DOM-frei): Vektorschrift, Layout, Goodnotes-/PDF-Export
+   Quillmark – Engine (DOM-frei): Vektorschrift, Layout, Goodnotes-/PDF-Export
    Einheiten der Schriftpfade: Grundlinie y=0, x-Höhe 50, Oberlänge 100, Unterlänge -38
    ========================================================================== */
 const TW = {};

@@ -19,7 +19,7 @@ export async function pipeline(task,model,opts){opts.progress_callback({status:'
     else if(u.includes('@huggingface/transformers'))return route.fulfill({contentType:'text/javascript',body:FAKE_TF});
     if(f&&fs.existsSync(f))return route.fulfill({path:f,contentType:f.endsWith('.js')?'text/javascript':f.endsWith('.wasm')?'application/wasm':'application/octet-stream'});route.abort();});
   const pg=await ctx.newPage();const errs=[];pg.on('console',m=>{if(m.type()==='error')errs.push(m.text())});pg.on('pageerror',e=>errs.push('PAGEERROR '+e.message));
-  await pg.goto('http://127.0.0.1:8765/Tintenwerk.html');await pg.waitForTimeout(400);
+  await pg.goto('http://127.0.0.1:8765/index.html');await pg.waitForTimeout(400);
   console.log('solve buttons disabled before model (now: tap loads):',await pg.evaluate(()=>[...document.querySelectorAll('#btnSolvePages,#btnSolveEditor')].map(b=>b.disabled)),'| name:',await pg.inputValue('#stuName'));
   await pg.click('#aiHelp summary');await pg.selectOption('#aiModel','besser');console.log('load btn:',await pg.textContent('#btnLoadModel'));
   // 1) Laden starten, nach Download-Ende ist die Seite bedienbar und Abbrechen geht

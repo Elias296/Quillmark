@@ -9,7 +9,7 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
   await ctx.route('https://lokilaptop.tail129eea.ts.net/**', r => r.request().method() === 'OPTIONS' ? r.fulfill({ status: 204, headers: CORS })
     : r.fulfill({ status: 200, headers: Object.assign({ 'content-type': 'text/event-stream' }, CORS), body: sse('OK') }));
   const pg = await ctx.newPage(); const errs = []; pg.on('pageerror', e => errs.push(e.message));
-  await pg.goto('http://127.0.0.1:8765/Tintenwerk.html'); await pg.waitForTimeout(400);
+  await pg.goto('http://127.0.0.1:8765/index.html'); await pg.waitForTimeout(400);
   const P = await pg.evaluate(() => ['lokilaptop.tail129eea.ts.net', '192.168.1.20:11434', '10.0.0.5', '172.20.1.1', '100.101.2.3', 'nas.local', 'localhost:11434',
     'openrouter.ai', 'demo.hf.space', '172.40.1.1', '100.10.2.3', '8.8.8.8'].map(h => TWApp.AI.srvPrivate(h)));
   ok(JSON.stringify(P) === JSON.stringify([true, true, true, true, true, true, true, false, false, false, false, false]), 'Erkennung eigener Rechner: ' + JSON.stringify(P));

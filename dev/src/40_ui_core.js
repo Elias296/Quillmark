@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Tintenwerk – Oberfläche: Zustand, Speicher, Vorschau, Import/OCR, Entwurfsschutz
+   Quillmark – Oberfläche: Zustand, Speicher, Vorschau, Import/OCR, Entwurfsschutz
    ========================================================================== */
 (function () {
 'use strict';
@@ -9,10 +9,10 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const K = { draft: 'tintenwerk.entwurf.v1', undo: 'tintenwerk.undo.v1', settings: 'tintenwerk.einstellungen.v1', own: 'tintenwerk.handschrift.v1', ui: 'tintenwerk.ui.v1', server: 'tintenwerk.server.v1' };
 
-const SAMPLE_MARK = 'Dies ist eine Beispielnotiz von Tintenwerk.';
+const SAMPLE_MARK = 'Dies ist eine Beispielnotiz von Quillmark.';
 const SAMPLE = {
-  title: 'Willkommen im Tintenwerk',
-  text: 'Willkommen im Tintenwerk\n\n' + SAMPLE_MARK + ' Sie zeigt, wie dein Text als echte Vektor-Handschrift auf einem Goodnotes-Blatt aussieht.\n\n' +
+  title: 'Willkommen bei Quillmark',
+  text: 'Willkommen bei Quillmark\n\n' + SAMPLE_MARK + ' Sie zeigt, wie dein Text als echte Vektor-Handschrift auf einem Goodnotes-Blatt aussieht.\n\n' +
     '# So funktioniert es\n- Screenshots importieren und Text lokal erkennen lassen\n- Text prüfen, korrigieren und auf Wunsch natürlicher formulieren\n- Schriftstil, Papier und Tinte wählen\n- Als native .goodnotes-Datei oder PDF exportieren\n\n' +
     '## Gut zu wissen\n1. Jede Zeile sitzt exakt auf der Grundlinie.\n2. Die Schrift lässt sich in Goodnotes mit Lasso und Radierer bearbeiten.\n3. Deine Notizen und deine Handschrift bleiben auf deinem iPad.\n\n' +
     'Tippe auf „Neue Notiz“ oder importiere deinen ersten Screenshot.'

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Tintenwerk – Zeichenstudio, Blatt-Einstellungen, lokale KI, Export, Selbsttest
+   Quillmark – Zeichenstudio, Blatt-Einstellungen, lokale KI, Export, Selbsttest
    ========================================================================== */
 (function () {
 'use strict';
@@ -240,8 +240,8 @@ $('#drawCancel').addEventListener('click', async () => {
 /* ---------- JSON-Sicherung ---------- */
 $('#btnOwnExport').addEventListener('click', () => {
   if (!ownCount() && !Object.keys(S.own.glyphs).length) { toast('Es gibt noch keine gezeichneten Zeichen.'); return; }
-  const data = { app: 'Tintenwerk', typ: 'handschrift', v: 1, einheiten: 'Grundlinie y=0, x-Höhe 50, Oberlänge 100; Punkte als [x, y, Ecke]', erstellt: new Date().toISOString(), glyphs: S.own.glyphs };
-  downloadBlob(new Blob([JSON.stringify(data)], { type: 'application/json' }), `Tintenwerk-Handschrift-${new Date().toISOString().slice(0, 10)}.json`);
+  const data = { app: 'Quillmark', typ: 'handschrift', v: 1, einheiten: 'Grundlinie y=0, x-Höhe 50, Oberlänge 100; Punkte als [x, y, Ecke]', erstellt: new Date().toISOString(), glyphs: S.own.glyphs };
+  downloadBlob(new Blob([JSON.stringify(data)], { type: 'application/json' }), `Quillmark-Handschrift-${new Date().toISOString().slice(0, 10)}.json`);
   toast('JSON-Sicherung erstellt.');
 });
 $('#btnOwnImport').addEventListener('click', () => $('#ownFile').click());
@@ -249,7 +249,7 @@ $('#ownFile').addEventListener('change', async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
   try {
     const data = JSON.parse(await f.text());
-    if (!data || data.typ !== 'handschrift' || typeof data.glyphs !== 'object') throw new Error('Keine Tintenwerk-Handschrift-Sicherung.');
+    if (!data || data.typ !== 'handschrift' || typeof data.glyphs !== 'object') throw new Error('Keine Quillmark-Handschrift-Sicherung.');
     const clean = {}; let n = 0;
     for (const [ch, g] of Object.entries(data.glyphs)) {
       if ([...ch].length !== 1 || !g || !Array.isArray(g.s) || !g.s.length || typeof g.w !== 'number') continue;
@@ -805,7 +805,7 @@ async function exportGoodnotes(btn) {
   if (L.unmapped.size && !(await confirmDialog('Zeichen ohne Vektorpfad', `${L.unmapped.size} Zeichen (${[...L.unmapped.keys()].join(' ')}) können nicht gezeichnet werden und würden im Export fehlen. Trotzdem exportieren?`, 'Trotzdem exportieren'))) return;
   const label = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Datei wird erzeugt …';
   try {
-    const title = (S.draft.title || '').trim() || 'Tintenwerk-Notiz';
+    const title = (S.draft.title || '').trim() || 'Quillmark-Notiz';
     const g = await TW.buildGoodnotes(L, title, await thumbnailJpeg());
     const v = await TW.verifyGoodnotes(g.zip, L);
     $('#exportChecks').innerHTML = checksHtml(v.checks);
@@ -822,7 +822,7 @@ async function exportPdf(btn) {
   if (L.unmapped.size && !(await confirmDialog('Zeichen ohne Vektorpfad', `${L.unmapped.size} Zeichen (${[...L.unmapped.keys()].join(' ')}) würden im PDF fehlen. Trotzdem exportieren?`, 'Trotzdem exportieren'))) return;
   const label = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin dark"></span> PDF wird erzeugt …';
   try {
-    const title = (S.draft.title || '').trim() || 'Tintenwerk-Notiz';
+    const title = (S.draft.title || '').trim() || 'Quillmark-Notiz';
     const pdf = await TW.buildPdf(L, title);
     $('#exportChecks').innerHTML = '';
     openModal('#exportModal');
@@ -890,7 +890,7 @@ async function refreshSettingsModal() {
   for (const k of Object.values(K)) { try { const v = localStorage.getItem(k); if (v) bytes += v.length * 2; } catch (e) { /* egal */ } }
   let extra = '';
   try { if (navigator.storage && navigator.storage.estimate) { const e = await navigator.storage.estimate(); if (e.usage) extra = ` · gesamter Website-Speicher inkl. Modell-Cache: ${(e.usage / 1048576).toFixed(1)} MB`; } } catch (e) { /* egal */ }
-  $('#storageInfo').textContent = `Tintenwerk-Daten: ${(bytes / 1024).toFixed(1)} KB · ${ownCount()} eigene Zeichen${extra}`;
+  $('#storageInfo').textContent = `Quillmark-Daten: ${(bytes / 1024).toFixed(1)} KB · ${ownCount()} eigene Zeichen${extra}`;
   const hs = $('#hostState'), https = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
   hs.className = 'badge ' + (https ? 'ok' : 'warn');
   hs.textContent = https ? 'Sichere Adresse (https) – alle Funktionen möglich' : (location.protocol === 'file:' ? 'file:// – WebGPU & Home-Bildschirm eingeschränkt' : 'Unverschlüsselte Adresse – eingeschränkt');

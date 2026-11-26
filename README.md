@@ -1,9 +1,10 @@
-# Tintenwerk
+# Quillmark
 
 Einzeldatei-Web-App für das iPad: Screenshots → lokaler OCR-Text → (optional) lokale KI-Umformulierung →
 echte Vektor-Handschrift auf einem Goodnotes-Blatt → Export als native `.goodnotes`-Datei oder Vektor-PDF.
 
-Die gesamte App steckt in **`Tintenwerk.html`** (`index.html` leitet nur dorthin weiter).
+Die gesamte App steckt in **`index.html`** (früherer Name: Tintenwerk; `Tintenwerk.html` leitet nur noch weiter).
+Adresse: **https://elias296.github.io/Quillmark/**
 
 ## Kurzanleitung für das iPad Air (M2)
 
@@ -12,15 +13,15 @@ Die gesamte App steckt in **`Tintenwerk.html`** (`index.html` leitet nur dorthin
 
 **GitHub Pages**
 1. Repository auf GitHub öffnen → **Settings → Pages**.
-2. *Source*: **Deploy from a branch**, Branch mit `Tintenwerk.html` wählen, Ordner `/ (root)` → **Save**.
-3. Nach ca. einer Minute ist die App unter `https://<benutzername>.github.io/<repository>/Tintenwerk.html` erreichbar.
+2. *Source*: **Deploy from a branch**, Branch mit `index.html` wählen, Ordner `/ (root)` → **Save**.
+3. Nach ca. einer Minute ist die App unter `https://<benutzername>.github.io/<repository>/` erreichbar.
    (Pages benötigt bei kostenlosen Konten ein öffentliches Repository.)
 
-**Alternative Cloudflare Pages:** *Workers & Pages → Create → Pages → Upload assets*, Ordner mit `Tintenwerk.html`
-hochladen → `https://<projekt>.pages.dev/Tintenwerk.html`.
+**Alternative Cloudflare Pages:** *Workers & Pages → Create → Pages → Upload assets*, Ordner mit `index.html`
+hochladen → `https://<projekt>.pages.dev/`.
 
 ### 2. Zum Home-Bildschirm hinzufügen
-Adresse in **Safari** öffnen → Teilen-Symbol → **„Zum Home-Bildschirm“**. Tintenwerk startet danach im Vollbild.
+Adresse in **Safari** öffnen → Teilen-Symbol → **„Zum Home-Bildschirm“**. Quillmark startet danach im Vollbild.
 Entwurf, Einstellungen und eigene Handschrift liegen nur im lokalen Browserspeicher – die Handschrift bitte
 zusätzlich als JSON sichern (Schritt 2 → Sicherung).
 
@@ -79,8 +80,8 @@ das sicherste Ergebnis – so bleiben Akzente, ñ, ß und Umlaute erhalten. Zwei
 Hochzahlen: `x^2`, `x2`, `cm3` werden zu x², x², cm³ (abschaltbar im ⓘ der Karte „Notiztext“).
 
 ## Entwicklung
-- Quellen: `dev/src/` · Bauen: `dev/tools/build.sh` (schreibt `Tintenwerk.html`) · Tests: `node dev/tools/test.js`
+- Quellen: `dev/src/` · Bauen: `dev/tools/build.sh` (schreibt `index.html`) · Tests: `node dev/tools/test.js`
 - Browser-Tests (Playwright, lokaler Server auf Port 8765): `node dev/tools/e2e-ui.js`, `e2e-server.js`, `e2e-server-compat.js`, `e2e-server-private.js`, `e2e-cache.js`, `e2e-solver.js`
 - Texterkennung mit echten Sprachdaten: `TESS_PK=<ordner> node dev/tools/e2e-ocr.js` (benötigte Pakete stehen im Kopf der Datei)
 - `dev/tools/shape.py` vergleicht eine erzeugte `.goodnotes` strukturell mit einer Referenzdatei (`python3 -I dev/tools/shape.py ref.goodnotes out.goodnotes`).
-- Änderungen immer in `dev/src/` machen und neu bauen, nicht in `Tintenwerk.html`.
+- Änderungen immer in `dev/src/` machen und neu bauen, nicht in `index.html`.

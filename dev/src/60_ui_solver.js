@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Tintenwerk – Aufgaben lösen (Hausaufgaben-Helfer): Buchseite → OCR → lokale KI → Lösungsnotiz
+   Quillmark – Aufgaben lösen (Hausaufgaben-Helfer): Buchseite → OCR → lokale KI → Lösungsnotiz
    ========================================================================== */
 (function () {
 'use strict';

@@ -16,7 +16,7 @@ const sse = parts => parts.map(p => `data: ${JSON.stringify({ choices: [{ delta:
     r.fulfill({ status: 200, headers: { 'content-type': 'text/event-stream', 'access-control-allow-origin': '*' }, body: sse(out) });
   });
   const pg = await ctx.newPage(); const errs = []; pg.on('pageerror', e => errs.push(e.message));
-  await pg.goto('http://127.0.0.1:8765/Tintenwerk.html'); await pg.waitForTimeout(500);
+  await pg.goto('http://127.0.0.1:8765/index.html'); await pg.waitForTimeout(500);
   const ev = f => pg.evaluate(f);
 
   ok(await ev(() => document.querySelector('#btnRewrite').disabled), 'Ohne WebGPU und ohne Server: „Text jetzt glätten“ gesperrt');

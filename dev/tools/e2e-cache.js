@@ -15,7 +15,7 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'OK   ' : 'FAIL ') + m); 
   await ctx.route('https://cdn.jsdelivr.net/**', r => r.fulfill({ contentType: 'text/javascript', body: FAKE_TF }));
   await ctx.route('https://huggingface.co/**', r => { hfHits++; r.fulfill({ status: 200, contentType: 'application/octet-stream', headers: { 'access-control-allow-origin': '*' }, body: Buffer.alloc(400000, 7) }); });
   const pg = await ctx.newPage(); const errs = []; pg.on('pageerror', e => errs.push(e.message));
-  const open = async () => { await pg.goto('http://127.0.0.1:8765/Tintenwerk.html'); await pg.waitForTimeout(400); };
+  const open = async () => { await pg.goto('http://127.0.0.1:8765/index.html'); await pg.waitForTimeout(400); };
   const load = async () => { await pg.click('#aiHelp summary'); await pg.click('#btnLoadModel'); await pg.click('#confirmYes'); await pg.waitForFunction(() => TWApp.AI.state === 'ready', null, { timeout: 20000 }); return pg.textContent('#aiLogText'); };
   const KEY = 'https://huggingface.co/onnx-community/Qwen2.5-0.5B-Instruct/resolve/main/onnx/model_q4f16.onnx';
 

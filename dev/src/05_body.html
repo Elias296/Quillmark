@@ -2,7 +2,7 @@
 <div class="bg" aria-hidden="true"></div>
 <div class="app">
 <aside class="rail" aria-label="Navigation">
-  <div class="logo" aria-label="Tintenwerk" role="img">
+  <div class="logo" aria-label="Quillmark" role="img">
     <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><path d="M27 4C16.5 4.6 9.2 10.6 7.6 20.2L6.4 27l2.3-1.5C18.6 23.8 25.7 17.2 27 4Z" fill="#F4F4F5"/><path d="M6.2 28.2 19 12.5" stroke="#0B0C0E" stroke-width="1.7" stroke-linecap="round"/><path d="M11.5 21.5l6-.8M14.8 17.3l4.8-.5" stroke="#0B0C0E" stroke-width="1.3" stroke-linecap="round"/></svg>
   </div>
   <nav id="modeSeg" aria-label="Arbeitsschritte">
@@ -221,7 +221,7 @@
 <div class="pop" id="pop" hidden role="dialog"></div>
 <template id="info-text"><h4>Formatierung</h4><ul><li><code># Titel</code>, <code>## Abschnitt</code> – Überschriften</li><li><code>- Punkt</code> oder <code>1. Punkt</code> – Listen</li><li>Leerzeile – neuer Absatz</li><li><code>**fett**</code> – kräftiger Strich</li><li><code>a | b | c</code> – Tabellenzeile</li><li><code>x^2</code> oder <code>x2</code> wird zu x²</li></ul><label class="switch"><input type="checkbox" data-opt="autoSup"><span>Hochzahlen automatisch setzen</span></label><p>Der Text wird automatisch lokal gespeichert.</p></template>
 <template id="info-ocr"><h4>Texterkennung</h4><p>Läuft vollständig im Browser mit Tesseract.js. Die Sprachen wählst du im Zuschnitt-Fenster (z. B. ES für Spanisch) – nur dann werden Akzente wie á, ñ zuverlässig erkannt. Jede Sprache lädt beim ersten Mal einige MB Sprachdaten. Es wird nur der zugeschnittene Ausschnitt verarbeitet.</p><p>Formeln und komplexe Tabellen werden nur als einfacher Text erkannt – bitte prüfen.</p></template>
-<template id="info-ki"><h4>Tizian – lokale KI</h4><p id="gpuDetail"></p><ul><li>Läuft über WebGPU auf dem Gerät, Texte verlassen das iPad nicht – außer du schaltest „Text auf Server verarbeiten“ ein.</li><li>Das Modell wird erst nach deinem Tipp geladen (kein automatischer Download).</li><li>Ein Fakten-Wächter vergleicht Zahlen, Namen und Fachbegriffe mit dem Original.</li><li>Der Entwurf ändert sich erst mit „Tizians Fassung übernehmen“.</li></ul><p>Tintenwerk verspricht keine Umgehung von KI-Detektoren – es geht um bessere, eigene Notizen. Editor, Handschrift und Export funktionieren auch ohne KI.</p></template>
+<template id="info-ki"><h4>Tizian – lokale KI</h4><p id="gpuDetail"></p><ul><li>Läuft über WebGPU auf dem Gerät, Texte verlassen das iPad nicht – außer du schaltest „Text auf Server verarbeiten“ ein.</li><li>Das Modell wird erst nach deinem Tipp geladen (kein automatischer Download).</li><li>Ein Fakten-Wächter vergleicht Zahlen, Namen und Fachbegriffe mit dem Original.</li><li>Der Entwurf ändert sich erst mit „Tizians Fassung übernehmen“.</li></ul><p>Quillmark verspricht keine Umgehung von KI-Detektoren – es geht um bessere, eigene Notizen. Editor, Handschrift und Export funktionieren auch ohne KI.</p></template>
 <template id="info-server"><h4>Tizian auf einem anderen Rechner</h4><p>Die App spricht jede <b>OpenAI-kompatible</b> Chat-Schnittstelle an (<code>/v1/chat/completions</code>).</p><p><b>Empfohlen – eigener Laptop (kostenlos, privat):</b></p><ol><li>Auf dem Laptop <b>Ollama</b> mit einem Modell, Freigabe <code>OLLAMA_ORIGINS=https://elias296.github.io</code>.</li><li><b>Tailscale</b> auf Laptop und iPad mit demselben Konto, auf dem Laptop <code>tailscale serve --bg 11434</code>.</li><li>Hier die Adresse <code>https://…ts.net</code> und den Modellnamen aus <code>ollama list</code> eintragen, Schlüssel leer lassen.</li></ol><p>Die Texte bleiben dabei in deinem privaten Tailscale-Netz. Der Laptop muss laufen und darf nicht schlafen.</p><p><b>Alternative – OpenRouter:</b> Adresse <code>https://openrouter.ai/api/v1</code>, ein Modell mit <code>:free</code> und dein API-Schlüssel. Kostenlos mit Tageslimit; die Texte gehen an fremde Anbieter, die sie speichern dürfen.</p><p>Handschrift, Texterkennung und Export bleiben immer auf dem iPad.</p></template>
 <template id="info-solve"><h4>Aufgaben lösen</h4><p>Buchseite fotografieren oder Screenshot senden → Zuschnitt → Texterkennung → Tizian löst jede Aufgabe. Reine Rechenzeilen wie <code>345 + 678 =</code> rechnet ein exakter Rechner.</p><p><b>Grenzen:</b> nur Text, kein Bildverständnis (Zeichnungen, Diagramme, Formeln). Kleine lokale Modelle machen Fehler, besonders in Mathe. Bitte Lösungen prüfen.</p></template>
 <template id="info-style"><h4>Schriftstile</h4><p>Alle Stile bestehen aus echten Vektor-Stiftpfaden. In Goodnotes lässt sich die Schrift mit Lasso und Radierer bearbeiten.</p><p>Bei „Meine eigene Handschrift“ werden fehlende Zeichen durch die Standardschrift ergänzt.</p></template>
@@ -364,7 +364,7 @@
     <div class="modal-head"><h2>Datenschutz &amp; Speicher</h2><button class="btn" data-close>Schließen</button></div>
     <div class="modal-body">
       <h4>Alles bleibt auf deinem Gerät</h4>
-      <p>Entwurf, Undo-Stand und Einstellungen liegen im lokalen Browserspeicher (<code>localStorage</code>), deine eigene Handschrift zusätzlich in <code>IndexedDB</code> dieses Geräts. Es gibt kein Konto, kein Tracking, keine Analyse-Skripte und keinen Server von Tintenwerk. Screenshots, OCR-Text und KI-Verarbeitung verlassen das iPad nicht – Ausnahme: der Server-Modus von Tizian, wenn du ihn einschaltest.</p>
+      <p>Entwurf, Undo-Stand und Einstellungen liegen im lokalen Browserspeicher (<code>localStorage</code>), deine eigene Handschrift zusätzlich in <code>IndexedDB</code> dieses Geräts. Es gibt kein Konto, kein Tracking, keine Analyse-Skripte und keinen Server von Quillmark. Screenshots, OCR-Text und KI-Verarbeitung verlassen das iPad nicht – Ausnahme: der Server-Modus von Tizian, wenn du ihn einschaltest.</p>
       <div class="warnbox" id="privServer" hidden style="margin-top:8px"></div>
       <p id="storageInfo" class="hint" style="margin-top:6px"></p>
       <div class="warnbox" style="margin-top:10px"><b>Wichtig für iPadOS:</b> Safari kann lokale Browserdaten bereinigen, wenn eine Website längere Zeit (ca. 7 Tage) nicht genutzt wird. Sichere deine eigene Handschrift deshalb als JSON-Datei (Schritt 2 → Sicherung). Zum Home-Bildschirm hinzugefügte Web-Apps sind davon in der Regel ausgenommen.</div>
@@ -383,14 +383,14 @@
         <li><b>Transformers.js 4.3.2</b> (<code>@huggingface/transformers</code>) – lokale KI über WebGPU. Quelle: <code>cdn.jsdelivr.net</code> (inkl. ONNX-Runtime-WASM). Wird erst nach Tipp auf „Lokales KI-Modell laden“ geladen.</li>
         <li><b>Optionaler Server</b> – nur wenn du „Text auf Server verarbeiten“ einschaltest: die von dir eingetragene Adresse (z. B. dein Hugging-Face-Space). Dorthin gehen ausschließlich die Texte, die Tizian bearbeiten soll.</li>
         <li><b>KI-Modell</b> <code>onnx-community/Qwen2.5-0.5B-Instruct</code> (quantisiertes ONNX). Optional <code>onnx-community/Qwen2.5-1.5B-Instruct</code> für bessere Lösungen. Quelle: <code>huggingface.co</code>. Nur nach deinem ausdrücklichen Klick; danach im Browser-Cache.</li>
-        <li><b>Keine weitere Bibliothek</b>: ZIP, Apple-LZ4, TPL, Protobuf und PDF erzeugt Tintenwerk mit eigenem Code in dieser Datei (kein JSZip nötig) – der Export funktioniert auch offline.</li>
+        <li><b>Keine weitere Bibliothek</b>: ZIP, Apple-LZ4, TPL, Protobuf und PDF erzeugt Quillmark mit eigenem Code in dieser Datei (kein JSZip nötig) – der Export funktioniert auch offline.</li>
       </ul>
       <p class="hint">Beim Nachladen sehen die genannten CDNs technisch bedingt deine IP-Adresse; Inhalte deiner Notizen werden dabei nicht übertragen.</p>
 
       <h4>Bereitstellung</h4>
       <p>Status: <span id="hostState" class="badge off"></span></p>
       <button class="btn btn-block" id="btnHostInfo" style="margin-top:8px">Info: HTTPS-Hosting &amp; Home-Bildschirm</button>
-      <p class="hint" style="margin-top:14px">Tintenwerk · Einzeldatei-Web-App · Version 1.0</p>
+      <p class="hint" style="margin-top:14px">Quillmark · Einzeldatei-Web-App · Version 1.0</p>
     </div>
   </div>
 </div>
@@ -400,16 +400,16 @@
   <div class="modal-card mid">
     <div class="modal-head"><h2>HTTPS-Hosting &amp; Home-Bildschirm</h2><button class="btn" data-close>Schließen</button></div>
     <div class="modal-body">
-      <p>Tintenwerk ist eine einzige Datei: <code>Tintenwerk.html</code>. Öffnest du sie direkt aus der Dateien-App (<code>file://</code>), schränkt Safari Sicherheitsfunktionen ein: <b>WebGPU</b> (lokale KI), Web-Worker für die OCR, der Browser-Cache für Modelle und „Zum Home-Bildschirm“ funktionieren dann nicht oder nur teilweise.</p>
+      <p>Quillmark ist eine einzige Datei: <code>index.html</code>. Öffnest du sie direkt aus der Dateien-App (<code>file://</code>), schränkt Safari Sicherheitsfunktionen ein: <b>WebGPU</b> (lokale KI), Web-Worker für die OCR, der Browser-Cache für Modelle und „Zum Home-Bildschirm“ funktionieren dann nicht oder nur teilweise.</p>
       <h4>Deshalb: einmal kostenlos unter einer festen https://-Adresse ablegen</h4>
       <ol>
-        <li><b>GitHub Pages:</b> Repository anlegen → <code>Tintenwerk.html</code> hochladen → <i>Settings → Pages → Deploy from a branch</i> → Adresse <code>https://DEINNAME.github.io/REPO/Tintenwerk.html</code>.</li>
-        <li><b>Cloudflare Pages:</b> <i>Workers &amp; Pages → Create → Pages → Upload assets</i> → Ordner mit der Datei hochladen → Adresse <code>https://PROJEKT.pages.dev/Tintenwerk.html</code>.</li>
+        <li><b>GitHub Pages:</b> Repository anlegen → <code>index.html</code> hochladen → <i>Settings → Pages → Deploy from a branch</i> → Adresse <code>https://DEINNAME.github.io/REPO/</code>.</li>
+        <li><b>Cloudflare Pages:</b> <i>Workers &amp; Pages → Create → Pages → Upload assets</i> → Ordner mit der Datei hochladen → Adresse <code>https://PROJEKT.pages.dev/</code>.</li>
       </ol>
       <h4>Auf dem iPad</h4>
       <ol>
         <li>Adresse in <b>Safari</b> öffnen → Teilen-Symbol → <b>„Zum Home-Bildschirm“</b>.</li>
-        <li>Tintenwerk startet danach im Vollbild wie eine App; die Daten bleiben lokal.</li>
+        <li>Quillmark startet danach im Vollbild wie eine App; die Daten bleiben lokal.</li>
         <li>Export: „Teilen / in Goodnotes öffnen“ wählen oder die Datei in „Dateien“ sichern und dort antippen → <b>In Goodnotes öffnen</b> → „Als neues Dokument importieren“.</li>
       </ol>
       <p class="hint">WebGPU ist in Safari ab iPadOS 26 standardmäßig aktiv. Unter iPadOS 18 lässt es sich unter Einstellungen → Apps → Safari → Erweitert → Feature Flags einschalten. Ohne WebGPU bleibt nur die KI-Umformulierung deaktiviert.</p>
