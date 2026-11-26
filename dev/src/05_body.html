@@ -214,7 +214,7 @@
 <!-- ============ Info-Popover (Progressive Disclosure) ============ -->
 <div class="pop" id="pop" hidden role="dialog"></div>
 <template id="info-text"><h4>Formatierung</h4><ul><li><code># Titel</code>, <code>## Abschnitt</code> – Überschriften</li><li><code>- Punkt</code> oder <code>1. Punkt</code> – Listen</li><li>Leerzeile – neuer Absatz</li><li><code>**fett**</code> – kräftiger Strich</li><li><code>a | b | c</code> – Tabellenzeile</li><li><code>x^2</code> oder <code>x2</code> wird zu x²</li></ul><label class="switch"><input type="checkbox" data-opt="autoSup"><span>Hochzahlen automatisch setzen</span></label><p>Der Text wird automatisch lokal gespeichert.</p></template>
-<template id="info-ocr"><h4>Texterkennung</h4><p>Läuft vollständig im Browser mit Tesseract.js (Deutsch + Englisch). Es wird nur der zugeschnittene Ausschnitt verarbeitet.</p><p>Formeln und komplexe Tabellen werden nur als einfacher Text erkannt – bitte prüfen.</p></template>
+<template id="info-ocr"><h4>Texterkennung</h4><p>Läuft vollständig im Browser mit Tesseract.js. Die Sprachen wählst du im Zuschnitt-Fenster (z. B. ES für Spanisch) – nur dann werden Akzente wie á, ñ zuverlässig erkannt. Jede Sprache lädt beim ersten Mal einige MB Sprachdaten. Es wird nur der zugeschnittene Ausschnitt verarbeitet.</p><p>Formeln und komplexe Tabellen werden nur als einfacher Text erkannt – bitte prüfen.</p></template>
 <template id="info-ki"><h4>Tizian – lokale KI</h4><p id="gpuDetail"></p><ul><li>Läuft über WebGPU auf dem Gerät, Texte verlassen das iPad nicht – außer du schaltest „Text auf Server verarbeiten“ ein.</li><li>Das Modell wird erst nach deinem Tipp geladen (kein automatischer Download).</li><li>Ein Fakten-Wächter vergleicht Zahlen, Namen und Fachbegriffe mit dem Original.</li><li>Der Entwurf ändert sich erst mit „Tizians Fassung übernehmen“.</li></ul><p>Tintenwerk verspricht keine Umgehung von KI-Detektoren – es geht um bessere, eigene Notizen. Editor, Handschrift und Export funktionieren auch ohne KI.</p></template>
 <template id="info-server"><h4>Tizian auf einem Server</h4><p>Die App spricht jede <b>OpenAI-kompatible</b> Chat-Schnittstelle an (<code>/v1/chat/completions</code>).</p><p><b>Kostenlos:</b> einen eigenen Hugging-Face-Space mit der Vorlage aus dem Tintenwerk-Repository (<code>server/huggingface-space</code>) anlegen. Läuft auf der Gratis-CPU, antwortet langsamer als lokal und schläft nach längerer Pause ein – der erste Aufruf danach dauert 1–2 Minuten.</p><p>Im Server-Modus verlassen die Texte für Tizian das iPad. Alles andere (Handschrift, Export, Texterkennung) bleibt lokal.</p></template>
 <template id="info-solve"><h4>Aufgaben lösen</h4><p>Buchseite fotografieren oder Screenshot senden → Zuschnitt → Texterkennung → Tizian löst jede Aufgabe. Reine Rechenzeilen wie <code>345 + 678 =</code> rechnet ein exakter Rechner.</p><p><b>Grenzen:</b> nur Text, kein Bildverständnis (Zeichnungen, Diagramme, Formeln). Kleine lokale Modelle machen Fehler, besonders in Mathe. Bitte Lösungen prüfen.</p></template>
@@ -240,6 +240,7 @@
         </div>
       </div>
     </div>
+    <div class="lang-bar"><span class="hint">Sprachen im Bild:</span><div id="ocrLangs" class="langs" role="group" aria-label="Sprachen der Texterkennung"></div></div>
     <div class="modal-foot">
       <button class="btn" id="cropPreset">ChatGPT auf iPad</button>
       <button class="btn btn-ghost" id="cropFull">Ganzes Bild</button>
@@ -372,7 +373,7 @@
 
       <h4>Nachgeladene externe Quellen (nur bei Bedarf)</h4>
       <ul>
-        <li><b>Tesseract.js 7.0.0</b> – Texterkennung (OCR). Quelle: <code>cdn.jsdelivr.net/npm/tesseract.js</code>, dazu WASM-Kern <code>tesseract.js-core</code> und Sprachdaten <code>@tesseract.js-data/deu</code> und <code>/eng</code> (ebenfalls jsDelivr). Wird erst beim ersten Screenshot-Import geladen.</li>
+        <li><b>Tesseract.js 7.0.0</b> – Texterkennung (OCR). Quelle: <code>cdn.jsdelivr.net/npm/tesseract.js</code>, dazu WASM-Kern <code>tesseract.js-core</code> und Sprachdaten <code>@tesseract.js-data/…</code> für die im Zuschnitt-Fenster gewählten Sprachen (Standard: <code>deu</code>, <code>eng</code>; ebenfalls jsDelivr). Wird erst beim ersten Screenshot-Import geladen.</li>
         <li><b>Transformers.js 4.3.2</b> (<code>@huggingface/transformers</code>) – lokale KI über WebGPU. Quelle: <code>cdn.jsdelivr.net</code> (inkl. ONNX-Runtime-WASM). Wird erst nach Tipp auf „Lokales KI-Modell laden“ geladen.</li>
         <li><b>Optionaler Server</b> – nur wenn du „Text auf Server verarbeiten“ einschaltest: die von dir eingetragene Adresse (z. B. dein Hugging-Face-Space). Dorthin gehen ausschließlich die Texte, die Tizian bearbeiten soll.</li>
         <li><b>KI-Modell</b> <code>onnx-community/Qwen2.5-0.5B-Instruct</code> (quantisiertes ONNX). Optional <code>onnx-community/Qwen2.5-1.5B-Instruct</code> für bessere Lösungen. Quelle: <code>huggingface.co</code>. Nur nach deinem ausdrücklichen Klick; danach im Browser-Cache.</li>
