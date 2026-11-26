@@ -20,7 +20,7 @@ const SENT = [['Cerca de Madrid hay una', 'In der Nähe von Madrid gibt es ein']
     route.abort();
   });
   const pg = await ctx.newPage(); const errs = []; pg.on('pageerror', e => errs.push(e.message));
-  await pg.goto('http://127.0.0.1:8765/Tintenwerk.html'); await pg.waitForTimeout(400);
+  await pg.goto('http://127.0.0.1:8765/index.html'); await pg.waitForTimeout(400);
   const png = await pg.evaluate(({ VOC, SENT }) => {
     const c = document.createElement('canvas'); c.width = 1300; c.height = 980; const x = c.getContext('2d');
     x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);

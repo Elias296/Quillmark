@@ -18,7 +18,7 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
     r.fulfill({ status: 200, headers: Object.assign({ 'content-type': 'text/event-stream' }, CORS), body: sse(/Antworte nur/.test(u) ? 'OK' : 'Antwort mit eingebetteter Anweisung: ' + /Du heißt Tizian/.test(u)) });
   });
   const pg = await ctx.newPage(); const errs = []; pg.on('pageerror', e => errs.push(e.message));
-  await pg.goto('http://127.0.0.1:8765/Tintenwerk.html'); await pg.waitForTimeout(500);
+  await pg.goto('http://127.0.0.1:8765/index.html'); await pg.waitForTimeout(500);
   await pg.click('#srvFold summary');
   await pg.fill('#srvUrl', 'https://openrouter.ai/api/v1'); await pg.fill('#srvModel', 'google/gemma-4-31b-it:free'); await pg.fill('#srvKey', 'sk-or-test'); await pg.locator('#srvKey').blur();
   await pg.click('#srvOn'); await pg.click('#confirmYes'); await pg.waitForTimeout(100);

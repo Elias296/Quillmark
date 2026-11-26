@@ -16,7 +16,7 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'OK   ' : 'FAIL ') + m); 
   await ctx.route('https://cdn.jsdelivr.net/**', r => r.request().url().includes('@huggingface/transformers') ? r.fulfill({ contentType: 'text/javascript', body: FAKE_TF }) : r.abort());
   const pg = await ctx.newPage(); const errs = [];
   pg.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errs.push(m.text()); }); pg.on('pageerror', e => errs.push('PAGEERROR ' + e.message));
-  await pg.goto('http://127.0.0.1:8765/Tintenwerk.html'); await pg.waitForTimeout(500);
+  await pg.goto('http://127.0.0.1:8765/index.html'); await pg.waitForTimeout(500);
   const shot = n => pg.screenshot({ path: path.join(out, n + '.png') });
   const ev = f => pg.evaluate(f);
 
@@ -25,7 +25,8 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'OK   ' : 'FAIL ') + m); 
   ok(pw >= 420 && pw / 1180 >= 0.38 && pw / 1180 <= 0.42, `Sidebar ${Math.round(pw)} px = ${(pw / 11.8).toFixed(1)} % der Breite`);
   ok(await ev(() => !document.querySelector('#zoomSeg') && !!document.querySelector('.pill #zoomLabel') && !!document.querySelector('.pill #pgLabel')), 'Zoom und Seiten in der Bottom-Pill, keine Leiste über dem Blatt');
   ok(await ev(() => [...document.querySelectorAll('#modeSeg .t-long')].map(e => e.textContent).join('|')) === 'Text & KI|Handschrift|Papier & Export', 'Tab-Namen');
-  ok(await ev(() => [...document.querySelectorAll('.topbar .actions > *')].map(e => e.id).join(',')) === 'btnUndo,btnSettings,btnExport', 'Topbar rechts: Undo, Einstellungen, Exportieren');
+  ok(await ev(() => [...document.querySelectorAll('.topbar .actions > *')].map(e => e.id).join(',')) === 'btnUndo,btnExport', 'Kopfzeile rechts: Rückgängig, Exportieren');
+  ok(await ev(() => !!document.querySelector('.rail #modeSeg') && !!document.querySelector('.rail #btnSettings') && !document.querySelector('#modeSeg #btnSettings')), 'Seitenleiste: Schritte und Einstellungen');
   await shot('ui_1_text');
   const small = async () => ev(() => [...document.querySelectorAll('button,a.btn,.radio,.switch,summary,select,.field')].filter(e => e.offsetParent).map(e => { const r = e.getBoundingClientRect(); return [e.id || e.textContent.trim().slice(0, 16), Math.round(r.width), Math.round(r.height)]; }).filter(x => x[1] < 44 || x[2] < 44));
   for (const m of ['import', 'schrift', 'blatt']) { await pg.click(`#modeSeg [data-mode=${m}]`); await pg.waitForTimeout(80); const s = await small(); ok(!s.length, `Touch-Targets >= 44 px in „${m}“ ${s.length ? JSON.stringify(s) : ''}`); }

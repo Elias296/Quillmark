@@ -313,7 +313,7 @@ TW.backgroundPdf = function (settings) {
     '<< /Type /Pages /Count 1 /Kids [3 0 R] >>',
     `<< /Type /Page /Parent 2 0 R /MediaBox ${MEDIABOX()} /Contents 4 0 R /Resources << /ProcSet [/PDF] >> >>`,
     streamObj('', content),
-    '<< /Producer (Tintenwerk) >>'
+    '<< /Producer (Quillmark) >>'
   ], 1, 5);
 };
 function pdfTextString(s) {
@@ -335,7 +335,7 @@ TW.buildPdf = async function (layout, title) {
     objs.push(z ? streamObj('/Filter /FlateDecode', z) : streamObj('', raw));
   }
   objs[1] = `<< /Type /Pages /Count ${n} /Kids [${kids.join(' ')}] >>`;
-  objs.push(`<< /Title ${pdfTextString(title || 'Notiz')} /Producer (Tintenwerk) /Creator (Tintenwerk) >>`);
+  objs.push(`<< /Title ${pdfTextString(title || 'Notiz')} /Producer (Quillmark) /Creator (Quillmark) >>`);
   return pdfAssemble(objs, 1, objs.length);
 };
 

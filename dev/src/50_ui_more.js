@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Tintenwerk – Zeichenstudio, Blatt-Einstellungen, lokale KI, Export, Selbsttest
+   Quillmark – Zeichenstudio, Blatt-Einstellungen, lokale KI, Export, Selbsttest
    ========================================================================== */
 (function () {
 'use strict';
@@ -23,7 +23,7 @@ function glyphSvg(found, cls) {
     for (let i = 0; i < q.q.length; i += 4) d += `Q${q.q[i].toFixed(1)} ${(100 - q.q[i + 1]).toFixed(1)} ${q.q[i + 2].toFixed(1)} ${(100 - q.q[i + 3]).toFixed(1)}`;
   }
   const pad = Math.max(8, (150 - w) / 2);
-  return `<svg class="${cls}" viewBox="${-pad} -12 ${w + 2 * pad} 156" fill="none" stroke="#1E3A8A" stroke-width="5.500" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+  return `<svg class="${cls}" viewBox="${-pad} -12 ${w + 2 * pad} 156" fill="none" stroke="currentColor" stroke-width="5.500" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 }
 function renderTiles() {
   const host = $('#tileGroups'); let html = '';
@@ -240,8 +240,8 @@ $('#drawCancel').addEventListener('click', async () => {
 /* ---------- JSON-Sicherung ---------- */
 $('#btnOwnExport').addEventListener('click', () => {
   if (!ownCount() && !Object.keys(S.own.glyphs).length) { toast('Es gibt noch keine gezeichneten Zeichen.'); return; }
-  const data = { app: 'Tintenwerk', typ: 'handschrift', v: 1, einheiten: 'Grundlinie y=0, x-Höhe 50, Oberlänge 100; Punkte als [x, y, Ecke]', erstellt: new Date().toISOString(), glyphs: S.own.glyphs };
-  downloadBlob(new Blob([JSON.stringify(data)], { type: 'application/json' }), `Tintenwerk-Handschrift-${new Date().toISOString().slice(0, 10)}.json`);
+  const data = { app: 'Quillmark', typ: 'handschrift', v: 1, einheiten: 'Grundlinie y=0, x-Höhe 50, Oberlänge 100; Punkte als [x, y, Ecke]', erstellt: new Date().toISOString(), glyphs: S.own.glyphs };
+  downloadBlob(new Blob([JSON.stringify(data)], { type: 'application/json' }), `Quillmark-Handschrift-${new Date().toISOString().slice(0, 10)}.json`);
   toast('JSON-Sicherung erstellt.');
 });
 $('#btnOwnImport').addEventListener('click', () => $('#ownFile').click());
@@ -249,7 +249,7 @@ $('#ownFile').addEventListener('change', async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
   try {
     const data = JSON.parse(await f.text());
-    if (!data || data.typ !== 'handschrift' || typeof data.glyphs !== 'object') throw new Error('Keine Tintenwerk-Handschrift-Sicherung.');
+    if (!data || data.typ !== 'handschrift' || typeof data.glyphs !== 'object') throw new Error('Keine Quillmark-Handschrift-Sicherung.');
     const clean = {}; let n = 0;
     for (const [ch, g] of Object.entries(data.glyphs)) {
       if ([...ch].length !== 1 || !g || !Array.isArray(g.s) || !g.s.length || typeof g.w !== 'number') continue;
@@ -455,6 +455,15 @@ function srvEndpoint(u) {
   return u + '/v1/chat/completions';
 }
 const srvHost = () => { try { return new URL(srvEndpoint(SRV.url)).host; } catch (e) { return SRV.url || 'Server'; } };
+/* Eigener Rechner: Tailscale-Netz (*.ts.net, 100.64.0.0/10), Heimnetz (10.x, 192.168.x, 172.16–31.x, *.local) oder dieses Gerät */
+function srvPrivate(host) {
+  const h = String(host || srvHost()).replace(/:\d+$/, '').toLowerCase();
+  if (/\.ts\.net$|\.local$|^localhost$|^127\./.test(h)) return true;
+  const m = /^(\d+)\.(\d+)\.\d+\.\d+$/.exec(h); if (!m) return false;
+  const a = +m[1], b = +m[2];
+  return a === 10 || (a === 192 && b === 168) || (a === 172 && b >= 16 && b <= 31) || (a === 100 && b >= 64 && b <= 127);
+}
+AI.srvPrivate = srvPrivate;
 AI.srvHost = srvHost;
 /* Manche Modelle (z. B. Gemma bei einigen Anbietern) lehnen System-Anweisungen ab: dann in die erste Nutzer-Nachricht einbetten */
 function mergeSystem(messages) {
@@ -545,12 +554,14 @@ document.addEventListener('tw-ai-state', () => {
   const b = $('#gpuBadge'), on = SRV.on && AI.loaded === 'server';
   if (on) {
     if (!AI.gpuBadge) AI.gpuBadge = [b.className, b.innerHTML, b.title];
-    b.className = 'badge'; b.innerHTML = '<i></i>Server'; b.title = 'Tizian läuft auf ' + srvHost();
+    const own = srvPrivate();
+    b.className = own ? 'badge ok' : 'badge'; b.innerHTML = own ? '<i></i>Eigener Rechner' : '<i></i>Server'; b.title = 'Tizian läuft auf ' + srvHost();
   } else if (AI.gpuBadge) { [b.className, b.innerHTML, b.title] = AI.gpuBadge; AI.gpuBadge = null; }
   $('#localOpts').hidden = on;
-  $('#aiOne').textContent = on ? `Läuft auf deinem Server (${srvHost()}) – Texte werden dorthin gesendet.` : 'Lokale KI: macht deinen Text flüssiger, direkt auf dem iPad.';
+  $('#aiOne').textContent = !on ? 'Lokale KI: macht deinen Text flüssiger, direkt auf dem iPad.'
+    : srvPrivate() ? `Läuft auf deinem Rechner (${srvHost()}) im privaten Netz.` : `Läuft auf einem Server (${srvHost()}) – Texte werden dorthin gesendet.`;
   const err = $('#aiError'); if (on) err.hidden = true; else if (!AI.gpu && err.textContent) err.hidden = false;
-  $('#srvBadge').hidden = !on;
+  $('#srvBadge').hidden = !on || srvPrivate();
 });
 $('#srvUrl').value = SRV.url; $('#srvModel').value = SRV.model; $('#srvKey').value = SRV.key;
 ['srvUrl', 'srvModel', 'srvKey'].forEach(id => $('#' + id).addEventListener('change', e => {
@@ -562,8 +573,11 @@ $('#srvOn').addEventListener('change', async e => {
   if (!e.target.checked) { SRV.on = false; saveSrv(); applyServer(); toast('Server-Modus aus. Tizian arbeitet wieder lokal.'); return; }
   SRV.url = $('#srvUrl').value.trim(); SRV.model = $('#srvModel').value.trim(); SRV.key = $('#srvKey').value.trim();
   if (!srvEndpoint(SRV.url)) { e.target.checked = false; toast('Bitte zuerst die Server-Adresse eintragen.'); $('#srvUrl').focus(); return; }
-  const ok = await confirmDialog('Texte an einen Server senden?',
-    `Solange der Server-Modus an ist, gehen die Texte, die Tizian glätten oder lösen soll, an:\n${srvHost()}\n\nDort werden sie verarbeitet – sie verlassen also dein iPad. Nutze nur einen Server, dem du vertraust, am besten deinen eigenen. Ein API-Schlüssel wird nur auf diesem Gerät gespeichert.`, 'Server nutzen');
+  const ok = srvPrivate()
+    ? await confirmDialog('Tizian auf deinem Rechner nutzen?',
+      `Solange der Server-Modus an ist, gehen die Texte, die Tizian glätten oder lösen soll, an:\n${srvHost()}\n\nDas ist eine Adresse in deinem privaten Netz (z. B. dein Laptop über Tailscale). Die Texte verlassen also das iPad, bleiben aber bei deinen eigenen Geräten.`, 'Rechner nutzen')
+    : await confirmDialog('Texte an einen Server senden?',
+      `Solange der Server-Modus an ist, gehen die Texte, die Tizian glätten oder lösen soll, an:\n${srvHost()}\n\nDort werden sie verarbeitet – sie verlassen also dein iPad. Nutze nur einen Server, dem du vertraust, am besten deinen eigenen. Ein API-Schlüssel wird nur auf diesem Gerät gespeichert.`, 'Server nutzen');
   if (!ok) { e.target.checked = false; return; }
   SRV.on = true; saveSrv(); applyServer(); toast(`Tizian läuft jetzt auf ${srvHost()}.`);
 });
@@ -791,7 +805,7 @@ async function exportGoodnotes(btn) {
   if (L.unmapped.size && !(await confirmDialog('Zeichen ohne Vektorpfad', `${L.unmapped.size} Zeichen (${[...L.unmapped.keys()].join(' ')}) können nicht gezeichnet werden und würden im Export fehlen. Trotzdem exportieren?`, 'Trotzdem exportieren'))) return;
   const label = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Datei wird erzeugt …';
   try {
-    const title = (S.draft.title || '').trim() || 'Tintenwerk-Notiz';
+    const title = (S.draft.title || '').trim() || 'Quillmark-Notiz';
     const g = await TW.buildGoodnotes(L, title, await thumbnailJpeg());
     const v = await TW.verifyGoodnotes(g.zip, L);
     $('#exportChecks').innerHTML = checksHtml(v.checks);
@@ -808,7 +822,7 @@ async function exportPdf(btn) {
   if (L.unmapped.size && !(await confirmDialog('Zeichen ohne Vektorpfad', `${L.unmapped.size} Zeichen (${[...L.unmapped.keys()].join(' ')}) würden im PDF fehlen. Trotzdem exportieren?`, 'Trotzdem exportieren'))) return;
   const label = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin dark"></span> PDF wird erzeugt …';
   try {
-    const title = (S.draft.title || '').trim() || 'Tintenwerk-Notiz';
+    const title = (S.draft.title || '').trim() || 'Quillmark-Notiz';
     const pdf = await TW.buildPdf(L, title);
     $('#exportChecks').innerHTML = '';
     openModal('#exportModal');
@@ -871,12 +885,12 @@ window.TWApp.termCheck = termCheck;
 
 /* ---------- Datenschutz & Speicher ---------- */
 async function refreshSettingsModal() {
-  const ps = $('#privServer'); ps.hidden = !(SRV.on && AI.loaded === 'server'); ps.innerHTML = `<b>Server-Modus ist an:</b> Texte, die Tizian bearbeiten soll, gehen an <code>${esc(srvHost())}</code>. Ausschalten unter Text &amp; KI → Tizian → „Server statt lokal“.`;
+  const ps = $('#privServer'); ps.hidden = !(SRV.on && AI.loaded === 'server'); ps.innerHTML = `<b>Server-Modus ist an:</b> Texte, die Tizian bearbeiten soll, gehen an <code>${esc(srvHost())}</code>${srvPrivate() ? ' (dein eigener Rechner im privaten Netz)' : ''}. Ausschalten unter Text &amp; KI → Tizian → „Server statt lokal“.`;
   let bytes = 0;
   for (const k of Object.values(K)) { try { const v = localStorage.getItem(k); if (v) bytes += v.length * 2; } catch (e) { /* egal */ } }
   let extra = '';
   try { if (navigator.storage && navigator.storage.estimate) { const e = await navigator.storage.estimate(); if (e.usage) extra = ` · gesamter Website-Speicher inkl. Modell-Cache: ${(e.usage / 1048576).toFixed(1)} MB`; } } catch (e) { /* egal */ }
-  $('#storageInfo').textContent = `Tintenwerk-Daten: ${(bytes / 1024).toFixed(1)} KB · ${ownCount()} eigene Zeichen${extra}`;
+  $('#storageInfo').textContent = `Quillmark-Daten: ${(bytes / 1024).toFixed(1)} KB · ${ownCount()} eigene Zeichen${extra}`;
   const hs = $('#hostState'), https = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
   hs.className = 'badge ' + (https ? 'ok' : 'warn');
   hs.textContent = https ? 'Sichere Adresse (https) – alle Funktionen möglich' : (location.protocol === 'file:' ? 'file:// – WebGPU & Home-Bildschirm eingeschränkt' : 'Unverschlüsselte Adresse – eingeschränkt');
@@ -912,10 +926,10 @@ $('#delAll').addEventListener('click', async () => {
 function makeTouchIcon() {         // Home-Bildschirm-Symbol zur Laufzeit erzeugen (Einzeldatei, keine Bilddatei nötig)
   try {
     const c = document.createElement('canvas'); c.width = c.height = 180; const x = c.getContext('2d');
-    x.fillStyle = '#1E3A8A'; x.fillRect(0, 0, 180, 180);
+    x.fillStyle = '#0B0C0E'; x.fillRect(0, 0, 180, 180);
     x.scale(180 / 32, 180 / 32); x.translate(0.5, 0.5);
     x.fillStyle = '#fff'; x.fill(new Path2D('M26 5C16 5.600 9.500 11.200 8 20.200L6.900 26.500l2.200-1.400C18.400 23.500 25 17.300 26 5Z'));
-    x.strokeStyle = '#1E3A8A'; x.lineWidth = 1.5; x.lineCap = 'round'; x.stroke(new Path2D('M7 27.500 18.500 13'));
+    x.strokeStyle = '#0B0C0E'; x.lineWidth = 1.5; x.lineCap = 'round'; x.stroke(new Path2D('M7 27.500 18.500 13'));
     $('#touchIcon').href = c.toDataURL('image/png');
   } catch (e) { /* Symbol ist optional */ }
 }

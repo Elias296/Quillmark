@@ -8,10 +8,10 @@ app_port: 7860
 pinned: false
 ---
 
-# Tizian-Server für Tintenwerk
+# Tizian-Server für Quillmark
 
 Dieser Space stellt Tizian (Qwen2.5-1.5B-Instruct, quantisiert) über eine OpenAI-kompatible
-Schnittstelle bereit. Tintenwerk nutzt ihn, wenn „Text auf Server verarbeiten“ eingeschaltet ist.
+Schnittstelle bereit. Quillmark nutzt ihn, wenn „Text auf Server verarbeiten“ eingeschaltet ist.
 
 ## Einrichten (kostenlos, im Browser auf dem iPad möglich)
 
@@ -21,13 +21,13 @@ Schnittstelle bereit. Tintenwerk nutzt ihn, wenn „Text auf Server verarbeiten�
 4. Warten, bis oben **Running** steht (der erste Start lädt das Modell, einige Minuten).
 5. Die Adresse des Space ist `https://<benutzername>-tizian.hf.space`
    (bei privaten Spaces siehe unten).
-6. In Tintenwerk: Text & KI → Tizian → **Server statt lokal** → Adresse eintragen → **Verbindung testen** →
+6. In Quillmark: Text & KI → Tizian → **Server statt lokal** → Adresse eintragen → **Verbindung testen** →
    **Text auf Server verarbeiten** einschalten.
 
 ## Schutz mit API-Schlüssel (empfohlen bei öffentlichem Space)
 
 Im Space unter **Settings → Variables and secrets → New secret** den Namen `API_KEY` und einen langen
-Zufallswert anlegen. Den Space neu starten und denselben Wert in Tintenwerk als API-Schlüssel eintragen.
+Zufallswert anlegen. Den Space neu starten und denselben Wert in Quillmark als API-Schlüssel eintragen.
 
 ## Gut zu wissen
 
