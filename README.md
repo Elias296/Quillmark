@@ -70,10 +70,13 @@ ZIP, LZ4, TPL, Protobuf und PDF sind in der Datei selbst implementiert; kein Tra
 Drei Schritte: **Text & KI** (Notiztext, Screenshot-Import, Tizian, Aufgaben lösen) · **Handschrift** (Schriftstil, Größe, Tinte;
 bei „Meine eigene Handschrift“ zusätzlich das Zeichenstudio) · **Papier & Export** (Blattvorlage, Export, Selbsttest).
 Details stehen hinter den ⓘ-Symbolen der Karten. Zoom und Seitenwechsel liegen in der Leiste unter dem Blatt.
+Texterkennung: Sprachen im Zuschnitt-Fenster wählen (DE, EN, ES, FR, IT, LA). Jede Sprache wird einzeln erkannt, pro Wort gewinnt
+das sicherste Ergebnis – so bleiben Akzente, ñ, ß und Umlaute erhalten. Zweispaltige Listen (z. B. Vokabeln) werden zu Tabellenzeilen.
 Hochzahlen: `x^2`, `x2`, `cm3` werden zu x², x², cm³ (abschaltbar im ⓘ der Karte „Notiztext“).
 
 ## Entwicklung
 - Quellen: `dev/src/` · Bauen: `dev/tools/build.sh` (schreibt `Tintenwerk.html`) · Tests: `node dev/tools/test.js`
 - Browser-Tests (Playwright, lokaler Server auf Port 8765): `node dev/tools/e2e-ui.js`, `e2e-server.js`, `e2e-cache.js`, `e2e-solver.js`
+- Texterkennung mit echten Sprachdaten: `TESS_PK=<ordner> node dev/tools/e2e-ocr.js` (benötigte Pakete stehen im Kopf der Datei)
 - `dev/tools/shape.py` vergleicht eine erzeugte `.goodnotes` strukturell mit einer Referenzdatei (`python3 -I dev/tools/shape.py ref.goodnotes out.goodnotes`).
 - Änderungen immer in `dev/src/` machen und neu bauen, nicht in `Tintenwerk.html`.

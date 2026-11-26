@@ -270,7 +270,14 @@ function updateAppendOption() {
 function syncRadioCards() { $$('.radio').forEach(l => { const i = $('input', l); if (i) l.classList.toggle('on', i.checked); }); }
 document.addEventListener('change', e => { if (e.target.matches('.radio input')) syncRadioCards(); });
 function titleFromText(text) {
+  const rows = text.split('\n').filter(l => / \| /.test(l));
+  const first = text.split('\n').find(l => /[A-Za-zÄÖÜäöüß]{3,}/.test(l)) || '';
+  if (/ \| /.test(first)) {
+    const two = rows.filter(r => r.split(' | ').length === 2).length;
+    return (two >= 3 ? 'Vokabeln vom ' : 'Tabelle vom ') + new Date().toLocaleDateString('de-DE');
+  }
   for (const raw of text.split('\n')) {
+    if (!/[A-Za-zÄÖÜäöüß]{3,}/.test(raw)) continue;
     const l = raw.replace(/^\s*#{1,3}\s+/, '').replace(/^\s*[-*•]\s+/, '').replace(/\*\*/g, '').trim();
     if (l.replace(/[^A-Za-zÄÖÜäöüß0-9]/g, '').length >= 3) return l.length > 60 ? l.slice(0, 57).replace(/\s+\S*$/, '') + ' …' : l;
   }
@@ -365,7 +372,7 @@ async function cropOne(file, idx, total) {
   crop.img = img; cropImg.src = url;
   crop.rect = crop.last ? Object.assign({}, crop.last) : { x: 0, y: 0, w: 1, h: 1 };
   $('#cropCount').textContent = total > 1 ? `Bild ${idx + 1} von ${total}` : file.name || '';
-  openModal('#cropModal'); fitCrop(); paintCrop();
+  renderLangBar(); openModal('#cropModal'); fitCrop(); paintCrop();
   const action = await new Promise(r => { crop.resolve = r; });
   crop.resolve = null;
   let canvas = null;
@@ -395,8 +402,14 @@ function ocrProgress(msg, frac) {
   if (frac != null) $('#ocrBar').style.width = Math.round(clamp(frac, 0, 1) * 100) + '%';
 }
 const OCR_STEPS = { 'loading tesseract core': 'OCR-Kern wird geladen', 'initializing tesseract': 'OCR wird gestartet', 'loading language traineddata': 'Sprachdaten Deutsch + Englisch werden geladen', 'initializing api': 'OCR wird vorbereitet', 'recognizing text': 'Text wird erkannt' };
+/* Unsichere Zeilen (z. B. Handschrift oder Striche) aussortieren: mittlere Wortsicherheit der Texterkennung */
+function lineConf(l) {
+  const ws = (l.words || []).filter(w => w.text && w.text.trim() && typeof w.confidence === 'number');
+  return ws.length ? ws.reduce((a, w) => a + w.confidence, 0) / ws.length : (typeof l.confidence === 'number' ? l.confidence : 100);
+}
+const OCR_MIN_CONF = 55;
 function lineText(l) {
-  const ws = (l.words || []).filter(w => w.text && w.text.trim());
+  const ws = (l.words || []).filter((w, i) => w.text && w.text.trim() && !(w.text.trim() === '|' || (i > 0 && typeof w.confidence === 'number' && w.confidence < 25 && w.text.trim().length <= 2)));
   if (!ws.length) return (l.text || '').trim();
   const h = Math.max(6, l.bbox.y1 - l.bbox.y0);
   let s = ws[0].text.trim();
@@ -415,7 +428,9 @@ function ocrToText(data) {
     let cur = null, prev = null;
     const flush = () => { if (cur != null) { out.push(cur); cur = null; } };
     for (const l of (p.lines || [])) {
-      const t = lineText(l); if (!t) continue;
+      const conf = lineConf(l), t = lineText(l);
+      if (!t || conf < OCR_MIN_CONF) continue;
+      if (conf < 80 && !/[A-Za-zÄÖÜäöüßÀ-ÿ]{3,}/.test(t)) continue;      // Bruchstücke wie „di | D“ (Handschrift, Striche) verwerfen
       const h = l.bbox.y1 - l.bbox.y0;
       const bigGap = prev && (l.bbox.y0 - prev.bbox.y1) > 0.9 * Math.min(h, prev.bbox.y1 - prev.bbox.y0);
       if (LIST_RE.test(t)) { flush(); cur = /^\d/.test(t) ? t : '- ' + t.replace(/^\S+\s+/, ''); }
@@ -433,17 +448,74 @@ function ocrToText(data) {
     if (out[i] === '' && isLi(res[res.length - 1]) && isLi(out.slice(i + 1).find(x => x !== ''))) continue;
     res.push(out[i]);
   }
-  return res.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  return tidyTables(res).join('\n').replace(/\n{3,}/g, '\n\n').trim();
 }
-async function ensureWorker(onLog) {
+/* Tabellen (z. B. Vokabellisten): keine Leerzeilen zwischen Zeilen, umbrochene Sätze in einer Zeile zusammenführen */
+function tidyTables(lines) {
+  const isRow = t => typeof t === 'string' && / \| /.test(t);
+  const cells = t => t.split(' | ');
+  const out = [];
+  for (let i = 0; i < lines.length; i++) {
+    const t = lines[i];
+    if (t === '' && isRow(out[out.length - 1]) && isRow(lines.slice(i + 1).find(x => x !== ''))) continue;
+    const prev = out[out.length - 1];
+    if (isRow(t) && isRow(prev)) {
+      const a = cells(prev), b = cells(t);
+      // Fortsetzung: Satz beginnt groß, ist noch nicht zu Ende, nächste Zeile beginnt klein (Vokabeln beginnen meist klein: kein Zusammenführen)
+      if (a.length === b.length && /^[A-ZÄÖÜÁÉÍÓÚÑ¿¡]/.test(a[0]) && !/[.!?:;]$/.test(a[0].trim()) && a[0].trim().split(/\s+/).length >= 3 && /^[a-zäöüßáéíóúñ]/.test(b[0])) {
+        out[out.length - 1] = a.map((c, k) => (c.trim() + ' ' + b[k].trim()).trim()).join(' | ');
+        continue;
+      }
+    }
+    out.push(t);
+  }
+  return out;
+}
+async function ensureWorker(lang, onLog) {
   if (!window.Tesseract) {
     ocrProgress('OCR-Bibliothek wird geladen (cdn.jsdelivr.net) …', 0.02);
     try { await loadScript(TESS_URL); } catch (e) { throw new Error('Tesseract.js konnte nicht geladen werden. Besteht eine Internetverbindung? (Quelle: cdn.jsdelivr.net)'); }
   }
   OCR.log = onLog;
-  if (!OCR.worker) OCR.worker = await window.Tesseract.createWorker(['deu', 'eng'], 1, { logger: m => OCR.log && OCR.log(m) });
+  if (!OCR.worker) { OCR.worker = await window.Tesseract.createWorker(lang, 1, { logger: m => OCR.log && OCR.log(m) }); OCR.langs = lang; }
+  else if (OCR.langs !== lang) { await OCR.worker.reinitialize(lang, 1); OCR.langs = lang; }
   return OCR.worker;
 }
+/* Mehrere Sprach-Durchläufe zusammenführen: Pro Wort gewinnt die Variante mit der höchsten Sicherheit.
+   Getrennte Durchläufe erkennen á, ñ, ß, ä … deutlich besser als ein gemischtes Sprachmodell. */
+function ocrWords(d) { const out = []; for (const b of (d.blocks || [])) for (const p of (b.paragraphs || [])) for (const l of (p.lines || [])) for (const w of (l.words || [])) out.push(w); return out; }
+function bboxIoU(a, b) {
+  const x = Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)), y = Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0)), i = x * y;
+  const u = (a.x1 - a.x0) * (a.y1 - a.y0) + (b.x1 - b.x0) * (b.y1 - b.y0) - i;
+  return u > 0 ? i / u : 0;
+}
+function mergeOcrRuns(runs) {
+  const base = runs[0]; if (runs.length < 2) return base;
+  const others = runs.slice(1).map(ocrWords);
+  for (const w of ocrWords(base)) {
+    if (!w.bbox) continue;
+    for (const ws of others) for (const v of ws) {
+      if (v.bbox && v.text && v.confidence > w.confidence && bboxIoU(w.bbox, v.bbox) > 0.5) { w.text = v.text; w.confidence = v.confidence; }
+    }
+  }
+  return base;
+}
+TW.mergeOcrRuns = mergeOcrRuns;
+/* Sprachen der Texterkennung (im Zuschnitt-Fenster wählbar, gemerkt) */
+const OCR_LANGS = [['deu', 'DE', 'Deutsch'], ['eng', 'EN', 'Englisch'], ['spa', 'ES', 'Spanisch'], ['fra', 'FR', 'Französisch'], ['ita', 'IT', 'Italienisch'], ['lat', 'LA', 'Latein']];
+function ocrLangs() { const l = (S.settings.ocrLangs || []).filter(x => OCR_LANGS.some(o => o[0] === x)); return l.length ? l : ['deu', 'eng']; }
+function renderLangBar() {
+  const on = ocrLangs();
+  $('#ocrLangs').innerHTML = OCR_LANGS.map(([c, s, n]) => `<button class="lang${on.includes(c) ? ' on' : ''}" data-l="${c}" aria-pressed="${on.includes(c)}" title="${n}">${s}</button>`).join('');
+}
+$('#ocrLangs').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  let on = ocrLangs();
+  on = on.includes(b.dataset.l) ? on.filter(x => x !== b.dataset.l) : on.concat(b.dataset.l);
+  if (!on.length) { toast('Mindestens eine Sprache muss aktiv sein.'); return; }
+  S.settings.ocrLangs = OCR_LANGS.map(o => o[0]).filter(c => on.includes(c)); saveSettings(); renderLangBar();
+});
+renderLangBar();
 async function stopWorker() { const w = OCR.worker; OCR.worker = null; if (w) { try { await w.terminate(); } catch (e) { /* egal */ } } }
 $('#ocrCancel').addEventListener('click', async () => { OCR.cancelled = true; await stopWorker(); $('#ocrStatus').hidden = true; OCR.busy = false; toast('Texterkennung abgebrochen. Dein Entwurf ist unverändert.'); });
 
@@ -463,18 +535,27 @@ async function runImport(files, mode) {
   } finally { closeModal('#cropModal'); }
   if (!crops.length) { OCR.busy = false; toast('Kein Bild zur Texterkennung übernommen.'); return; }
   const texts = []; let confSum = 0, confN = 0;
+  const langs = ocrLangs(), runs = crops.map(() => []), total = langs.length * crops.length;
+  let done = 0;
   try {
+    for (const lang of langs) {
+      const lname = (OCR_LANGS.find(o => o[0] === lang) || [lang, lang, lang])[2];
+      for (let i = 0; i < crops.length; i++) {
+        if (OCR.cancelled) return;
+        const label = (crops.length > 1 ? `Bild ${i + 1} von ${crops.length} · ` : '') + (langs.length > 1 ? `${lname}: ` : '');
+        const worker = await ensureWorker(lang, m => {
+          const step = OCR_STEPS[m.status] || m.status;
+          const f = m.status === 'recognizing text' ? 0.15 + 0.85 * (m.progress || 0) : (m.progress || 0) * 0.15;
+          ocrProgress(`${label}${step} … ${Math.round((m.progress || 0) * 100)} %`, (done + f) / total);
+        });
+        if (OCR.cancelled) return;
+        ocrProgress(`${label}Text wird erkannt …`, (done + 0.15) / total);
+        const { data } = await worker.recognize(crops[i], {}, { text: true, blocks: true });
+        runs[i].push(data); done++;
+      }
+    }
     for (let i = 0; i < crops.length; i++) {
-      if (OCR.cancelled) return;
-      const label = crops.length > 1 ? `Bild ${i + 1} von ${crops.length}: ` : '';
-      const worker = await ensureWorker(m => {
-        const step = OCR_STEPS[m.status] || m.status;
-        const p = m.status === 'recognizing text' ? m.progress : (m.progress || 0) * 0.15;
-        ocrProgress(`${label}${step} … ${Math.round((m.progress || 0) * 100)} %`, (i + (m.status === 'recognizing text' ? 0.15 + 0.85 * m.progress : p)) / crops.length);
-      });
-      if (OCR.cancelled) return;
-      ocrProgress(`${label}Text wird erkannt …`, (i + 0.15) / crops.length);
-      const { data } = await worker.recognize(crops[i], {}, { text: true, blocks: true });
+      const data = mergeOcrRuns(runs[i]);
       const t = ocrToText(data);
       if (t) texts.push(t);
       if (typeof data.confidence === 'number') { confSum += data.confidence; confN++; }

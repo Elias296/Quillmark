@@ -191,6 +191,11 @@ pre.log:empty{display:none}
 .ch[data-h=w]{left:0;top:50%;cursor:ew-resize}.ch[data-h=e]{left:100%;top:50%;cursor:ew-resize}
 .ch[data-h=sw]{left:0;top:100%;cursor:nesw-resize}.ch[data-h=s]{left:50%;top:100%;cursor:ns-resize}.ch[data-h=se]{left:100%;top:100%;cursor:nwse-resize}
 
+.lang-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 14px;border-top:1px solid var(--line);background:#fff}
+.langs{display:flex;gap:6px;flex-wrap:wrap}
+.lang{min-width:var(--tap);height:var(--tap);padding:0 10px;border-radius:10px;border:1px solid var(--line-2);background:#fff;font-weight:700;font-size:14px;color:var(--muted)}
+.lang.on{background:var(--blue);border-color:var(--blue);color:#fff}
+
 /* Zeichenfeld */
 .draw-wrap{display:flex;gap:20px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
 .draw-pad{position:relative;width:320px;height:320px;flex:none;border-radius:14px;background:#fff;border:1px solid var(--line-2);touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overflow:hidden}

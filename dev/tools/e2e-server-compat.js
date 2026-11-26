@@ -32,7 +32,7 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
   ok(reqs.length === n + 1 && reqs[n].body.messages.every(m => m.role !== 'system'), 'Gemerkt: weitere Anfragen gleich ohne System-Rolle (kein Fehlversuch)');
   await pg.click('#cmpDiscard');
   limit = true;
-  await pg.click('#btnRewrite'); await pg.waitForSelector('#toast:not([hidden])', { timeout: 10000 });
+  await pg.click('#btnRewrite'); await pg.waitForFunction(() => /429/.test(document.querySelector('#toast').textContent), null, { timeout: 10000 });
   ok(/429/.test(await pg.textContent('#toast')) && /Limit erreicht/.test(await pg.textContent('#toast')), 'Limit-Fehler 429 wird verständlich gemeldet: ' + (await pg.textContent('#toast')).slice(0, 90));
   ok(!errs.length, 'Keine Seitenfehler ' + JSON.stringify(errs));
   await b.close(); process.exit(fails ? 1 : 0);
