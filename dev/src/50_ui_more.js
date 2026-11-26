@@ -930,8 +930,9 @@ async function clearModelCache() {
 }
 $('#delModel').addEventListener('click', async () => { const n = await clearModelCache(); toast(n ? 'KI-Modell aus dem Cache entfernt.' : 'Es ist kein KI-Modell im Cache gespeichert.'); refreshSettingsModal(); });
 $('#delAll').addEventListener('click', async () => {
-  if (!(await confirmDialog('Komplett-Reset?', 'Entwurf, Undo-Stand, Einstellungen, eigene Handschrift und der KI-Modell-Cache werden gelöscht. Das lässt sich nicht rückgängig machen.', 'Alles löschen', true))) return;
+  if (!(await confirmDialog('Komplett-Reset?', 'Notizen, Undo-Stand, Einstellungen, eigene Handschrift und der KI-Modell-Cache werden gelöscht, und du wirst auf diesem Gerät abgemeldet. Das lässt sich nicht rückgängig machen.', 'Alles löschen', true))) return;
   for (const k of Object.values(K)) LS.del(k);
+  if (A.auth && A.auth.signOutLocal) A.auth.signOutLocal();                    // auch die Anmeldung auf diesem Gerät
   await clearModelCache();
   try { const d = await IDB.open().catch(() => null); if (d) d.close(); await new Promise(r => { const q = indexedDB.deleteDatabase('tintenwerk'); q.onsuccess = q.onerror = q.onblocked = r; }); } catch (e) { /* egal */ }
   location.reload();
