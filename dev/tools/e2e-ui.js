@@ -25,7 +25,7 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'OK   ' : 'FAIL ') + m); 
   ok(pw >= 420 && pw / 1180 >= 0.38 && pw / 1180 <= 0.42, `Sidebar ${Math.round(pw)} px = ${(pw / 11.8).toFixed(1)} % der Breite`);
   ok(await ev(() => !document.querySelector('#zoomSeg') && !!document.querySelector('.pill #zoomLabel') && !!document.querySelector('.pill #pgLabel')), 'Zoom und Seiten in der Bottom-Pill, keine Leiste über dem Blatt');
   ok(await ev(() => [...document.querySelectorAll('#modeSeg .t-long')].map(e => e.textContent).join('|')) === 'Text & KI|Chat|Handschrift|Papier & Export', 'Tab-Namen');
-  ok(await ev(() => [...document.querySelectorAll('.topbar .actions > *')].map(e => e.id).join(',')) === 'btnUndo,btnExport', 'Kopfzeile rechts: Rückgängig, Exportieren');
+  ok(await ev(() => [...document.querySelectorAll('.topbar .actions > *')].filter(e => e.offsetWidth > 0).map(e => e.id).join(',')) === 'btnUndo,btnExport', 'Kopfzeile rechts: Rückgängig, Exportieren');
   ok(await ev(() => !!document.querySelector('.rail #modeSeg') && !!document.querySelector('.rail #btnSettings') && !document.querySelector('#modeSeg #btnSettings')), 'Seitenleiste: Schritte und Einstellungen');
   await shot('ui_1_text');
   const small = async () => ev(() => [...document.querySelectorAll('button,a.btn,.radio,.switch,summary,select,.field')].filter(e => e.offsetParent).map(e => { const r = e.getBoundingClientRect(); return [e.id || e.textContent.trim().slice(0, 16), Math.round(r.width), Math.round(r.height)]; }).filter(x => x[1] < 44 || x[2] < 44));

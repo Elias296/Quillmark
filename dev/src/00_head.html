@@ -302,6 +302,34 @@ pre.log:empty{display:none}
 .ex-tech>summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid var(--dim);border-bottom:2px solid var(--dim);transform:rotate(45deg) translateY(-3px)}
 .ex-tech[open]>summary::after{transform:rotate(-135deg)}
 
+/* ---------- Konto ---------- */
+.acct-btn{min-height:44px;height:44px;padding:0 14px;border-radius:999px;color:var(--muted)}
+.acct-btn:hover{color:var(--text)}
+.acct-wrap{position:relative;display:flex}
+.acct-avatar{width:44px;height:44px;border-radius:50%;border:1px solid var(--line-2);background:var(--glass-3);color:var(--text);font-weight:700;font-size:16px;display:grid;place-items:center}
+.acct-avatar[aria-expanded=true]{border-color:rgba(255,255,255,.55)}
+.acct-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;min-width:240px;max-width:min(320px,calc(100vw - 16px));padding:8px;border-radius:20px;background:var(--glass-strong);border:1px solid var(--line);box-shadow:inset 0 1px 0 var(--hi),0 20px 60px rgba(0,0,0,.55);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.acct-mail{padding:8px 12px 10px;border-bottom:1px solid var(--line);margin-bottom:6px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.acct-mail small{font-size:12px;color:var(--muted)}
+.acct-mail b{font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acct-item{display:flex;width:100%;min-height:44px;align-items:center;padding:0 12px;border:0;border-radius:14px;background:transparent;color:var(--text);font-weight:600;text-align:left}
+.acct-item:hover,.acct-item:focus{background:var(--glass-2);outline:none}
+.auth-card{width:min(440px,100%)}
+.auth-intro{margin:12px 0 4px}
+.auth-intro:empty{display:none}
+.auth-google{margin-top:14px;gap:10px}
+.auth-or{display:flex;align-items:center;gap:10px;margin:16px 0 0;color:var(--dim);font-size:12.5px}
+.auth-or::before,.auth-or::after{content:"";flex:1;height:1px;background:var(--line)}
+.auth-msg{margin-top:14px;padding:11px 14px;border-radius:14px;font-size:14px;line-height:1.45;background:var(--glass);border:1px solid var(--line);color:var(--text)}
+.auth-msg.err{background:rgba(248,113,113,.10);border-color:rgba(248,113,113,.35);color:#FECACA}
+.auth-msg.ok{background:rgba(74,222,128,.10);border-color:rgba(74,222,128,.32);color:#BBF7D0}
+.auth-msg .spin{display:inline-block;vertical-align:-3px;margin-right:8px}
+.auth-links{display:flex;flex-wrap:wrap;gap:4px 14px;justify-content:center;margin-top:10px}
+.linkbtn{min-height:40px;border:0;background:transparent;color:var(--muted);font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px;padding:0 4px;border-radius:8px}
+.linkbtn:hover{color:var(--text)}
+.auth-foot{margin-top:16px;text-align:center}
+#authForm .lbl:first-child{margin-top:14px}
+
 /* ---------- Meine Notizen ---------- */
 .note-list{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
 .note-row{display:flex;align-items:center;gap:6px;padding:4px 4px 4px 0;border-radius:18px;border:1px solid var(--line);background:var(--glass)}
@@ -371,6 +399,8 @@ pre.log:empty{display:none}
   .topbar .icon-btn,#btnNotes{width:44px;height:44px}
   .cta{width:44px;height:44px;padding:0;border-radius:50%}
   .cta .cta-t{display:none}
+  .acct-btn{width:44px;padding:0;justify-content:center}
+  .acct-btn .acct-t{display:none}
   .title-input{font-size:17px;padding:0 8px;min-width:0}
   .card{padding:14px;border-radius:22px}
   details.fold{margin:14px -14px -14px;padding:0 14px}

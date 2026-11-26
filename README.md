@@ -51,6 +51,40 @@ Oben links neben dem Titel: **Meine Notizen** – alle Lernzettel mit Titel und 
 die bisherige bleibt in der Liste. **Backup speichern** erzeugt eine JSON-Datei mit allen Notizen (auch Papierkorb), eingefügten Bildern,
 der eigenen Handschrift und den Blatteinstellungen; **Backup öffnen** lädt sie wieder (gleiche Notizen: die neuere Fassung gewinnt).
 
+## Konto (freiwillig, Supabase Auth)
+Oben rechts „Anmelden“: Konto erstellen (mit E-Mail-Bestätigung), Anmelden, „Passwort vergessen?“ und – sobald in Supabase
+eingeschaltet – „Mit Google fortfahren“. Nach der Anmeldung zeigt der runde Profil-Knopf die E-Mail-Adresse und „Abmelden“.
+Ein Konto ist freiwillig: Schreiben, Texterkennung, Meine Notizen, Backups und Export funktionieren ohne Konto. Notizen,
+Bilder und Handschrift bleiben bei An- und Abmeldung auf dem Gerät (Geräte-Sync gibt es noch nicht). Gäste laden nichts nach;
+das Anmelde-Skript (`@supabase/supabase-js@2.118.0`, mit SRI-Prüfsumme) kommt erst beim Tipp auf „Anmelden“ bzw. bei einer
+gespeicherten Sitzung von jsDelivr. Ohne Eintrag in der Konfiguration startet Quillmark wie bisher rein lokal, ohne Anmelde-Knopf.
+
+### Einrichtung
+1. **Supabase-Projekt** anlegen (supabase.com → New project).
+2. **Konfiguration im Code:** In `dev/src/39_config.js` nur zwei Werte eintragen, dann `dev/tools/build.sh` ausführen:
+   - `supabaseUrl`: Project URL, z. B. `https://abcdefghijklmnop.supabase.co` (Project Settings → Data API / API)
+   - `supabaseKey`: der **Publishable key** (`sb_publishable_…`, Project Settings → API Keys).
+     Niemals den Secret Key bzw. `service_role`-Key eintragen – Quillmark erkennt ihn und lässt Konten dann ausgeschaltet.
+3. **Rückkehradresse erlauben** – Supabase → Authentication → URL Configuration:
+   - **Site URL:** `https://elias296.github.io/Quillmark/`
+   - **Redirect URLs:** `https://elias296.github.io/Quillmark/` (genau diese Adresse; für lokale Tests zusätzlich z. B. `http://127.0.0.1:8765/index.html`)
+   Quillmark schickt diese Adresse bei Registrierung, Passwort-Reset und Google-Login als Rückkehrziel mit.
+4. **E-Mail-Versand** – Supabase → Authentication:
+   - Sign In / Providers → Email: „Enable email provider“ an, **„Confirm email“ an** (Registrierung mit Bestätigungslink).
+   - Der eingebaute Supabase-Mailer ist nur zum Testen gedacht (sehr niedriges Stundenlimit, nur an Team-Adressen). Für echte Nutzer
+     unter Project Settings → Authentication → **SMTP Settings** einen eigenen SMTP-Dienst eintragen (z. B. Resend, Brevo, Postmark;
+     Absenderadresse mit eigener Domain), danach unter Rate Limits das E-Mail-Limit passend erhöhen.
+   - Emails → Templates: „Confirm signup“ und „Reset password“ dürfen auf Deutsch angepasst werden; der Link muss `{{ .ConfirmationURL }}` bleiben.
+5. **Google-Login** (optional):
+   - Google Cloud Console → APIs & Services → OAuth consent screen (Branding) ausfüllen, Zielgruppe „External“, App veröffentlichen.
+   - Credentials → Create credentials → **OAuth client ID** → Typ „Web application“:
+     - Authorized JavaScript origins: `https://elias296.github.io`
+     - **Authorized redirect URI = Google-Callback-URL von Supabase:** `https://<projekt-ref>.supabase.co/auth/v1/callback`
+       (genau angezeigt unter Supabase → Authentication → Sign In / Providers → Google → „Callback URL (for OAuth)“)
+   - Client ID und **Client Secret** in Supabase bei Provider Google eintragen und einschalten. Das Secret bleibt nur dort – nie im Frontend.
+   - Quillmark zeigt „Mit Google fortfahren“ automatisch, sobald der Anbieter in Supabase aktiv ist. Beim ersten Google-Login legt
+     Supabase das Konto an, später öffnet es dasselbe Konto (gleiche E-Mail wird mit einem bestehenden E-Mail-Konto verknüpft).
+
 ## Chat mit Tizian
 Seitenleiste → **Chat**: frei mit Tizian schreiben, sich etwas erklären oder Aufgaben lösen lassen. Schnell-Aktionen:
 **Lernzettel mit Skizze**, **Aufgaben lösen**, **Zusammenfassen**, **Quiz** (ohne Eingabe nutzen sie den Notiztext).
@@ -87,7 +121,9 @@ Die Vorlage in [`server/huggingface-space`](server/huggingface-space/README.md) 
 - Tesseract.js 7.0.0 inkl. `tesseract.js-core` und Sprachdaten `deu`/`eng` (cdn.jsdelivr.net) – OCR
 - Transformers.js 4.3.2 (cdn.jsdelivr.net) und Modell `onnx-community/Qwen2.5-0.5B-Instruct` oder `…-1.5B-Instruct` (huggingface.co) – lokale KI
 
-ZIP, LZ4, TPL, Protobuf und PDF sind in der Datei selbst implementiert; kein Tracking, kein Konto.
+- `@supabase/supabase-js` 2.118.0 (cdn.jsdelivr.net, mit SRI) – nur wenn Konten eingerichtet sind und du „Anmelden“ tippst
+
+ZIP, LZ4, TPL, Protobuf und PDF sind in der Datei selbst implementiert; kein Tracking, Konto nur freiwillig.
 
 ## Oberfläche
 Dunkles Milchglas-Design (Schwarz/Grau); die drei Schritte und die Einstellungen liegen in der schwebenden Seitenleiste links.
@@ -100,7 +136,7 @@ Hochzahlen: `x^2`, `x2`, `cm3` werden zu x², x², cm³ (abschaltbar im ⓘ der 
 
 ## Entwicklung
 - Quellen: `dev/src/` · Bauen: `dev/tools/build.sh` (schreibt `index.html`) · Tests: `node dev/tools/test.js`
-- Browser-Tests (Playwright, lokaler Server auf Port 8765): `node dev/tools/e2e-ui.js`, `e2e-server.js`, `e2e-server-compat.js`, `e2e-server-private.js`, `e2e-cache.js`, `e2e-solver.js`, `e2e-chat.js`, `e2e-notes.js`
+- Browser-Tests (Playwright, lokaler Server auf Port 8765): `node dev/tools/e2e-ui.js`, `e2e-server.js`, `e2e-server-compat.js`, `e2e-server-private.js`, `e2e-cache.js`, `e2e-solver.js`, `e2e-chat.js`, `e2e-notes.js`, `e2e-auth.js` (braucht `SUPA_SDK=<pfad>/supabase-js-2.118.0/dist/umd/supabase.js`)
 - Texterkennung mit echten Sprachdaten: `TESS_PK=<ordner> node dev/tools/e2e-ocr.js` (benötigte Pakete stehen im Kopf der Datei)
 - `dev/tools/shape.py` vergleicht eine erzeugte `.goodnotes` strukturell mit einer Referenzdatei (`python3 -I dev/tools/shape.py ref.goodnotes out.goodnotes`).
 - Änderungen immer in `dev/src/` machen und neu bauen, nicht in `index.html`.
