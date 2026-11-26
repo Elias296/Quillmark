@@ -466,8 +466,9 @@ function ocrToText(data) {
     const flush = () => { if (cur != null) { out.push(cur); cur = null; } };
     for (const l of (p.lines || [])) {
       const conf = lineConf(l), t = lineText(l);
-      if (!t || conf < OCR_MIN_CONF) continue;
-      if (conf < 80 && !/[A-Za-zÄÖÜäöüßÀ-ÿ]{3,}/.test(t)) continue;      // Bruchstücke wie „di | D“ (Handschrift, Striche) verwerfen
+      const calc = /\d\s*[-+×x·*:\/÷]\s*\d/.test(t) && /=\s*$/.test(t);            // Rechenzeile wie „3. 24 × 15 =“
+      if (!t || conf < (calc ? 35 : OCR_MIN_CONF)) continue;
+      if (conf < 80 && !calc && !/[A-Za-zÄÖÜäöüßÀ-ÿ]{3,}/.test(t)) continue;      // Bruchstücke wie „di | D“ (Handschrift, Striche) verwerfen
       const h = l.bbox.y1 - l.bbox.y0;
       const bigGap = prev && (l.bbox.y0 - prev.bbox.y1) > 0.9 * Math.min(h, prev.bbox.y1 - prev.bbox.y0);
       if (LIST_RE.test(t)) { flush(); cur = /^\d/.test(t) ? t : '- ' + t.replace(/^\S+\s+/, ''); }

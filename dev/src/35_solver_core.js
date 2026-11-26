@@ -9,7 +9,10 @@ TW.solver = (function () {
   /* Zerlegt Seitentext in {context, tasks:[{label, text}]}.
      Aufgaben beginnen mit "1.", "2)", "Aufgabe 3"; die Nummern müssen aufsteigen (schützt vor "12. Januar" mitten im Text). */
   function splitTasks(text) {
-    const lines = String(text || '').replace(/\r\n?/g, '\n').split('\n');
+    // OCR verschluckt oft das Leerzeichen nach der Nummer: „1.345 + 678 =“ → „1. 345 + 678 =“
+    // (deutsche Kommazahlen haben ein Komma, ein Punkt am Zeilenanfang vor einer Rechnung ist die Nummer)
+    const lines = String(text || '').replace(/\r\n?/g, '\n').split('\n')
+      .map(ln => ln.replace(/^(\s*\d{1,2})\.(?=\d+\s*[-+×x·*:\/÷]\s*\d[^=]*=)/i, '$1. '));
     const starts = [];
     let last = 0;
     lines.forEach((ln, i) => {
@@ -72,7 +75,8 @@ TW.solver = (function () {
   }
   /* Reine Rechenzeile "345 + 678 =" (ggf. mit a) davor, Leerstellen/Punkte nach dem =) → {expr, result, text} oder null */
   function calcLine(raw) {
-    const m = /^\s*(?:[a-z][.)]\s*)?([\d\s.,+\-−–×·*÷:/()]+?)\s*=\s*[._\s?…□]*$/i.exec(String(raw || '').trim());
+    raw = String(raw || '').replace(/(\d)\s*[xX]\s*(?=\d)/g, '$1 × ');            // „24 x 15“ (Ersatz-Malzeichen, häufig aus der OCR)
+    const m = /^\s*(?:[a-z][.)]\s*)?([\d\s.,+\-−–×·*÷:/()]+?)\s*=\s*[._\s?…□]*$/i.exec(raw.trim());
     if (!m) return null;
     const expr = m[1].trim();
     if (!/\d/.test(expr) || !/[+\-−–×·*÷:/]/.test(expr.replace(/^-/, ''))) return null;

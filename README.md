@@ -58,6 +58,11 @@ Tizian ist ein Textmodell und kann keine Fotos erzeugen – dafür zeichnet Quil
 - **Bild in den Lernzettel einfügen** (Text & KI) setzt eigene Fotos als `![Bild](bild:…)` ein. In der Vorschau und im PDF erscheinen sie direkt;
   im `.goodnotes`-Export liegen sie im Seitenhintergrund (sichtbar, aber in Goodnotes nicht verschiebbar).
 
+## Beispielfotos zum Ausprobieren
+Im Ordner [`beispiele/`](beispiele/) (auf der Seite unter `…/beispiele/1_buchseite_fotosynthese.jpg` usw.): Buchseite Fotosynthese,
+Vokabeltabelle Englisch, Mathe-Übungen, Geschichtsseite mit Aufgaben und eine Vulkan-Grafik zum Einfügen als Bild.
+Neu erzeugen: `node dev/tools/beispiele.js beispiele`.
+
 ## Tizian auf einem Server (für Geräte, auf denen die lokale KI nicht startet)
 Text & KI → Tizian → **Server statt lokal**: Adresse eintragen, **Verbindung testen**, dann **Text auf Server verarbeiten**
 einschalten (standardmäßig aus, mit Datenschutz-Abfrage). Unterstützt wird jede OpenAI-kompatible Chat-Schnittstelle
