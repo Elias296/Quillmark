@@ -23,7 +23,7 @@ function glyphSvg(found, cls) {
     for (let i = 0; i < q.q.length; i += 4) d += `Q${q.q[i].toFixed(1)} ${(100 - q.q[i + 1]).toFixed(1)} ${q.q[i + 2].toFixed(1)} ${(100 - q.q[i + 3]).toFixed(1)}`;
   }
   const pad = Math.max(8, (150 - w) / 2);
-  return `<svg class="${cls}" viewBox="${-pad} -12 ${w + 2 * pad} 156" fill="none" stroke="#1E3A8A" stroke-width="5.500" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+  return `<svg class="${cls}" viewBox="${-pad} -12 ${w + 2 * pad} 156" fill="none" stroke="currentColor" stroke-width="5.500" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 }
 function renderTiles() {
   const host = $('#tileGroups'); let html = '';
@@ -926,10 +926,10 @@ $('#delAll').addEventListener('click', async () => {
 function makeTouchIcon() {         // Home-Bildschirm-Symbol zur Laufzeit erzeugen (Einzeldatei, keine Bilddatei nötig)
   try {
     const c = document.createElement('canvas'); c.width = c.height = 180; const x = c.getContext('2d');
-    x.fillStyle = '#1E3A8A'; x.fillRect(0, 0, 180, 180);
+    x.fillStyle = '#0B0C0E'; x.fillRect(0, 0, 180, 180);
     x.scale(180 / 32, 180 / 32); x.translate(0.5, 0.5);
     x.fillStyle = '#fff'; x.fill(new Path2D('M26 5C16 5.600 9.500 11.200 8 20.200L6.900 26.500l2.200-1.400C18.400 23.500 25 17.300 26 5Z'));
-    x.strokeStyle = '#1E3A8A'; x.lineWidth = 1.5; x.lineCap = 'round'; x.stroke(new Path2D('M7 27.500 18.500 13'));
+    x.strokeStyle = '#0B0C0E'; x.lineWidth = 1.5; x.lineCap = 'round'; x.stroke(new Path2D('M7 27.500 18.500 13'));
     $('#touchIcon').href = c.toDataURL('image/png');
   } catch (e) { /* Symbol ist optional */ }
 }

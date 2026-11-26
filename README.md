@@ -70,6 +70,7 @@ Die Vorlage in [`server/huggingface-space`](server/huggingface-space/README.md) 
 ZIP, LZ4, TPL, Protobuf und PDF sind in der Datei selbst implementiert; kein Tracking, kein Konto.
 
 ## Oberfläche
+Dunkles Milchglas-Design (Schwarz/Grau); die drei Schritte und die Einstellungen liegen in der schwebenden Seitenleiste links.
 Drei Schritte: **Text & KI** (Notiztext, Screenshot-Import, Tizian, Aufgaben lösen) · **Handschrift** (Schriftstil, Größe, Tinte;
 bei „Meine eigene Handschrift“ zusätzlich das Zeichenstudio) · **Papier & Export** (Blattvorlage, Export, Selbsttest).
 Details stehen hinter den ⓘ-Symbolen der Karten. Zoom und Seitenwechsel liegen in der Leiste unter dem Blatt.
