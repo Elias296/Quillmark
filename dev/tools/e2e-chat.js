@@ -13,7 +13,7 @@ const SHEET = '# Vulkane\n\n## Entstehung\n- Magma steigt aus dem **Erdmantel** 
     if (r.request().method() === 'OPTIONS') return r.fulfill({ status: 204, headers: CORS });
     const body = JSON.parse(r.request().postData()); reqs.push(body);
     const last = body.messages[body.messages.length - 1].content;
-    const ans = /Lernzettel/.test(last) ? SHEET : /Antworte nur/.test(last) ? 'OK' : 'Die Fotosynthese wandelt Licht in chemische Energie um.';
+    const ans = /Lernzettel/.test(last) ? SHEET : /Antworte nur/.test(last) ? 'OK' : 'Die Fotosynthese wandelt Licht in **chemische Energie** um.';
     r.fulfill({ status: 200, headers: Object.assign({ 'content-type': 'text/event-stream' }, CORS), body: sse(ans) });
   });
   const pg = await ctx.newPage(); const errs = []; pg.on('pageerror', e => errs.push(e.message)); pg.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errs.push(m.text()); });
@@ -28,6 +28,9 @@ const SHEET = '# Vulkane\n\n## Entstehung\n- Magma steigt aus dem **Erdmantel** 
   ok(/Server statt lokal/.test(await pg.textContent('#chatLog')), 'Ohne WebGPU und Server: Hinweis auf „Server statt lokal“');
   await pg.fill('#chatInput', '12 + 30 ='); await pg.click('#chatSend'); await pg.waitForTimeout(150);
   ok(/12 \+ 30 = 42/.test(await pg.textContent('#chatLog')) && /Rechner/.test(await pg.textContent('#chatLog')) && reqs.length === 0, 'Rechenzeile: exakter Rechner, ohne Server-Anfrage');
+  await pg.fill('#chatInput', 'Was ist 5+5?'); await pg.click('#chatSend'); await pg.waitForTimeout(150);
+  ok(/5\+5 = 10/.test(await pg.textContent('#chatLog')) && reqs.length === 0, 'Frage „Was ist 5+5?“: Rechner statt KI');
+  ok(await ev(() => getComputedStyle(document.querySelector('.radio input')).appearance === 'none'), 'Auswahlkreise eigen gestaltet (nicht schwarz gefüllt)');
   await pg.click('#chatClear'); await pg.click('#confirmYes'); await pg.waitForTimeout(100);
 
   // --- mit eigenem Rechner (Tailscale)
@@ -39,6 +42,7 @@ const SHEET = '# Vulkane\n\n## Entstehung\n- Magma steigt aus dem **Erdmantel** 
   await pg.waitForFunction(() => /chemische Energie/.test(document.querySelector('#chatLog').textContent) && document.querySelector('#chatSend').textContent === 'Senden', null, { timeout: 8000 });
   const r0 = reqs[reqs.length - 1];
   ok(r0.messages[0].role === 'system' && /Du heißt Tizian/.test(r0.messages[0].content) && r0.messages.filter(m => m.role === 'user' && m.content === 'Was ist Fotosynthese?').length === 1, 'Anfrage: Systemanweisung, Frage genau einmal');
+  ok(await ev(() => !/\*\*/.test(document.querySelector('#chatLog').innerText)), 'Keine **Sternchen** in der Chat-Anzeige');
   ok(/Notiztext/.test(r0.messages[0].content) === false, 'Beispielnotiz wird nicht als Hintergrund mitgeschickt');
 
   // --- Lernzettel mit Skizze

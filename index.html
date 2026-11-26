@@ -143,7 +143,8 @@ textarea:focus,.field:focus{outline:none;border-color:rgba(255,255,255,.35);box-
 .progress>i{display:block;height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .2s}
 .progress.thin{height:4px}
 .radio{display:flex;gap:12px;align-items:center;min-height:60px;padding:10px 14px;border:1px solid var(--line);border-radius:18px;background:var(--glass);cursor:pointer;transition:background .15s,border-color .15s}
-.radio input{width:22px;height:22px;margin:0;accent-color:var(--accent);flex:none}
+.radio input{-webkit-appearance:none;appearance:none;width:22px;height:22px;margin:0;flex:none;border-radius:50%;border:2px solid var(--line-2);background:transparent;transition:border-color .15s,background .15s}
+.radio input:checked{border-color:var(--accent);background:radial-gradient(circle,var(--accent) 0 5px,transparent 5.5px)}
 .radio.on{border-color:rgba(255,255,255,.45);background:var(--glass-2);box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}
 .radio.disabled{opacity:.45}
 .radio b{font-weight:600}
@@ -196,10 +197,11 @@ pre.log:empty{display:none}
 .msg.me .bub{background:var(--accent);color:var(--on-accent);border-bottom-right-radius:6px}
 .msg.ai .bub{background:var(--glass-2);border:1px solid var(--line);border-bottom-left-radius:6px}
 .msg.sys .bub{background:rgba(251,191,36,.10);border-color:rgba(251,191,36,.28);color:#FDE68A}
+.bub b.h{font-size:16.5px}
 .bub .sk{display:inline-block;margin:2px 0;padding:2px 9px;border-radius:999px;background:rgba(255,255,255,.10);border:1px dashed var(--line-2);font-size:13.5px}
 .by{font-size:11.5px;color:var(--dim);margin:4px 8px 0}
 .msg-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
-.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 8px;scrollbar-width:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 0 8px}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex:none;min-height:var(--tap);padding:0 15px;border-radius:999px;border:1px solid var(--line);background:var(--glass);color:var(--text);font-weight:600;font-size:14px;white-space:nowrap}
 .chip:hover{background:var(--glass-2)}
@@ -730,7 +732,7 @@ pre.log:empty{display:none}
       <p>Entwurf, Undo-Stand und Einstellungen liegen im lokalen Browserspeicher (<code>localStorage</code>), deine eigene Handschrift zusätzlich in <code>IndexedDB</code> dieses Geräts. Es gibt kein Konto, kein Tracking, keine Analyse-Skripte und keinen Server von Quillmark. Screenshots, OCR-Text und KI-Verarbeitung verlassen das iPad nicht – Ausnahme: der Server-Modus von Tizian, wenn du ihn einschaltest.</p>
       <div class="warnbox" id="privServer" hidden style="margin-top:8px"></div>
       <p id="storageInfo" class="hint" style="margin-top:6px"></p>
-      <div class="warnbox" style="margin-top:10px"><b>Wichtig für iPadOS:</b> Safari kann lokale Browserdaten bereinigen, wenn eine Website längere Zeit (ca. 7 Tage) nicht genutzt wird. Sichere deine eigene Handschrift deshalb als JSON-Datei (Schritt 2 → Sicherung). Zum Home-Bildschirm hinzugefügte Web-Apps sind davon in der Regel ausgenommen.</div>
+      <div class="warnbox" style="margin-top:10px"><b>Wichtig für iPadOS:</b> Safari kann lokale Browserdaten bereinigen, wenn eine Website längere Zeit (ca. 7 Tage) nicht genutzt wird. Sichere deine eigene Handschrift deshalb als JSON-Datei (Handschrift → Sicherung). Zum Home-Bildschirm hinzugefügte Web-Apps sind davon in der Regel ausgenommen.</div>
 
       <h4>Gezielt löschen</h4>
       <div class="stack">
@@ -3952,7 +3954,8 @@ const isSheet = t => /^\s*#\s/m.test(t) || /\[\[.+\]\]/.test(t);
 
 function bubble(m, i) {
   const who = m.role === 'user' ? 'me' : 'ai';
-  const body = esc(m.text).replace(/\[\[([^\]]+)\]\]/g, '<span class="sk">✎ Skizze: $1</span>');
+  const body = esc(m.text).replace(/\[\[([^\]]+)\]\]/g, '<span class="sk">✎ Skizze: $1</span>')
+    .replace(/^#{1,3}\s+(.+)$/gm, '<b class="h">$1</b>').replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>');
   const acts = m.role === 'assistant' && !m.pending && m.text
     ? `<div class="msg-acts"><button class="btn btn-sm ${isSheet(m.text) ? 'btn-primary' : ''}" data-take="${i}">${isSheet(m.text) ? 'Als Lernzettel übernehmen' : 'Als Notiz'}</button><button class="btn btn-sm" data-append="${i}">Anhängen</button><button class="btn btn-sm btn-ghost" data-copy="${i}">Kopieren</button></div>` : '';
   return `<div class="msg ${who}${m.note ? ' sys' : ''}"><div class="bub">${body || '<span class="spin dark"></span>'}</div>${m.by ? `<div class="by">${esc(m.by)}</div>` : ''}${acts}</div>`;
@@ -3982,7 +3985,9 @@ function history(limit) {
 /* Eine Anfrage an Tizian: text = sichtbare Nachricht, prompt = was das Modell bekommt (Standard: text) */
 async function ask(text, prompt) {
   if (busy) return;
-  const calc = TW.solver.calcTask(text);
+  // „Was ist 5+5?“, „wie viel ist 12 * 3“, „5+5“ → exakter Rechner
+  const q = text.trim().replace(/^(?:was|wie ?viel)\s+(?:ist|sind|ergibt|ergeben|macht|gibt)\s+/i, '').replace(/\s*[?!.]+$/, '');
+  const calc = TW.solver.calcTask(text) || (/^[\d\s.,+\-−–×xX·*÷:/()]+$/.test(q) && /\d\s*[-+−–×xX·*÷:/]\s*[\d(]/.test(q) ? TW.solver.calcTask(q + ' =') : null);
   if (calc && !prompt) {                                 // reine Rechenzeilen: exakter Rechner, ohne KI
     chat.push({ role: 'user', text }, { role: 'assistant', text: calc.join('\n'), by: 'Rechner' }); save(); render(); return;
   }
